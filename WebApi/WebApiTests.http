@@ -1,0 +1,5 @@
+// log in as ana
+
+POST https://localhost:5127/Auth/login
+Content-Type: application/json
+{ "Username" : "ana", "Password" : "password" }
