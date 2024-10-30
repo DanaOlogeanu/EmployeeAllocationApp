@@ -1,8 +1,13 @@
 using System.Text;
+using Application.DaoInterfaces;
+using Application.Logic;
+using Application.LogicInterfaces;
 using Domain.Auth;
+using EfcDataAccess.DAOs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using WebApi.Services;
+using AppContext = EfcDataAccess.AppContext;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,19 +31,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
+
 AuthorizationPolicies.AddPolicies(builder.Services);
-builder.Services.AddScoped<IAuthService, AuthService>();
+
+//builder.Services.AddScoped<IAuthService, AuthService>(); old log in
+builder.Services.AddScoped<IUserLogic, UserLogic>();
+builder.Services.AddScoped<IUserDao, UserEfcDao>();  
+ 
+builder.Services.AddScoped<IUserSkillLogic, UserSkillLogic>();
+builder.Services.AddScoped<IUserSkillDao, UserSkillEfcDao>();  
+
+builder.Services.AddScoped<ISkillLogic, SkillLogic>();
+builder.Services.AddScoped<ISkillDao, SkillEfcDao>();  
+//database 
+builder.Services.AddDbContext<AppContext>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
 
 app.UseHttpsRedirection();
+//app.UseRouting();
 app.UseAuthentication();
 
 app.UseCors(x => x
@@ -46,7 +59,12 @@ app.UseCors(x => x
     .AllowAnyHeader()
     .SetIsOriginAllowed(origin => true) // allow any origin
     .AllowCredentials());
-
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseAuthorization();
 

@@ -14,6 +14,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Domain\Domain.csproj" />
+      <ProjectReference Include="..\HttpClients\HttpClients.csproj" />
+
     </ItemGroup>
 
 

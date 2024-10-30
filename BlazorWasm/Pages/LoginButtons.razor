@@ -1,7 +1,8 @@
-@using BlazorWasm.Services
+@using HttpClients.ClientInterfaces
+
 @namespace Login
 @inject NavigationManager navMgr
-@inject IAuthService authService
+@inject IUserService authService
 
 
 <AuthorizeView>

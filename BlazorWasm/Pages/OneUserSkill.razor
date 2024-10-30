@@ -1,0 +1,58 @@
+@page "/OneUserSkill/{id:int}"
+@inject IUserSkillService UserSkillService
+@using HttpClients.ClientInterfaces
+@using Domain.Dtos
+<h3>Skill</h3>
+
+@if (userSkill == null)
+{
+    <p>No skill to display</p>
+}
+else
+{
+    <div class="table-container">
+        <table class="table">
+            <tr>
+                <td class="skillview">Skill: @userSkill.SkillName</td>
+            </tr>
+            <tr>
+                <td class="skillview">Proficiency: @userSkill.Proficiency.ToString()</td>
+            </tr>
+            <tr>
+                <td class="skillview">Notes: @userSkill.Notes</td>
+            </tr>
+        </table>
+    </div>
+}
+    @* <div class="button-row"> *@
+    @*         <button @onclick="@(() => RemoveProduct(product.Id))"  class="deletebtn">Delete product</button>   <!--how to add disabled button for password as well???? --> *@
+    @*     </div> *@
+    @* } *@
+    @* @if (!string.IsNullOrEmpty(msg)) *@
+    @* { *@
+    @*     <label style="color: red">@msg</label> *@
+        
+    @code {
+    [Parameter]
+    public int Id { get; set; }
+    
+    private string msg = "";
+   private UserSkillBasicDto? userSkill;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        msg = "";
+    
+        try
+        {
+            userSkill = await UserSkillService.GetByIdAsync(@Id);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+        
+    }
+
+}

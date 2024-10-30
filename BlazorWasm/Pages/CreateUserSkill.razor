@@ -1,0 +1,214 @@
+@page "/CreateUserSkill"
+@using Domain.Models
+@using Domain.Dtos
+@using HttpClients.ClientInterfaces
+@using System.Security.Claims
+@inject IUserSkillService userSkillService
+@inject ISkillService skillService
+@inject NavigationManager navMgr
+
+
+  
+     
+@if (categories == null)
+{
+    <label>Loading skill categories...</label>
+}
+else if (!categories.Any())
+{
+    <label>No skill categories, you cannot create a new skill</label>
+}
+else
+{
+    <h3>Add a new Skill</h3>
+
+    <div class="form-group field">
+        <div>
+            <label>Skill Category:</label>
+            <select @onchange="LoadSkills">
+                
+                <option>Choose category</option>
+                @foreach (string category in categories)
+                {
+                    <option value="@category"> @category </option>
+                }
+            </select>
+        </div>
+        @* <button @onclick="AddSkill" class="acceptbtn">Create</button>   *@
+        
+        <div>
+            @if (skills == null || !skills.Any())
+            {
+                <label>Loading skills...</label>
+            }
+            else
+            {
+                <label>Skill Name:</label>
+                <select @bind="selectedSkillName">
+                    <option>Choose skill</option>
+                    @foreach (string skill in skills)
+                    {
+                        <option value="@skill">@skill</option>
+                    }
+                </select>
+            }
+            
+        </div>
+        
+        <div class="form-group field">
+            <label>Proficiency:</label>
+             <select @bind="selectedProficiency">
+                                <option>Choose proficiency</option>
+                                @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
+                                {
+                                    <option value="@prof">@prof</option>
+                                }
+                                    </select>
+        </div>
+        
+         @* <div class="form-group field"> *@
+         @*            <label>Proficiency:</label> *@
+         @*            <input type="text" @bind="proficiency"/> *@
+         @*        </div> *@
+        
+        <div class="form-group field">
+            <label>Notes:</label>
+            <input type="text" @bind="notes"/>
+        </div>
+        <div class="button-row">
+            @if (!string.IsNullOrEmpty(msg))
+            {
+                <label style="color: red">@msg</label>
+            }
+            <button @onclick="Create" class="acceptbtn">Create</button>
+        </div>
+    </div>
+}
+@code {
+    
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!;   //added to remember the logged in claims
+
+    private Proficiency selectedProficiency;
+
+    private string? username;
+    private List<string>? skills= new List<string>();
+    
+    private string? selectedSkillName;
+   // private int? proficiency;
+    private  string? notes;
+    private string msg = "";
+    
+    private List<string> categories = new List<string>();
+   private string? selectedCategory;
+  
+    
+    protected override async Task OnInitializedAsync()
+    {
+        msg = "";
+        try
+        {
+            categories = await skillService.GetUniqueCategories();
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
+    
+    
+    private async Task LoadSkills(ChangeEventArgs category)
+    {
+    // Get the selected category
+        selectedCategory = category.Value?.ToString();
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(selectedCategory))
+            {
+                skills = await skillService.GetUniqueSkills(selectedCategory);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+     }
+   
+    // LoadSkillsByCategory(selectedCategory); // Example function you might implement
+ 
+    // TODO   AddSkill(string name, string category)  + add skill page
+   
+   
+    
+    private async Task Create()
+    {
+        username = await GetUsernameAsync();
+        msg = "";
+        if (string.IsNullOrEmpty(username))
+        {
+            msg = "The skills needs an owner!";
+            return;
+        }
+        if (string.IsNullOrEmpty(selectedSkillName))
+        {
+            msg = "You must select a skill!";
+            return;
+        }
+        if ((int)selectedProficiency==0)
+        {
+            msg = "You must select proficiency level!";
+            return;
+        }
+        try
+        {
+            UserSkillCreationDto dto = new(username,selectedSkillName, selectedProficiency,notes);
+           UserSkill skill = await userSkillService.CreateAsync(dto);
+          navMgr.NavigateTo("/OneUserSkill/"+skill.UserSkillId);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+        // selectedCategory = null;
+        // newCategory = null;
+        // selectedSkillName = null;
+        // isAddingNewCategory = false;
+    }
+    
+    
+    
+    
+    //remember userName
+    private async Task<string?> GetUsernameAsync() //using the claims set in blazor/webapi/authController 
+    {
+        
+        AuthenticationState authState = await AuthState;
+        ClaimsPrincipal user = authState.User;
+        
+    //
+        foreach (var claim in user.Claims)
+        {
+            Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+        }
+
+    // Safely attempt to find the claim
+        Claim? usernameClaim = user.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.Name) || 
+                                                                   claim.Type.Equals("name") || 
+                                                                   claim.Type.Equals("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"));
+
+        if (usernameClaim == null)
+        {
+    // Handle the case where the claim doesn't exist
+            msg = "No username claim found.";
+            return null;
+        }
+    //IEnumerable<Claim> claims = user.Claims;
+    //Claim usernameClaim = claims.First(claim => claim.Type.Equals("Name"));
+        string name = usernameClaim.Value; //if int-> int.Parse(idClaim.Value);
+        return name;
+    }
+}

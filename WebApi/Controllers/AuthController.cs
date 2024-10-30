@@ -1,11 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Application.LogicInterfaces;
 using Domain.Dtos;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using WebApi.Services;
+
 
 [ApiController]
 [Route("[controller]")]
@@ -13,9 +14,9 @@ using WebApi.Services;
 public class AuthController : ControllerBase
 {
     private readonly IConfiguration config;
-    private readonly IAuthService authService;
+    private readonly IUserLogic authService;
 
-    public AuthController(IConfiguration config, IAuthService authService)
+    public AuthController(IConfiguration config, IUserLogic authService)
     {
         this.config = config;
         this.authService = authService;
@@ -57,7 +58,7 @@ public class AuthController : ControllerBase
         return serializedToken;
     }
     
-    [HttpPost, Route("login")]  // resulting in the URI to hit this endpoint: https://localhost:5127/Auth/login
+    [HttpPost, Route("login")]  // resulting in the URI to hit this endpoint: https://localhost:5127/auth/login
     public async Task<ActionResult> Login([FromBody] UserLoginDto userLoginDto)
     {
         try
