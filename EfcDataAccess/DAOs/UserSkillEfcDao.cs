@@ -92,4 +92,33 @@ public class UserSkillEfcDao:IUserSkillDao
         return found;
     }
     
+    //update skill 
+    public async Task UpdateAsync(UserSkillBasicDto userSkill)
+    {
+        var existingSkill = await context.UserSkills.FindAsync(userSkill.UserSkillId);
+        if (existingSkill == null)
+        {
+            throw new Exception("User skill not found");
+        }
+
+        existingSkill.Proficiency = userSkill.Proficiency;
+        existingSkill.Notes = userSkill.Notes;
+
+        context.UserSkills.Update(existingSkill);
+        await context.SaveChangesAsync();
+    }
+    
+    //delete skill
+    public async Task DeleteAsync(int userSkillId)
+    {
+        var existingSkill = await context.UserSkills.FindAsync(userSkillId);
+        if (existingSkill == null)
+        {
+            throw new Exception("User skill not found");
+        }
+
+        context.UserSkills.Remove(existingSkill);
+        await context.SaveChangesAsync();
+    }
+    
 }

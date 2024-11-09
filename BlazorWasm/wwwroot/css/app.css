@@ -38,6 +38,10 @@ a, .btn-link {
     color: red;
 }
 
+.selected-row {
+    background-color: #d3d3d3; /* Light gray background for selected rows */
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -99,3 +103,4 @@ a, .btn-link {
     .loading-progress-text:after {
         content: var(--blazor-load-percentage-text, "Loading");
     }
+

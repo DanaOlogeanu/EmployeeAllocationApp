@@ -129,4 +129,25 @@ public class UserSkillHttpClient: IUserSkillService
         })!;
         return userSkills;
     }
+     //update skill
+    public async Task UpdateAsync(UserSkillBasicDto userSkill)
+    {
+        HttpResponseMessage response = await client.PutAsJsonAsync($"/UserSkills/{userSkill.UserSkillId}", userSkill);
+        if (!response.IsSuccessStatusCode)
+        {
+            string content = await response.Content.ReadAsStringAsync();
+            throw new Exception(content);
+        }
+    }
+    
+    //delete skill 
+    public async Task DeleteAsync(int userSkillId)
+    {
+        HttpResponseMessage response = await client.DeleteAsync($"/UserSkills/{userSkillId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            string content = await response.Content.ReadAsStringAsync();
+            throw new Exception(content);
+        }
+    }
 }

@@ -78,11 +78,16 @@ else
         <div class="button-row">
             @if (!string.IsNullOrEmpty(msg))
             {
-                <label style="color: red">@msg</label>
+                <label style="color: green">@msg</label>
             }
             <button @onclick="Create" class="acceptbtn">Create</button>
         </div>
     </div>
+}
+
+@if (showSuccessMessage)
+{
+    <SuccessMessage Message="@successMessage" OnClose="CloseSuccessMessage" />
 }
 @code {
     
@@ -90,17 +95,17 @@ else
     public Task<AuthenticationState> AuthState { get; set; } = null!;   //added to remember the logged in claims
 
     private Proficiency selectedProficiency;
-
     private string? username;
     private List<string>? skills= new List<string>();
-    
     private string? selectedSkillName;
    // private int? proficiency;
     private  string? notes;
     private string msg = "";
     
     private List<string> categories = new List<string>();
-   private string? selectedCategory;
+    private string? selectedCategory;
+    private bool showSuccessMessage = false;
+    private string successMessage = "";
   
     
     protected override async Task OnInitializedAsync()
@@ -164,9 +169,12 @@ else
         }
         try
         {
-            UserSkillCreationDto dto = new(username,selectedSkillName, selectedProficiency,notes);
-           UserSkill skill = await userSkillService.CreateAsync(dto);
-          navMgr.NavigateTo("/OneUserSkill/"+skill.UserSkillId);
+            UserSkillCreationDto dto = new(username, selectedSkillName, selectedProficiency, notes);
+            await userSkillService.CreateAsync(dto);
+            successMessage = "Skill successfully added to the list!";
+            showSuccessMessage = true;
+            await Task.Delay(1000); // Display message for 1 second
+            navMgr.NavigateTo("/viewUserSkills");
         }
         catch (Exception e)
         {
@@ -178,7 +186,6 @@ else
         // selectedSkillName = null;
         // isAddingNewCategory = false;
     }
-    
     
     
     
@@ -210,5 +217,10 @@ else
     //Claim usernameClaim = claims.First(claim => claim.Type.Equals("Name"));
         string name = usernameClaim.Value; //if int-> int.Parse(idClaim.Value);
         return name;
+    }
+    
+    private void CloseSuccessMessage()
+    {
+        showSuccessMessage = false;
     }
 }

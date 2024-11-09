@@ -14,4 +14,8 @@ public interface IUserSkillService
     Task<IEnumerable<UserSkill>> GetUserSkills(string username);
     // view single skill
     Task<UserSkillBasicDto> GetByIdAsync(int id);
+    // update skill
+    Task UpdateAsync(UserSkillBasicDto userSkill);
+    //delete skill
+    Task DeleteAsync(int userSkillId);
 }

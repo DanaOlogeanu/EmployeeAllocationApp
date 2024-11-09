@@ -16,4 +16,10 @@ public interface IUserSkillDao
    
     //view single user skill
     Task <UserSkill?> GetByIdAsync(int id);
+    
+    //update skill 
+    Task UpdateAsync(UserSkillBasicDto userSkill);
+    
+    //delete skill
+    Task DeleteAsync(int userSkillId);
 }

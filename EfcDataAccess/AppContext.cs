@@ -20,7 +20,7 @@ public class AppContext:DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         // optionsBuilder.UseSqlite("Data Source = EmployeeAllocation.db");  //initial 
-        optionsBuilder.UseSqlite("Data Source = C:\\Users\\Danka\\RiderProjects\\EmployeeAllocationApp\\EfcDataAccess\\EmployeeAllocation.db");   //CHANGE ONCE Initially created+migrated
+        optionsBuilder.UseSqlite("Data Source = ../EfcDataAccess/EmployeeAllocation.db");   //CHANGE ONCE Initially created+migrated
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     }
     

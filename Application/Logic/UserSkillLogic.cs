@@ -82,6 +82,16 @@ public class UserSkillLogic:IUserSkillLogic
 
         return new UserSkillBasicDto (skill.UserSkillId, skill.Owner.Username, skill.Skill.Name,skill.Proficiency, skill.Notes);
     }
+    
+    //update skill
+    public async Task UpdateAsync(UserSkillBasicDto userSkill)
+    {
+        await userSkillDao.UpdateAsync(userSkill);
+    }
 
- 
+    //delete skill 
+    public async Task DeleteAsync(int userSkillId)
+    {
+        await userSkillDao.DeleteAsync(userSkillId);
+    }
 }

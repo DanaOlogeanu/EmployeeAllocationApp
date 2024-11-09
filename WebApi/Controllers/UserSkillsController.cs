@@ -85,4 +85,42 @@ public class UserSkillsController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+    
+    //Update skill
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult> UpdateAsync(int id, [FromBody] UserSkillBasicDto userSkill)
+    {
+        try
+        {
+            if (id != userSkill.UserSkillId)
+            {
+                return BadRequest("ID mismatch");
+            }
+
+            await userSkillLogic.UpdateAsync(userSkill);
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500, e.Message);
+        }
+    }
+    
+    //Delete skill 
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult> DeleteAsync(int id)
+    {
+        try
+        {
+            await userSkillLogic.DeleteAsync(id);
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500, e.Message);
+        }
+    }
+    
 }

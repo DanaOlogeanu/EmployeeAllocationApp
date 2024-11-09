@@ -2,6 +2,7 @@
 @inject IUserSkillService UserSkillService
 @using HttpClients.ClientInterfaces
 @using Domain.Dtos
+@using Domain.Models
 <h3>Skill</h3>
 
 @if (userSkill == null)
@@ -16,15 +17,34 @@ else
                 <td class="skillview">Skill: @userSkill.SkillName</td>
             </tr>
             <tr>
-                <td class="skillview">Proficiency: @userSkill.Proficiency.ToString()</td>
+                <td class="skillview">
+                                    <!-- Add dropdown for Proficiency -->
+                                    Proficiency: 
+                                    <select @bind="userSkill.Proficiency">
+                                        @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
+                                        {
+                                            <option value="@prof">@prof</option>
+                                        }
+                                    </select>
+                </td>
             </tr>
             <tr>
-                <td class="skillview">Notes: @userSkill.Notes</td>
-            </tr>
+                <td class="skillview">
+                    <!-- Add input for Notes -->
+                    Notes: 
+                    <input type="text" @bind="userSkill.Notes" />
+                </td>
+           </tr>
         </table>
     </div>
 }
-    @* <div class="button-row"> *@
+
+<div class="button-row">
+        <!-- Add Save button -->
+        <button @onclick="SaveChanges" class="acceptbtn">Save</button>
+  </div>
+
+@* <div class="button-row"> *@
     @*         <button @onclick="@(() => RemoveProduct(product.Id))"  class="deletebtn">Delete product</button>   <!--how to add disabled button for password as well???? --> *@
     @*     </div> *@
     @* } *@
@@ -54,5 +74,18 @@ else
         }
         
     }
+        private async Task SaveChanges()
+        {
+            try
+            {
+                await UserSkillService.UpdateAsync(userSkill);
+                msg = "Changes saved successfully!";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                msg = e.Message;
+            }
+        }
 
 }
