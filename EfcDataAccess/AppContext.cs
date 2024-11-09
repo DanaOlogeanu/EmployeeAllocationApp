@@ -11,11 +11,11 @@ public class AppContext:DbContext
     public DbSet<Department> Departments{ get; set; }
     public DbSet<Project> Projects { get; set; }
     public DbSet<Tag> Tags { get; set; }
-    public DbSet<TaskProject> Tasks { get; set; }
+    public DbSet<TaskProject> TasksProject { get; set; }
     public DbSet<TaskApproval> TasksApprovals { get; set; }
     public DbSet<TaskAssignmentLog> TaskAssignmentLogs { get; set; }
     public DbSet<TaskSkill> TaskSkills { get; set; }
-    public DbSet<Availability> Availabilities { get; set; }
+    public DbSet<Holiday> Holidays { get; set; }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -38,7 +38,7 @@ public class AppContext:DbContext
         modelBuilder.Entity<TaskApproval>().HasKey(ta => ta.Id);
         modelBuilder.Entity<TaskAssignmentLog>().HasKey(tal => tal.Id);
         modelBuilder.Entity<TaskSkill>().HasKey(ts => ts.Id);
-        modelBuilder.Entity<Availability>().HasKey(a => a.Id);
+        modelBuilder.Entity<Holiday>().HasKey(a => a.Id);
         // modelBuilder.Entity<Company>().HasKey(company => company.Id);
         // modelBuilder.Entity<SubCategory>().HasKey(subCategory => subCategory.Id);
         // modelBuilder.Entity<Category>().HasKey(Category => Category.Id);

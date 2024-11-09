@@ -1,0 +1,465 @@
+@page "/OneTask/{id:int}"
+@using HttpClients.ClientInterfaces
+@using Domain.Dtos
+@using Domain.Models
+@inject ITaskProjectService taskProjectService
+@inject ISkillService skillService
+
+<div class="center-container">
+    <div class="container">
+        <h3 class="page-header">Task Overview</h3>
+
+        @if (isEditMode)
+        {
+            <!-- Editable Mode -->
+            <EditForm Model="taskProject" OnValidSubmit="HandleSave" class="form-container">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="form-group">
+                    <label for="task-name">Name:</label>
+                    <InputText id="task-name" class="form-control" @bind-Value="taskProject.Name" />
+                </div>
+
+                <div class="form-group">
+                    <label for="project-id">Project ID:</label>
+                    <InputNumber id="project-id" class="form-control" @bind-Value="taskProject.ProjectId" readonly />
+                </div>
+
+                <div class="form-group">
+                    <label for="assigned-to">Assigned To:</label>
+                    <InputText id="assigned-to" class="form-control" @bind-Value="taskProject.OwnerUsername" />
+                </div>
+
+                <div class="form-group">
+                    <label for="estimate">Estimate (hours):</label>
+                    <InputNumber id="estimate" class="form-control" @bind-Value="taskProject.Estimate" />
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Task Status:</label>
+                    <InputSelect id="status" class="form-control" @bind-Value="taskProject.TaskStatusEnum">
+                        @foreach (var status in Enum.GetValues(typeof(TaskStatusEnum)))
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                
+                <div class="form-group">
+                    <label for="start-date">Start Date:</label>
+                    @* <InputDate id="start-date" class="form-control" @bind-Value="taskProject.StartDate" /> *@
+                      <input id="start-date" type="date" @bind="taskProject.StartDate" class="form-control"  />
+                </div>
+
+                <div class="form-group">
+                    <label for="deadline">Deadline:</label>
+                    @* <InputDate id="deadline" class="form-control" @bind-Value="taskProject.Deadline" /> *@
+                       <input id="deadline" type="date" @bind="taskProject.Deadline" class="form-control"  />
+                    
+                </div>
+
+                <div class="form-group">
+                    <label for="dependent-on">Dependent On:</label>
+                    <InputNumber id="dependent-on" class="form-control" @bind-Value="taskProject.DependentOn" />
+                </div>
+
+                <div class="form-group">
+                    <label for="order-no">Order No:</label>
+                    <InputNumber id="order-no" class="form-control" @bind-Value="taskProject.OrderNo" />
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes:</label>
+                    <InputTextArea id="notes" class="form-control" @bind-Value="taskProject.Notes" />
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="acceptbtn">Save</button>
+                    <button type="button" class="cancelbtn" @onclick="CancelEdit">Cancel</button>
+                </div>
+            </EditForm>
+        }
+        else
+        {
+            <!-- Read-Only Mode -->
+            <div class="task-details">
+            <p><strong>Name:</strong> @taskProject?.Name</p>
+            <p><strong>Project ID:</strong> @taskProject?.ProjectId</p>
+            <p><strong>Assigned To:</strong> @(string.IsNullOrWhiteSpace(taskProject?.OwnerUsername) ? "Unassigned" : taskProject.OwnerUsername)</p>
+            <p><strong>Estimate (hours):</strong> @taskProject?.Estimate</p>
+                <p><strong>Task Status:</strong> @taskProject?.TaskStatusEnum</p>
+                <p><strong>Start Date:</strong>@taskProject?.StartDate.ToString()</p>
+                <p><strong>Deadline:</strong> @taskProject?.Deadline.ToString()</p>
+                <p><strong>Dependent On:</strong> @taskProject?.DependentOn</p>
+                <p><strong>Order No:</strong> @taskProject?.OrderNo</p>
+                <p><strong>Notes:</strong> @taskProject?.Notes</p>
+            </div>
+
+            <button class="acceptbtn" @onclick="EnableEdit">Edit Task</button>
+        }
+
+        <h4 class="section-header">Required Skills</h4>
+
+        @if (showAddSkillForm)
+        {
+            <EditForm Model="skills" OnValidSubmit="AddSkill" class="form-container">
+                <div class="form-group">
+                    <label for="category">Skill Category:</label>
+                    <select id="category" class="form-control" @onchange="LoadSkills">
+                        <option value="">Choose category</option>
+                        @foreach (string category in categories)
+                        {
+                            <option value="@category">@category</option>
+                        }
+                    </select>
+                </div>
+
+                @if (skills != null && skills.Any())
+                {
+                    <div class="form-group">
+                        <label for="skill-name">Skill Name:</label>
+                        <select id="skill-name" class="form-control" @bind="selectedSkill">
+                            <option value="">Choose skill</option>
+                            @foreach (string skill in skills)
+                            {
+                                <option value="@skill">@skill</option>
+                            }
+                        </select>
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label for="proficiency">Proficiency:</label>
+                    <select id="proficiency" class="form-control" @bind="selectedProficiency">
+                        <option value="">Choose proficiency</option>
+                        @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
+                        {
+                            <option value="@prof">@prof</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="acceptbtn">Add Skill</button>
+                    <button type="button" class="cancelbtn" @onclick="CancelAddSkill">Cancel</button>
+                </div>
+            </EditForm>
+        }
+        else
+        {
+            <button class="acceptbtn" @onclick="ShowAddSkillForm">Add Task Required Skill</button>
+        }
+    </div>
+</div>
+
+
+
+
+
+
+
+
+@* without css *@
+@* <h3>Task Overview</h3> *@
+@* @if (isEditMode) *@
+@* { *@
+@*     <!-- Editable Mode --> *@
+@*     <EditForm Model="taskProject" OnValidSubmit="HandleSave"> *@
+@*         <DataAnnotationsValidator /> *@
+@*         <ValidationSummary /> *@
+@* *@
+@*         <div> *@
+@*             <label>Name:</label> *@
+@*             <InputText @bind-Value="taskProject.Name" /> *@
+@*         </div> *@
+@* *@
+@*         <div> *@
+@*             <label>Project ID:</label> *@
+@*             <InputNumber @bind-Value="taskProject.ProjectId" /> *@
+@*         </div> *@
+@* *@
+@*         <div> *@
+@*             <label>Assigned to:</label> *@
+@*             <InputText @bind-Value="taskProject.OwnerUsername" /> *@
+@*         </div> *@
+@* *@
+@*         <div> *@
+@*             <label>Estimate (hours):</label> *@
+@*             <InputNumber @bind-Value="taskProject.Estimate" /> *@
+@*         </div> *@
+@* *@
+@*         <div> *@
+@*             <label>Task Status:</label> *@
+@*             <InputSelect @bind-Value="taskProject.TaskStatusEnum"> *@
+@*                 @foreach (var status in Enum.GetValues(typeof(TaskStatusEnum))) *@
+@*                 { *@
+@*                     <option value="@status">@status</option> *@
+@*                 } *@
+@*             </InputSelect> *@
+@*         </div> *@
+@* *@
+@*         <div> *@
+@*             <label>Start Date:</label> *@
+@*             <InputDate @bind-Value="taskProject.StartDate" /> *@
+@*         </div> *@
+@* *@
+@*         <div> *@
+@*             <label>Deadline:</label> *@
+@*             <InputDate @bind-Value="taskProject.Deadline" /> *@
+@*         </div> *@
+@* *@
+@*         <div> *@
+@*             <label>Dependent On:</label> *@
+@*             <InputNumber @bind-Value="taskProject.DependentOn" /> *@
+@*         </div> *@
+@* *@
+@*         <div> *@
+@*             <label>Order No:</label> *@
+@*             <InputNumber @bind-Value="taskProject.OrderNo" /> *@
+@*         </div> *@
+@* *@
+@*         <div> *@
+@*             <label>Notes:</label> *@
+@*             <InputTextArea @bind-Value="taskProject.Notes" /> *@
+@*         </div> *@
+@* *@
+@*         <button type="submit">Save</button> *@
+@*         <button type="button" @onclick="CancelEdit">Cancel</button> *@
+@*     </EditForm> *@
+@* } *@
+@* else *@
+@* { *@
+@*     <!-- Read-Only Mode --> *@
+@*     <div> *@
+@*         <strong>Name:</strong> *@
+@*         @if (taskProject != null) *@
+@*         { *@
+@*             @taskProject.Name @:</div> *@
+@*             <div> *@
+@*                 <strong>Project ID:</strong> @taskProject.ProjectId *@
+@*             </div> *@
+@*             <div> *@
+@*                 <strong>Assigned to:</strong> @(string.IsNullOrWhiteSpace(taskProject.OwnerUsername) ? "Unassigned" : taskProject.OwnerUsername) *@
+@*             </div> *@
+@*             <div> *@
+@*                 <strong>Estimate (hours):</strong> @taskProject.Estimate *@
+@*             </div> *@
+@*             <div> *@
+@*                 <strong>Task Status:</strong> @taskProject.TaskStatusEnum *@
+@*             </div> *@
+@*             <div> *@
+@*                 <strong>Start Date:</strong> @taskProject.StartDate *@
+@*             </div> *@
+@*             <div> *@
+@*                 <strong>Deadline:</strong> @taskProject.Deadline *@
+@*             </div> *@
+@*             <div> *@
+@*                 <strong>Dependent On:</strong> @taskProject.DependentOn *@
+@*             </div> *@
+@*             <div> *@
+@*                 <strong>Order No:</strong> @taskProject.OrderNo *@
+@*             </div> *@
+@*             @:<div> *@
+@*             <strong>Notes:</strong> *@
+@*             @taskProject.Notes *@
+@*         } *@
+@*   *@
+@*     </div> *@
+@* *@
+@*     <button @onclick="EnableEdit">Edit Task</button> *@
+@* } *@
+@* *@
+@* *@
+@* <!-- Add Task Required Skills --> *@
+@* <h4>Required Skills</h4> *@
+@* $1$ <ul> #1# *@
+@* $1$     @foreach (var skill in taskSkills) #1# *@
+@* $1$     { #1# *@
+@* $1$         <li>@skill.SkillName - Proficiency: @skill.Proficiency</li> #1# *@
+@* $1$     } #1# *@
+@* $1$ </ul> #1# *@
+@* *@
+@* @if (showAddSkillForm) *@
+@* { *@
+@*     <EditForm Model="skills" OnValidSubmit="AddSkill"> *@
+@*      *@
+@*     <div class="form-group field"> *@
+@*         <div> *@
+@*             <label>Skill Category:</label> *@
+@*             <select @onchange="LoadSkills"> *@
+@* *@
+@*                 <option>Choose category</option> *@
+@*                 @foreach (string category in categories) *@
+@*                 { *@
+@*                     <option value="@category"> @category </option> *@
+@*                 } *@
+@*             </select> *@
+@*         </div> *@
+@*     *@
+@*         $1$ <button @onclick="AddSkill" class="acceptbtn">Create</button>   #1# *@
+@* *@
+@*         @if (skills == null || !skills.Any()) *@
+@*         { *@
+@*             <label>Loading skills...</label> *@
+@*         } *@
+@*         else *@
+@*         { *@
+@* *@
+@*             <div> *@
+@*                 <label>Skill Name:</label> *@
+@*                 <label>Skill Name:</label> *@
+@*                 <select @bind="selectedSkill"> *@
+@*                     <option>Choose skill</option> *@
+@*                     @foreach (string skill in skills) *@
+@*                     { *@
+@*                         <option value="@skill">@skill</option> *@
+@*                     } *@
+@*                 </select> *@
+@*                 $1$ <InputText @bind-Value="selectedSkill"/> #1# *@
+@*             </div> *@
+@*         } *@
+@*              *@
+@*             <div> *@
+@*                 <label>Proficiency:</label> *@
+@*                  *@
+@*                 <select @bind="selectedProficiency"> *@
+@*                     <option>Choose proficiency</option> *@
+@*                     @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency))) *@
+@*                     { *@
+@*                         <option value="@prof">@prof</option> *@
+@*                     } *@
+@*                 </select> *@
+@*                  *@
+@*             </div> *@
+@*             <button type="submit">Add Skill</button> *@
+@*             <button type="button" @onclick="CancelAddSkill">Cancel</button> *@
+@*        *@
+@*     </div> *@
+@*     </EditForm> *@
+@* } *@
+@* else *@
+@* { *@
+@*     <button  @onclick="ShowAddSkillForm"> Add Task Required Skill </button> *@
+@* } *@
+@* *@
+
+
+
+@code {
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!; //added to remember the logged in claims
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private string msg = "";
+    private TaskProjectBasicDto? taskProject;
+
+    private string name;
+    private int projectId;
+    private string ownerUsername;
+    private int? estimate;
+    private TaskStatusEnum taskStatus;
+    private DateOnly? startDate;
+    private DateOnly? deadline;
+    private int? dependentOn;
+    private double? orderNo;
+    private string notes;
+
+
+    private List<TaskSkill> taskSkills; //??????needed new????? todo get task skills
+    
+    //add task skills 
+    private string selectedSkill;
+    private Proficiency selectedProficiency;
+    private List<string> categories = new List<string>();
+    private string? selectedCategory;
+    private List<string>? skills = new List<string>(); 
+
+    // UI States
+    private bool isEditMode = false;
+    private bool showAddSkillForm = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        msg = "";
+
+        try
+        {
+            taskProject = await taskProjectService.GetByIdAsync(@Id);
+            categories = await skillService.GetUniqueCategories();
+
+    //TODO  loading existing taskskills >get task skills by task id
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
+
+    
+    
+    
+    private void EnableEdit()
+    {
+        isEditMode = true;
+    }
+
+    private void CancelEdit()
+    {
+        isEditMode = false;
+    }
+
+    private async Task HandleSave()
+    {
+    // Simulate saving the task to the database
+        await taskProjectService.UpdateAsync(taskProject);
+        isEditMode = false;
+    }
+
+    private void ShowAddSkillForm()
+    {
+        showAddSkillForm = true;
+    //drop downs no need for this
+    //   newSkillName = string.Empty;
+    //   newSkillProficiency = ProficiencyLevelEnum.Beginner;
+    }
+
+    private async Task AddSkill()
+    {
+    // Add the skill to the list (simulating database save)
+    // taskSkills.Add(new SkillModel { Name = newSkillName, Proficiency = newSkillProficiency });
+    //TODO add new taskSkill
+        showAddSkillForm = false;
+    }
+
+    private void CancelAddSkill()
+    {
+        showAddSkillForm = false;
+    }
+
+    
+    private async Task LoadSkills(ChangeEventArgs category)
+    {
+    // Get the selected category
+        selectedCategory = category.Value?.ToString();
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(selectedCategory))
+            {
+                skills = await skillService.GetUniqueSkills(selectedCategory);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
+
+}

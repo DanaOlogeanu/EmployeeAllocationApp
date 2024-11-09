@@ -1,0 +1,175 @@
+/* Ensure the body and html cover the full page */
+html, body {
+    height: 100%;
+    margin: 0;
+    background-color: #f0f0f0; /* Set background color for the whole page */
+}
+
+ /*Full page box shadow */
+/*body {*/
+/*    box-shadow: 0 0 60px rgba(0, 0, 0, 0.15); !* Apply shadow to the entire page *!*/
+/*}*/
+
+/*!* Container for grid layout *!*/
+/*.container {*/
+/*    max-width: 1200px;*/
+/*    margin: 50px auto;*/
+/*    background-color: #ffffff; !* White background for the card container *!*/
+/*    box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.1); !* Light shadow around the content container *!*/
+/*    border-radius: 8px; !* Optional: Adds rounded corners to the container *!*/
+/*    padding: 20px; !* Adds padding around the container *!*/
+/*}*/
+
+/* Grid layout for the cards */
+/*.row {*/
+/*    display: grid;*/
+/*    grid-template-columns: repeat(3, 1fr); !* Default: 3 cards per row *!*/
+/*    gap: 20px; !* Space between cards *!*/
+/*}*/
+
+/*@media (max-width: 1024px) {*/
+/*    !* For medium-sized screens (tablet or smaller) *!*/
+/*    .row {*/
+/*        grid-template-columns: repeat(2, 1fr); !* 2 cards per row *!*/
+/*    }*/
+/*}*/
+
+/*@media (max-width: 768px) {*/
+/*    !* For smaller screens (mobile) *!*/
+/*    .row {*/
+/*        grid-template-columns: 1fr; !* 1 card per row *!*/
+/*    }*/
+/*}*/
+
+/*!* Card Styling *!*/
+/*.card {*/
+/*    border-radius: 8px; !* Rounded corners for cards *!*/
+/*    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); !* Subtle shadow for cards *!*/
+/*}*/
+
+/*!* Card Image *!*/
+/*.card-img-top {*/
+/*    width: 100%;*/
+/*    height: 244px; !* Fixed height for images *!*/
+/*    object-fit: cover; !* Ensures images cover the container without distortion *!*/
+/*    border-top-left-radius: 8px;*/
+/*    border-top-right-radius: 8px;*/
+/*}*/
+
+/*!* Card Body Styling *!*/
+/*.card-body {*/
+/*    padding: 20px;*/
+/*}*/
+
+/*!* Card Title *!*/
+/*.card-title {*/
+/*    font-size: 1.25rem;*/
+/*    font-weight: 600;*/
+/*}*/
+
+/*!* Card Text *!*/
+/*.card-text {*/
+/*    font-size: 1rem;*/
+/*    margin-bottom: 20px;*/
+/*}*/
+
+/*!* Button Row Styling *!*/
+/*.d-flex {*/
+/*    display: flex;*/
+/*    justify-content: space-around;*/
+/*    margin-top: 15px;*/
+/*}*/
+
+/*!* Additional custom styling for card buttons *!*/
+/*.btn {*/
+/*    font-size: 1rem;*/
+/*    padding: 10px 15px;*/
+/*    border-radius: 5px;*/
+/*}*/
+
+/*!* Custom card image size *!*/
+/*.card-img-top {*/
+/*    width: 100%;*/
+/*    height: 150px; !* Adjust the height to make sure the images fit properly *!*/
+/*    object-fit: cover;*/
+/*}*/
+
+
+
+
+
+/* Centered Card Layout */
+.center-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+.container {
+    width: 60%;
+    max-width: 800px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
+}
+
+/* Form Header */
+.page-header {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;, the 
+    color: #333;
+}
+
+/* Form Table */
+.form-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+.form-table tr {
+    margin-bottom: 15px;
+}
+
+.form-table label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Button Row */
+.button-row {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.error-msg {
+    color: red;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.acceptbtn {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.acceptbtn:hover {
+    background-color: #45a049;
+}

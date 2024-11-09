@@ -1,0 +1,383 @@
+@page "/OneProject/{id:int}"
+@using Domain.Dtos
+@using Domain.Models
+@using HttpClients.ClientInterfaces
+@using TaskStatus = Domain.Models.TaskStatusEnum
+@using System.Security.Claims
+@inject IProjectService projectService
+@inject ITaskProjectService taskProjectService
+@inject NavigationManager navMgr
+
+@if (project == null)
+{
+    <p class="no-data-msg">No project to display</p>
+}
+else
+{
+    <div class="center-container">
+        <div class="container">
+            <h3>Project Overview</h3>
+
+            <!-- Toggle buttons for editing mode -->
+            <div style="text-align: center; padding-top: 10px;">
+                @if (isEditing)
+                {
+                    <button class="save" @onclick="SaveChanges">Save Changes</button>
+                    <button class="cancel" @onclick="ToggleEdit">Cancel</button>
+                }
+                else
+                {
+                    <button class="btn-primary" @onclick="ToggleEdit">Edit Project</button>
+                }
+            </div>
+
+            <table>
+                <!-- Row for Project Name -->
+                <tr>
+                    <td colspan="2">
+                        <strong>Project Name:</strong>
+                        @if (isEditing)
+                        {
+                            <input type="text" @bind="project.ProjectName"/>
+                        }
+                        else
+                        {
+                            @project.ProjectName
+                        }
+                    </td>
+                </tr>
+
+                <!-- Row for Project Description -->
+                <tr>
+                    <td colspan="2">
+                        <strong>Project Description:</strong>
+                        @if (isEditing)
+                        {
+                            <textarea @bind="project.Description" rows="3"></textarea>
+                        }
+                        else
+                        {
+                            <p>@project.Description</p>
+                        }
+                    </td>
+                </tr>
+
+                <!-- Row for Project Status and Start Date -->
+                <tr>
+                    <td>
+                        <strong>Project Status:</strong>
+                        @if (isEditing)
+                        {
+                            <select @bind="project.ProjectStatus">
+                                @foreach (var status in Enum.GetValues(typeof(ProjectStatus)))
+                                {
+                                    <option value="@status">@status</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            @project.ProjectStatus
+                        }
+                    </td>
+                    <td>
+                        <strong>Start Date:</strong>
+                        @if (isEditing)
+                        {
+                            <input type="date" @bind="project.StartDate"/>
+                        }
+                        else
+                        {
+                            @project.StartDate.ToString()
+                        }
+                    </td>
+                </tr>
+
+                <!-- Other Rows for Project -->
+                <tr>
+                    <td>
+                        <strong>Project Priority:</strong>
+                        @if (isEditing)
+                        {
+                            <select @bind="project.ProjectPriority">
+                                @foreach (var priority in Enum.GetValues(typeof(Priority)))
+                                {
+                                    <option value="@priority">@priority</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            @project.ProjectPriority
+                        }
+                    </td>
+                    <td>
+                        <strong>Deadline:</strong>
+                        @if (isEditing)
+                        {
+                            <input type="date" @bind="project.Deadline"/>
+                        }
+                        else
+                        {
+                            @project.Deadline.ToString()
+                        }
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <strong>Tag:</strong>
+                        @if (isEditing)
+                        {
+                            <input type="text" @bind="project.TagName"/>
+                        }
+                        else
+                        {
+                            @project.TagName
+                        }
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <label>
+                            @if (isEditing)
+                            {
+                                <input type="checkbox" @bind="project.IsInvoicable"/>
+                                <strong>Invoicable Project</strong>
+                            }
+                            else
+                            {
+                                <input type="checkbox" disabled="true" checked="@project.IsInvoicable"/>
+                                <strong>Invoicable Project</strong>
+                            }
+                        </label>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Section for Project Tasks (Read-Only) -->
+            <h4>Project Tasks</h4>
+            @if (project.Tasks != null && project.Tasks.Any())
+            {
+                <table>
+                    <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Start Date</th>
+                        <th>Deadline</th>
+                        <th>Assigned to</th>
+                        <th>Dependent On</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var task in project.Tasks)
+                    {
+                        <tr>
+                            <td>@task.OrderNo</td>
+                            <td><a href="/OneTask/@task.Id" class="project-link">@task.Name</a></td>
+                            <td>@task.TaskStatusEnum</td>
+                            <td>@task.StartDate.ToString()</td>
+                            <td>@task.Deadline.ToString()</td>
+                            <td>@(string.IsNullOrWhiteSpace(task.OwnerUsername) ? "Unassigned" : task.OwnerUsername)</td>
+                            <td>@task.DependentOn</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="no-data-msg">No tasks available for this project.</p>
+            }
+
+            <!-- Add Task Button -->
+            <div style="text-align: center; padding-top: 10px;">
+                <button class="btn-primary" @onclick="ToggleTaskForm">Add Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Input Form -->
+    @if (isAddingTask)
+    {
+        <div class="task-form center-container">
+            <div class="container">
+                <!-- Task Form Fields -->
+                <table>
+                    <tr>
+                            <!-- Task Name -->
+                            <td colspan="2" style="padding: 8px; width: 50%;">
+                                <label>Task Name:</label>
+                                <input @bind="taskName" class="form-control"  rows="2"  type="text" placeholder="Enter task name"/>
+                                </td>
+                    </tr>
+                    <tr>
+                        <!-- Assignee -->
+                        @*     <td style="padding: 8px; width: 50%;"> *@
+                        @*         <label>Assignee:</label> *@
+                        @*         <input @bind="assignee" class="form-control" type="text" placeholder="Enter assignee's name"/> *@
+                        @*     </td> *@
+                        @* </tr> *@
+                        @* <tr> *@
+                        <!-- Estimate -->
+                        <td style="padding: 8px; width: 50%;">
+                            <label>Estimate (hours):</label>
+                            <input @bind="estimate" class="form-control" type="number" placeholder="Enter estimated hours"/>
+                        </td>
+
+                        <!-- Dependent On -->
+                        <td style="padding: 8px; width: 50%;">
+                            <label>Dependent On Task No:</label>
+                            <input @bind="dependentOn" class="form-control" type="number" placeholder="Enter dependent task no"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <!-- Start Date -->
+                        @* <td style="padding: 8px; width: 50%;"> *@
+                        @*     <label>Start Date:</label> *@
+                        @*     <input type="date" @bind="startDate" class="form-control" style="width: 100%;" /> *@
+                        @* </td> *@
+
+                        <!-- Deadline -->
+                        @*     <td style="padding: 8px; width: 50%;"> *@
+                        @*         <label>Deadline:</label> *@
+                        @*         <input type="date" @bind="deadline" class="form-control" style="width: 100%;" /> *@
+                        @*     </td> *@
+                        @* </tr> *@
+                        @* <tr> *@
+                        <!-- Task Status -->
+                        <td style="padding: 8px; width: 50%;">
+                            <label>Task Status:</label>
+                            <select @bind="taskStatus" class="form-control">
+                                @foreach (TaskStatusEnum status in Enum.GetValues<TaskStatusEnum>())
+                                {
+                                    <option value="@status">@status</option>
+                                }
+                            </select>
+                        </td>
+
+                        <!-- Order Number -->
+                        <td style="padding: 8px; width: 50%;">
+                            <label>Task Order Number:</label>
+                            <input @bind="orderNo" class="form-control" type="number" step="0.01" placeholder="Enter order number"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <!-- Notes (Spans the entire row) -->
+                        <td colspan="2" style="padding: 8px;">
+                            <label>Notes:</label>
+                            <textarea @bind="notes" class="form-control" rows="2" placeholder="Enter notes" style="width: 100%;"></textarea>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Save Task Button -->
+                <div class="save-task-btn">
+                    @if (!string.IsNullOrEmpty(msg))
+                    {
+                        <div class="msg">@msg</div>
+                    }
+                    <button class="save" @onclick="CreateTask">Save Task</button>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+
+
+
+
+
+
+@code {
+    // [CascadingParameter]
+    // public Task<AuthenticationState> AuthState { get; set; } = null!;   //added to remember the logged in claims
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private string msg = "";
+    private ProjectBasicDto? project;
+
+    protected override async Task OnInitializedAsync()
+    {
+        msg = "";
+
+        try
+        {
+            project = await projectService.GetByIdAsync(@Id);
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
+
+
+
+    // //TO UPDATE IN SAME PAGE
+    private bool isEditing = false;
+    // Toggle editing mode
+    private void ToggleEdit()
+    {
+        isEditing = !isEditing;
+    }
+
+    // Save project changes
+    private async Task SaveChanges()
+    {
+        if (project != null)
+        {
+    // Add saving logic here (e.g., call projectService to update the project)
+            await projectService.UpdateAsync(project);
+            isEditing = false;
+        }
+    }
+
+
+
+    private bool isAddingTask = false;
+    private string? taskName;
+    private string? assignee;
+    private int? estimate;
+    private DateOnly? startDate;
+    private DateOnly? deadline; // = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+    private int? dependentOn;
+    public TaskStatusEnum taskStatus = TaskStatusEnum.Created;
+    private double? orderNo;
+    private string? notes;
+
+
+    private void ToggleTaskForm()
+    {
+        isAddingTask = !isAddingTask;
+    }
+
+    private async Task CreateTask()
+    {
+
+        msg = "";
+
+        try
+        {
+            TaskProjectCreationDto dto = new(taskName, @Id, assignee, estimate, taskStatus, startDate, deadline, dependentOn, orderNo, notes);
+            TaskProject taskProject = await taskProjectService.CreateAsync(dto);
+            navMgr.NavigateTo("/OneTask/" + taskProject.Id);
+            isAddingTask = false;
+            StateHasChanged(); // Manually trigger a UI re-render
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+
+    }
+
+}

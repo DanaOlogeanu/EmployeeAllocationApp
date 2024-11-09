@@ -43,11 +43,30 @@ builder.Services.AddScoped<IUserSkillDao, UserSkillEfcDao>();
 
 builder.Services.AddScoped<ISkillLogic, SkillLogic>();
 builder.Services.AddScoped<ISkillDao, SkillEfcDao>();  
+
+builder.Services.AddScoped<IProjectLogic, ProjectLogic>();
+builder.Services.AddScoped<IProjectDao, ProjectEfcDao>();
+
+builder.Services.AddScoped<ITagLogic, TagLogic>();
+builder.Services.AddScoped<ITagDao, TagEfcDao>(); 
+
+builder.Services.AddScoped<ITaskProjectLogic, TaskProjectLogic>();
+builder.Services.AddScoped<ITaskProjectDao, TaskProjectEfcDao>(); 
+
+
 //database 
 builder.Services.AddDbContext<AppContext>();
 
-var app = builder.Build();
 
+//??
+// builder.Services.AddControllers().AddJsonOptions(options =>
+// {
+//     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+//     options.JsonSerializerOptions.IncludeFields = false; // Not needed unless using fields
+// });
+
+
+var app = builder.Build();
 
 
 app.UseHttpsRedirection();

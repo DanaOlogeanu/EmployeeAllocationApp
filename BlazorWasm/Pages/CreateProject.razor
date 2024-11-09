@@ -1,0 +1,259 @@
+@page "/CreateProject"
+@using Domain.Models
+@using Domain.Dtos
+@using HttpClients.ClientInterfaces
+@using System.Security.Claims
+@inject IProjectService projectService
+@inject ITagService tagService
+@inject NavigationManager navMgr
+@attribute [Authorize]
+@* <!-- @attribute [Authorize("ProjectManager")]   blacking access to a page  --> *@
+
+
+<div class="center-container">
+    <div class="container">
+        <h3 class="page-header">Add a New Project</h3>
+
+        <div class="form-container">
+            <table class="form-table">
+                <!-- Row for Project Name -->
+                <tr>
+                    <td colspan="2">
+                        <label>Project Name:</label>
+                        <input type="text" @bind="projectName" class="form-control" />
+                    </td>
+                </tr>
+
+                <!-- Row for Project Description -->
+                <tr>
+                    <td colspan="2">
+                        <label>Project Description:</label>
+                        <textarea @bind="description" rows="3" class="form-control" placeholder="Enter description here..."></textarea>
+                    </td>
+                </tr>
+
+                <!-- Row for Project Status and Project Priority -->
+                <tr>
+                    <td>
+                        <label>Project Status:</label>
+                        <select @bind="selectedProjectStatus" class="form-control">
+                            @foreach (ProjectStatus status in Enum.GetValues(typeof(ProjectStatus)))
+                            {
+                                <option value="@status">@status</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <label>Project Priority:</label>
+                        <select @bind="selectedProjectPriority" class="form-control">
+                            @foreach (Priority priority in Enum.GetValues(typeof(Priority)))
+                            {
+                                <option value="@priority">@priority</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+
+                <!-- Row for Start Date and Deadline -->
+                <tr>
+                    <td>
+                        <label>Start Date:</label>
+                        <input type="date" @bind="startDate" class="form-control" />
+                    </td>
+                    <td>
+                        <label>Deadline:</label>
+                        <input type="date" @bind="deadline" class="form-control" />
+                    </td>
+                </tr>
+
+                <!-- Row for Tag Category and Tag Selection -->
+                <tr>
+                    <td>
+                        @if (categories == null)
+                        {
+                            <label>Loading tag categories...</label>
+                        }
+                        else if (!categories.Any())
+                        {
+                            <label>No tag categories. You need to create a tag first.</label>
+                        }
+                        else
+                        {
+                            <label>Tag Category:</label>
+                            <select @onchange="LoadTags" class="form-control">
+                                <option>Choose category</option>
+                                @foreach (string category in categories)
+                                {
+                                    <option value="@category">@category</option>
+                                }
+                            </select>
+                        }
+                    </td>
+                    <td>
+                        @if (tags == null || !tags.Any())
+                        {
+                            @* <label>Choose category first to load tags.</label> *@
+                            @* <label>Select Tag:</label> *@
+                            @* <select  class="form-control"> *@
+                            @*     <option>Choose category first</option> *@
+                            @* </select> *@
+                        }
+                        else
+                        {
+                            <label>Select Tag:</label>
+                            <select @bind="selectedTag" class="form-control">
+                                <option>Choose tag</option>
+                                @foreach (string tag in tags)
+                                {
+                                    <option value="@tag">@tag</option>
+                                }
+                            </select>
+                        }
+                    </td>
+                </tr>
+
+                <!-- Row for Invoicable Project Checkbox -->
+                <tr>
+                    <td colspan="2">
+                        <label>
+                            <input type="checkbox" @bind="isInvoicable" /> Invoicable Project
+                        </label>
+                    </td>
+                </tr>
+
+                <!-- Row for Submit Button -->
+                <tr>
+                    <td colspan="2" class="button-row">
+                        @if (!string.IsNullOrEmpty(msg))
+                        {
+                            <label class="error-msg">@msg</label>
+                        }
+                        <button @onclick="Create" class="acceptbtn">Add Project</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!; //added to remember the logged in claims
+
+    private string msg = "";
+
+    private string ownerUsername;
+    private string projectName;
+    private string? description;
+    private bool isInvoicable = false; // true = invoicable; false = not invoiceable
+    private DateOnly? startDate;
+    private DateOnly? deadline;
+    private ProjectStatus? selectedProjectStatus = ProjectStatus.Created;
+    private string selectedTag;
+    private Priority selectedProjectPriority;
+
+    private List<string> categories = new List<string>();
+    private string? selectedCategory;
+    private List<string> tags = new List<string>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        msg = "";
+        try
+        {
+            categories = await tagService.GetUniqueCategories();
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
+
+    private async Task LoadTags(ChangeEventArgs category)
+    {
+    // Get the selected category
+        selectedCategory = category.Value?.ToString();
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(selectedCategory))
+            {
+                tags = await tagService.GetTags(selectedCategory);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
+
+    private async Task Create()
+    {
+        ownerUsername = await GetUsernameAsync();
+        msg = "";
+        if (string.IsNullOrEmpty(ownerUsername))
+        {
+            msg = "The projects needs an owner!";
+            return;
+        }
+        if (string.IsNullOrEmpty(projectName))
+        {
+            msg = "You must add a project name!";
+            return;
+        }
+        if ((int)selectedProjectPriority == 0)
+        {
+            msg = "You must select priority of the project!";
+            return;
+        }
+        try
+        {
+            ProjectCreationDto dto = new(ownerUsername, projectName, description, isInvoicable, startDate, deadline, selectedProjectStatus, selectedTag, selectedProjectPriority);
+            Project project = await projectService.CreateAsync(dto);
+            navMgr.NavigateTo("/OneProject/" + project.ProjectId);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+
+    }
+
+    //remember userName
+    private async Task<string?> GetUsernameAsync() //using the claims set in blazor/webapi/authController 
+    {
+
+        AuthenticationState authState = await AuthState;
+        ClaimsPrincipal user = authState.User;
+
+    //
+        foreach (var claim in user.Claims)
+        {
+            Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+        }
+
+    // Safely attempt to find the claim
+        Claim? usernameClaim = user.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.Name) ||
+                                                                   claim.Type.Equals("name") ||
+                                                                   claim.Type.Equals("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"));
+
+        if (usernameClaim == null)
+        {
+    // Handle the case where the claim doesn't exist
+            msg = "No username claim found.";
+            return null;
+        }
+    //IEnumerable<Claim> claims = user.Claims;
+    //Claim usernameClaim = claims.First(claim => claim.Type.Equals("Name"));
+        string name = usernameClaim.Value; //if int-> int.Parse(idClaim.Value);
+        return name;
+    }
+
+}

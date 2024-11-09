@@ -6,7 +6,7 @@
 @inject IUserSkillService userSkillService
 @inject ISkillService skillService
 @inject NavigationManager navMgr
-
+@attribute [Authorize]
 
   
      
@@ -80,7 +80,7 @@ else
             {
                 <label style="color: green">@msg</label>
             }
-            <button @onclick="Create" class="acceptbtn">Create</button>
+            <button @onclick="Create" class="acceptbtn">Add Skill</button>
         </div>
     </div>
 }

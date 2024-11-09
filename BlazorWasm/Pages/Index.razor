@@ -1,11 +1,56 @@
 ﻿@page "/"
-@* <!-- @attribute [Authorize("MustBeManager")]   blacking access to a page  --> *@
+@using Microsoft.AspNetCore.Components
 
 
-<PageTitle>Index</PageTitle>
+<h3 class="text-center">Welcome to Employee Allocation</h3>
 
-<h1>Hello, world!</h1>
+<div class="container">
+    <div class="row">
+        <!-- Skills Card -->
+        <div class="col-sm-12 col-md-6 col-lg-4">
+            <div class="card">
+                <img src="img/skillsPhotoCrop.PNG" class="card-img-top" alt="Skills" />
+                <div class="card-body">
+                    <h5 class="card-title">Skills</h5>
+                    <p class="card-text">Manage skills: create skills or view existing ones.</p>
+                    <div class="d-flex justify-content-around">
+                        <a class="btn btn-primary" href="/CreateUserSkill">Create Skill</a>
+                        <a class="btn btn-secondary" href="/ViewUserSkills">View Skills</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-Welcome to your new app.
+        <!-- Projects Card -->
+        <div class="col-sm-12 col-md-6 col-lg-4">
+            <div class="card">
+                <img src="img/projectsPhoto.PNG" class="card-img-top" alt="Projects" />
+                <div class="card-body">
+                    <h5 class="card-title">Projects</h5>
+                    <p class="card-text">Manage projects: create or view existing projects.</p>
+                    <div class="d-flex justify-content-around">
+                        <a class="btn btn-primary" href="/CreateProject">Create Project</a>
+                        <a class="btn btn-secondary" href="/ViewProjects">View Projects</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<SurveyPrompt Title="How is Blazor working for you?"/>
+         <!-- Tasks Card -->
+         <div class="col-sm-12 col-md-6 col-lg-4">
+             <div class="card">
+                 <img src="img/generalPhoto.PNG" class="card-img-top" alt="Tasks" />
+                 <div class="card-body">
+                     <h5 class="card-title">Tasks</h5>
+                     <p class="card-text">Manage tasks: update or view existing ones.</p>
+                     <div class="d-flex justify-content-around">
+                         <a class="btn btn-primary" href="/create-project">Update Tasks</a>
+                         <a class="btn btn-secondary" href="/view-projects">View Tasks</a>
+                     </div>
+                 </div>
+             </div>
+         </div>
+    </div>
+</div>
+
+

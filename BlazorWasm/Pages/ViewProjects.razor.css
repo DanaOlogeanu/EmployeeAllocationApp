@@ -1,0 +1,70 @@
+
+/* Center the page header */
+.page-header {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Center the table */
+.table-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Style the table */
+.styled-table {
+    border-collapse: collapse;
+    width: 80%;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.styled-table th, .styled-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.styled-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.styled-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.styled-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Style the project link */
+.project-link {
+    color: black;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.project-link:hover {
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Style the "Add New Project" button */
+.acceptbtn {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.acceptbtn:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}

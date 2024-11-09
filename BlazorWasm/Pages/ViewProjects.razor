@@ -1,0 +1,127 @@
+@page "/ViewProjects"
+@using Domain.Models
+@using HttpClients.ClientInterfaces
+@using System.Security.Claims
+@inject IProjectService projectService
+@inject NavigationManager navMgr
+@attribute [Authorize]
+
+<h3 class="page-header">View Projects</h3>
+
+@if (projects == null)
+{
+}
+else if (!projects.Any())
+{
+    <p>No projects to display</p>
+}
+else
+{
+    <div class="table-container">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Project Name</th>
+                    <th>Is Invoicable</th>
+                    <th>Start Date</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Tag</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in projects)
+                {
+                    <tr>
+                        <td><a href="/OneProject/@item.ProjectId" class="project-link">@item.ProjectName</a></td>
+                        <td>@item.IsInvoicable</td>
+                        <td>@item.StartDate</td>
+                        <td>@item.Deadline</td>
+                        <td>@item.ProjectStatus</td>
+                        <td>@item.ProjectPriority</td>
+                        <td>@item.TagName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(msg))
+{
+    <label style="color: red">@msg</label>
+}
+<button @onclick="MoveToCreateProject" class="acceptbtn">ADD NEW PROJECT</button>
+
+
+
+
+
+
+@code {
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!;   //added to remember the logged in claims
+   
+    private IEnumerable<Project>? projects;   
+    private string msg = "";
+    // private int projectId;
+    // private string projectName;
+    // private string? description;
+    // private string qwnerUsername;
+    // private bool? isInvoicable;
+    // private DateOnly? startDate;
+    // private DateOnly? deadline;
+    // private ProjectStatus? projectStatus;
+    // private string tagName;
+    // private Priority projectPriority;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        msg = "";
+       
+        try
+        {
+            string? username = await GetUsernameAsync();
+            projects= await projectService.GetProjects(username);
+  
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+        
+    }
+    
+    
+    private async Task<string?> GetUsernameAsync() //using the claims set in blazor/webapi/authController 
+    {
+        
+        AuthenticationState authState = await AuthState;
+        ClaimsPrincipal user = authState.User;
+        foreach (var claim in user.Claims)
+        {
+            Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+        }
+        
+        Claim? usernameClaim = user.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.Name) || 
+                                                                   claim.Type.Equals("name") || 
+                                                                   claim.Type.Equals("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"));
+
+        if (usernameClaim == null)
+        {
+            msg = "No username claim found.";
+            return null;
+        }
+        string name = usernameClaim.Value;
+        return name;
+    }
+    
+    
+    private async Task MoveToCreateProject()
+    {
+        navMgr.NavigateTo("/CreateProject");
+        
+    }
+}

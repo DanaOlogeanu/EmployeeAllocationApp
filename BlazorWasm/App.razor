@@ -4,8 +4,34 @@
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
-                    <img width="600" src="https://i.kym-cdn.com/entries/icons/original/000/002/144/You_Shall_Not_Pass!_0-1_screenshot.jpg"/>
-                    <p>Please log in!</p>
+                    @* <img width="600" src="https://i.kym-cdn.com/entries/icons/original/000/002/144/You_Shall_Not_Pass!_0-1_screenshot.jpg"/> *@
+                    @* <img width="600" style="margin: auto;" src="https://i.kym-cdn.com/entries/icons/original/000/002/144/You_Shall_Not_Pass!_0-1_screenshot.jpg" alt="Stop sign"/> *@
+                    @* <a href="/Login" style="text-decoration: none; margin: auto;" class="project-link">To continue to your profile, please log in.</a>> *@
+                   
+        <div style="
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            height: 100vh; /* Full height of viewport */
+            padding-top: 25vh; /* Start the card at 1/4 height */
+            background-color: #f4f4f9;">
+            <div style="
+                background-color: white; 
+                padding: 20px 40px; 
+                border-radius: 8px; 
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+                text-align: center;">
+                <a href="/Login" style="
+                    text-decoration: none; 
+                    font-size: 18px; 
+                    color: #007ACC; /* Blue Azure color */
+                    font-weight: bold;">
+                    To continue to your profile, please log in.
+                </a>
+            </div>
+        </div>
+
+                    
                 </NotAuthorized>
             </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
