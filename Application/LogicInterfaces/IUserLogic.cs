@@ -11,8 +11,11 @@ public interface IUserLogic
    public Task<IEnumerable<User>> GetAsync(SearchUserParametersDto searchParameters); 
    
    //log in 
-   Task<User> ValidateUser(string name, string password); 
-   
-   
-   
+   Task<User> ValidateUser(string name, string password);
+
+
+   Task<DateOnly> SoonestAvailabilityForUser(string username);
+   Task<User?> GetByUsernameAsync(string username);
+   Task<IEnumerable<User>?> GetByDepartmentAsync(string dpt);
+   Task<bool> IsOnHoliday(string username, DateOnly date);
 }

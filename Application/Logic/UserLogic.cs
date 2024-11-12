@@ -40,4 +40,37 @@ public class UserLogic: IUserLogic
 
         return existingUser;  
     }
+    
+    //availability 
+    public Task<DateOnly> SoonestAvailabilityForUser(string username)
+    {
+        return userDao.SoonestAvailabilityForUser(username);
+    }
+
+  public async Task<User?> GetByUsernameAsync(string username)
+    {
+        User? existingUser = await userDao.GetByUsernameAsync(username);
+        
+        if (existingUser == null)
+        {
+            throw new Exception("User not found");
+        }
+        return existingUser;  
+    }
+
+  public async Task<IEnumerable<User>?> GetByDepartmentAsync(string selectedDpt)
+  {
+     IEnumerable<User>? existingUsers = await userDao.GetByDepartmentAsync(selectedDpt);
+        
+     if (existingUsers == null)
+     {
+         throw new Exception("Users not found for the selected department");
+     }
+     return existingUsers;  
+  }
+
+  public async Task<bool> IsOnHoliday(string username, DateOnly date)
+  {
+      return await userDao.IsOnHoliday(username, date);
+  }
 }

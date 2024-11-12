@@ -56,6 +56,8 @@ builder.Services.AddScoped<ITaskProjectDao, TaskProjectEfcDao>();
 builder.Services.AddScoped<ITaskSkillLogic, TaskSkillLogic>(); 
 builder.Services.AddScoped<ITaskSkillDao, TaskSkillEfcDao>();
 
+builder.Services.AddScoped<IDepartmentLogic, DepartmentLogic>();
+builder.Services.AddScoped<IDepartmentDao, DepartmentEfcDao>(); 
 
 //database 
 builder.Services.AddDbContext<AppContext>();

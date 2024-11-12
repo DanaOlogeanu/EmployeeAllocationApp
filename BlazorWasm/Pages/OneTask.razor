@@ -4,7 +4,9 @@
 @using Domain.Models
 @inject ITaskProjectService taskProjectService
 @inject ISkillService skillService
-@inject ITaskSkillService taskSkillService
+@inject IUserService userService
+@inject IDepartmentService dptService
+@inject ITaskSkillService taskSkillService;
 
 <div class="center-container">
     <div class="container">
@@ -29,7 +31,7 @@
 
                 <div class="form-group">
                     <label for="assigned-to">Assigned To:</label>
-                    <InputText id="assigned-to" class="form-control" @bind-Value="taskProject.OwnerUsername" />
+                    <InputText id="assigned-to" class="form-control" @bind-Value="taskProject.OwnerUsername" readonly/>
                 </div>
 
                 <div class="form-group">
@@ -47,14 +49,18 @@
                     </InputSelect>
                 </div>
 
+                
                 <div class="form-group">
                     <label for="start-date">Start Date:</label>
-                    <input id="start-date" type="date" @bind="taskProject.StartDate" class="form-control" />
+                    @* <InputDate id="start-date" class="form-control" @bind-Value="taskProject.StartDate" /> *@
+                    <input id="start-date" type="date" @bind="taskProject.StartDate" class="form-control"  />
                 </div>
 
                 <div class="form-group">
                     <label for="deadline">Deadline:</label>
-                    <input id="deadline" type="date" @bind="taskProject.Deadline" class="form-control" />
+                    @* <InputDate id="deadline" class="form-control" @bind-Value="taskProject.Deadline" /> *@
+                    <input id="deadline" type="date" @bind="taskProject.Deadline" class="form-control"  />
+                    
                 </div>
 
                 <div class="form-group">
@@ -87,7 +93,7 @@
                 <p><strong>Assigned To:</strong> @(string.IsNullOrWhiteSpace(taskProject?.OwnerUsername) ? "Unassigned" : taskProject.OwnerUsername)</p>
                 <p><strong>Estimate (hours):</strong> @taskProject?.Estimate</p>
                 <p><strong>Task Status:</strong> @taskProject?.TaskStatusEnum</p>
-                <p><strong>Start Date:</strong> @taskProject?.StartDate.ToString()</p>
+                <p><strong>Start Date:</strong>@taskProject?.StartDate.ToString()</p>
                 <p><strong>Deadline:</strong> @taskProject?.Deadline.ToString()</p>
                 <p><strong>Dependent On:</strong> @taskProject?.DependentOn</p>
                 <p><strong>Order No:</strong> @taskProject?.OrderNo</p>
@@ -98,41 +104,42 @@
         }
 
         <h4 class="section-header">Required Skills</h4>
-        @if (taskSkills != null && taskSkills.Any())
-        {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Skill Name</th>
-                        <th>Proficiency</th>
-                        <th></th> <!-- Column for delete icon -->
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var taskSkill in taskSkills)
-                    {
-                        <tr>
-                            <td>@taskSkill.SkillName</td>
-                            <td>@taskSkill.Proficiency</td>
-                            <td>
-                               <span @onclick="() => DeleteSkill(taskSkill.Id)" class="delete-icon">❌</span>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p>No skills added to this task yet.</p>
-        }
 
+         @if (taskSkills != null && taskSkills.Any())
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Skill Name</th>
+                                <th>Proficiency</th>
+                                <th></th> <!-- Column for delete icon -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var taskSkill in taskSkills)
+                            {
+                                <tr>
+                                    <td>@taskSkill.SkillName</td>
+                                    <td>@taskSkill.Proficiency</td>
+                                    <td>
+                                       <span @onclick="() => DeleteSkill(taskSkill.Id)" class="delete-icon">❌</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>No skills added to this task yet.</p>
+                }
+        
         @if (showAddSkillForm)
         {
             <EditForm Model="skills" OnValidSubmit="AddSkill" class="form-container">
                 <div class="form-group">
                     <label for="category">Skill Category:</label>
-                    <select id="category" class="form-control" @onchange="LoadSkills">
+                    <select id="category" class="form-control"  @onchange="LoadSkills">
                         <option value="">Choose category</option>
                         @foreach (string category in categories)
                         {
@@ -176,205 +183,79 @@
         {
             <button class="acceptbtn" @onclick="ShowAddSkillForm">Add Task Required Skill</button>
         }
+        
+        @* Assignment of user to task *@
+        <h4 class="section-header">Assign Task</h4>
+        @if (showAddAssignmentForm)
+        {
+            <EditForm Model="departments"  class="form-container">
+                <div class="form-group">
+                    <label for="department">User Department:</label>
+                    <select id="department" class="form-control"  @onchange="LoadUsers">
+                        <option value="">Choose department</option>
+                        @foreach (string department in departments)
+                        {
+                            <option value="@department">@department</option>
+                        }
+                    </select>
+                </div>
+                
+    
+                @* New user and availability *@
+
+                <!-- Display Users with Availability -->
+                @if (usersByDpt != null && usersByDpt.Any()) 
+                {
+
+                    <h5>Users Availability in @selectedDpt:</h5>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>UserName</th>
+                            <th>Name</th>
+                            <th>Estimated Start Date</th>
+                            <th>Estimated Deadline</th>
+                            <th> </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (User user in usersByDpt)
+                        {
+                            <tr>  
+                                <td>@user.Username</td>
+                                <td>@user.Name</td>
+                                <td>@userAvailability[user.Username]</td> 
+                                 <td>@userDeadline[user.Username]</td> 
+                                  
+                                <td>
+                                    <button type="submit" class="acceptbtn" @onclick="() => AssignTaskToUser(user.Username)">Assign User</button>
+                                    <button type="button" class="cancelbtn" @onclick="CancelAddAssign">Cancel</button>
+                                </td>
+                            </tr> 
+                        }
+                        </tbody>
+                    </table>
+                }
+                  <div class="button-group">
+                               
+                                 
+                                </div>
+            </EditForm>
+        } 
+        else
+        {
+            <button class="acceptbtn" @onclick="ShowAddAssignmentForm">Assign task </button>
+        }
+    
+
+        @* needed *@
     </div>
 </div>
 
-
-
-
-
-
-
-
-
-@* without css *@
-@* <h3>Task Overview</h3> *@
-@* @if (isEditMode) *@
-@* { *@
-@*     <!-- Editable Mode --> *@
-@*     <EditForm Model="taskProject" OnValidSubmit="HandleSave"> *@
-@*         <DataAnnotationsValidator /> *@
-@*         <ValidationSummary /> *@
-@* *@
-@*         <div> *@
-@*             <label>Name:</label> *@
-@*             <InputText @bind-Value="taskProject.Name" /> *@
-@*         </div> *@
-@* *@
-@*         <div> *@
-@*             <label>Project ID:</label> *@
-@*             <InputNumber @bind-Value="taskProject.ProjectId" /> *@
-@*         </div> *@
-@* *@
-@*         <div> *@
-@*             <label>Assigned to:</label> *@
-@*             <InputText @bind-Value="taskProject.OwnerUsername" /> *@
-@*         </div> *@
-@* *@
-@*         <div> *@
-@*             <label>Estimate (hours):</label> *@
-@*             <InputNumber @bind-Value="taskProject.Estimate" /> *@
-@*         </div> *@
-@* *@
-@*         <div> *@
-@*             <label>Task Status:</label> *@
-@*             <InputSelect @bind-Value="taskProject.TaskStatusEnum"> *@
-@*                 @foreach (var status in Enum.GetValues(typeof(TaskStatusEnum))) *@
-@*                 { *@
-@*                     <option value="@status">@status</option> *@
-@*                 } *@
-@*             </InputSelect> *@
-@*         </div> *@
-@* *@
-@*         <div> *@
-@*             <label>Start Date:</label> *@
-@*             <InputDate @bind-Value="taskProject.StartDate" /> *@
-@*         </div> *@
-@* *@
-@*         <div> *@
-@*             <label>Deadline:</label> *@
-@*             <InputDate @bind-Value="taskProject.Deadline" /> *@
-@*         </div> *@
-@* *@
-@*         <div> *@
-@*             <label>Dependent On:</label> *@
-@*             <InputNumber @bind-Value="taskProject.DependentOn" /> *@
-@*         </div> *@
-@* *@
-@*         <div> *@
-@*             <label>Order No:</label> *@
-@*             <InputNumber @bind-Value="taskProject.OrderNo" /> *@
-@*         </div> *@
-@* *@
-@*         <div> *@
-@*             <label>Notes:</label> *@
-@*             <InputTextArea @bind-Value="taskProject.Notes" /> *@
-@*         </div> *@
-@* *@
-@*         <button type="submit">Save</button> *@
-@*         <button type="button" @onclick="CancelEdit">Cancel</button> *@
-@*     </EditForm> *@
-@* } *@
-@* else *@
-@* { *@
-@*     <!-- Read-Only Mode --> *@
-@*     <div> *@
-@*         <strong>Name:</strong> *@
-@*         @if (taskProject != null) *@
-@*         { *@
-@*             @taskProject.Name @:</div> *@
-@*             <div> *@
-@*                 <strong>Project ID:</strong> @taskProject.ProjectId *@
-@*             </div> *@
-@*             <div> *@
-@*                 <strong>Assigned to:</strong> @(string.IsNullOrWhiteSpace(taskProject.OwnerUsername) ? "Unassigned" : taskProject.OwnerUsername) *@
-@*             </div> *@
-@*             <div> *@
-@*                 <strong>Estimate (hours):</strong> @taskProject.Estimate *@
-@*             </div> *@
-@*             <div> *@
-@*                 <strong>Task Status:</strong> @taskProject.TaskStatusEnum *@
-@*             </div> *@
-@*             <div> *@
-@*                 <strong>Start Date:</strong> @taskProject.StartDate *@
-@*             </div> *@
-@*             <div> *@
-@*                 <strong>Deadline:</strong> @taskProject.Deadline *@
-@*             </div> *@
-@*             <div> *@
-@*                 <strong>Dependent On:</strong> @taskProject.DependentOn *@
-@*             </div> *@
-@*             <div> *@
-@*                 <strong>Order No:</strong> @taskProject.OrderNo *@
-@*             </div> *@
-@*             @:<div> *@
-@*             <strong>Notes:</strong> *@
-@*             @taskProject.Notes *@
-@*         } *@
-@*   *@
-@*     </div> *@
-@* *@
-@*     <button @onclick="EnableEdit">Edit Task</button> *@
-@* } *@
-@* *@
-@* *@
-@* <!-- Add Task Required Skills --> *@
-@* <h4>Required Skills</h4> *@
-@* $1$ <ul> #1# *@
-@* $1$     @foreach (var skill in taskSkills) #1# *@
-@* $1$     { #1# *@
-@* $1$         <li>@skill.SkillName - Proficiency: @skill.Proficiency</li> #1# *@
-@* $1$     } #1# *@
-@* $1$ </ul> #1# *@
-@* *@
-@* @if (showAddSkillForm) *@
-@* { *@
-@*     <EditForm Model="skills" OnValidSubmit="AddSkill"> *@
-@*      *@
-@*     <div class="form-group field"> *@
-@*         <div> *@
-@*             <label>Skill Category:</label> *@
-@*             <select @onchange="LoadSkills"> *@
-@* *@
-@*                 <option>Choose category</option> *@
-@*                 @foreach (string category in categories) *@
-@*                 { *@
-@*                     <option value="@category"> @category </option> *@
-@*                 } *@
-@*             </select> *@
-@*         </div> *@
-@*     *@
-@*         $1$ <button @onclick="AddSkill" class="acceptbtn">Create</button>   #1# *@
-@* *@
-@*         @if (skills == null || !skills.Any()) *@
-@*         { *@
-@*             <label>Loading skills...</label> *@
-@*         } *@
-@*         else *@
-@*         { *@
-@* *@
-@*             <div> *@
-@*                 <label>Skill Name:</label> *@
-@*                 <label>Skill Name:</label> *@
-@*                 <select @bind="selectedSkill"> *@
-@*                     <option>Choose skill</option> *@
-@*                     @foreach (string skill in skills) *@
-@*                     { *@
-@*                         <option value="@skill">@skill</option> *@
-@*                     } *@
-@*                 </select> *@
-@*                 $1$ <InputText @bind-Value="selectedSkill"/> #1# *@
-@*             </div> *@
-@*         } *@
-@*              *@
-@*             <div> *@
-@*                 <label>Proficiency:</label> *@
-@*                  *@
-@*                 <select @bind="selectedProficiency"> *@
-@*                     <option>Choose proficiency</option> *@
-@*                     @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency))) *@
-@*                     { *@
-@*                         <option value="@prof">@prof</option> *@
-@*                     } *@
-@*                 </select> *@
-@*                  *@
-@*             </div> *@
-@*             <button type="submit">Add Skill</button> *@
-@*             <button type="button" @onclick="CancelAddSkill">Cancel</button> *@
-@*        *@
-@*     </div> *@
-@*     </EditForm> *@
-@* } *@
-@* else *@
-@* { *@
-@*     <button  @onclick="ShowAddSkillForm"> Add Task Required Skill </button> *@
-@* } *@
-@* *@
-
-
 @code {
+
     [CascadingParameter]
-    public Task<AuthenticationState> AuthState { get; set; } = null!; // added to remember the logged-in claims
+    public Task<AuthenticationState> AuthState { get; set; } = null!; //added to remember the logged in claims
 
     [Parameter]
     public int Id { get; set; }
@@ -393,18 +274,21 @@
     private double? orderNo;
     private string notes;
 
-    private List<TaskSkill> taskSkills; // needed for task skills
 
-    // add task skills
+    private List<TaskSkill> taskSkills; //??????needed new????? todo get task skills
+
+    //add task skills 
     private string selectedSkill;
     private Proficiency selectedProficiency;
     private List<string> categories = new List<string>();
     private string? selectedCategory;
     private List<string>? skills = new List<string>();
 
-    // UI States
+    // UI States SKills
     private bool isEditMode = false;
     private bool showAddSkillForm = false;
+    //UI States Assignment
+    private bool showAddAssignmentForm = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -414,9 +298,10 @@
         {
             taskProject = await taskProjectService.GetByIdAsync(@Id);
             categories = await skillService.GetUniqueCategories();
-
-            // Load existing task skills by task project id
+            departments = await dptService.GetUniqueDepartmentsAsync();
+         // Load existing task skills by task project id
             taskSkills = (await taskSkillService.GetAsync(null, null, taskProject?.ProjectId)).ToList();
+            
         }
         catch (Exception e)
         {
@@ -424,7 +309,7 @@
             msg = e.Message;
         }
     }
-
+    
     private void EnableEdit()
     {
         isEditMode = true;
@@ -437,7 +322,7 @@
 
     private async Task HandleSave()
     {
-        // Simulate saving the task to the database
+    // Simulate saving the task to the database
         await taskProjectService.UpdateAsync(taskProject);
         isEditMode = false;
     }
@@ -449,7 +334,6 @@
 
     private async Task AddSkill()
     {
-        // Add the skill to the list (simulating database save)
         TaskSkillCreationDto dto = new TaskSkillCreationDto(taskProject!.ProjectId, selectedSkill, selectedProficiency);
         TaskSkill createdSkill = await taskSkillService.CreateAsync(dto);
         taskSkills.Add(createdSkill);
@@ -461,15 +345,17 @@
         showAddSkillForm = false;
     }
 
+
     private async Task LoadSkills(ChangeEventArgs category)
     {
-        // Get the selected category
+    // Get the selected category
         selectedCategory = category.Value?.ToString();
         try
         {
             if (!string.IsNullOrWhiteSpace(selectedCategory))
             {
                 skills = await skillService.GetUniqueSkills(selectedCategory);
+
             }
         }
         catch (Exception e)
@@ -478,7 +364,7 @@
             msg = e.Message;
         }
     }
-
+    
     private async Task DeleteSkill(int taskSkillId)
     {
         try
@@ -492,7 +378,148 @@
             msg = e.Message;
         }
     }
+
+    //Assign Task 
+    //Availability
+    private List<string> departments = new List<string>();
+    private string selectedDpt;
+    private IEnumerable<User> usersByDpt;
+    private string? selectedUser;
+
+    private DateOnly availableStartDate;
+    private DateOnly userTaskDeadline;
+    //private int hoursForProjectsPerDay;
+
+    //start date
+    public async Task<DateOnly> SoonestAvailabilityForUser(string username)
+    {
+        try
+        {
+            availableStartDate = await userService.SoonestAvailabilityForUser(username);
+   
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+        return availableStartDate;
+
+    }
+
+    //deadline
+    public async Task<DateOnly> calculateTaskDeadline(string username, int? estimatedTaskHours, int? hoursForProjectsPerDay, DateOnly availableStartDate)
+    {
+        try
+        {
+            if (estimatedTaskHours > 0)
+            {
+                bool holiday = await IsOnHoliday(username, availableStartDate);
+                if (!holiday || !IsWeekend(availableStartDate))
+                {
+                    estimatedTaskHours -= hoursForProjectsPerDay;
+                }
+                availableStartDate = availableStartDate.AddDays(1);
+                return await calculateTaskDeadline(username, estimatedTaskHours, hoursForProjectsPerDay, availableStartDate);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+        return availableStartDate;
+    }
+
+
+
+    public bool IsWeekend(DateOnly date)
+    {
+        if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+        {
+           return true;
+        }
+        return false;
+    }
+
+    public async Task<bool> IsOnHoliday(string username,DateOnly date)
+    {
+        try
+        {
+            return await userService.IsOnHoliday(username, date);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+            return false;
+        }
+    }
+
+
+    private Dictionary<string, DateOnly> userAvailability;
+    private Dictionary<string, DateOnly> userDeadline;
+ 
+    private async Task LoadUsers(ChangeEventArgs department)
+    {
+        selectedDpt = department.Value?.ToString();
+        try
+        {
+            userAvailability = new();
+            userDeadline = new();
+            if (!string.IsNullOrWhiteSpace(selectedDpt))
+            {
+                usersByDpt = await userService.GetByDepartmentAsync(selectedDpt);
+                foreach (var user in usersByDpt)
+                {
+                    var userAvailabilityvar = await SoonestAvailabilityForUser(user.Username);
+                    var userDeadlinevar =  await calculateTaskDeadline(user.Username, taskProject.Estimate, user.ProjectHoursPerDay, userAvailabilityvar);
+                    userAvailability[user.Username] = userAvailabilityvar;
+                    userDeadline[user.Username] = userDeadlinevar;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+       
+    }
+    
+   
+        
+
+    private void ShowAddAssignmentForm()
+    {
+        showAddAssignmentForm = true;
+
+    }
+
+    
+    //TODO figure out assing task how to update task 
+    
+    private async Task AssignTaskToUser(string username)
+    {
+        if (username != null)
+        {
+            taskProject.OwnerUsername = username;
+            taskProject.StartDate = userAvailability[username];
+            taskProject.Deadline = userDeadline[username];
+            await taskProjectService.UpdateAsync(taskProject);
+    //   StateHasChanged(); //to reload
+
+    // Your task assignment logic here
+    // Add the skill to the list (simulating database save)
+    // taskSkills.Add(new SkillModel { Name = newSkillName, Proficiency = newSkillProficiency });
+    //TODO save the user as assigned to task + show change
+        }
+        showAddAssignmentForm = false;
+    }
+
+    private void CancelAddAssign()
+    {
+        showAddAssignmentForm = false;
+    }
+    
 }
-
-
-

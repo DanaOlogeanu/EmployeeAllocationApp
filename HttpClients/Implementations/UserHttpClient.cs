@@ -18,6 +18,8 @@ public class UserHttpClient: IUserService
         this.client = client;
     }
     
+    
+    //TODO Review
     //list of users parameters
     public async Task<ICollection<User>> GetAsync(string? department, string?  skillOne, int? reqScoreOne, string? skillTwo, int? reqScoreTwo, string? skillThree, int? reqScoreThree)
     {
@@ -38,6 +40,93 @@ public class UserHttpClient: IUserService
         return users;
     }
 
+    public async Task<DateOnly> SoonestAvailabilityForUser(string username)
+    {
+        string uri = "/Users/Availability";
+        if (!string.IsNullOrEmpty(username))
+        {
+            uri += $"?username={username}";
+        }
+        HttpResponseMessage response = await client.GetAsync(uri);
+        string content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception(content);
+        }
+        DateOnly date = JsonSerializer.Deserialize<DateOnly>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        })!;
+
+        return date;
+}
+
+    public async Task<User?> GetByUsernameAsync(string username)
+    {
+        string uri = "Users/GetUser";
+        if (!string.IsNullOrEmpty(username))
+        {
+            uri += $"?username={username}";
+        }
+        HttpResponseMessage response = await client.GetAsync(uri);
+        string content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception(content);
+        }
+        User user = JsonSerializer.Deserialize<User>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        })!;
+        return user;
+    }
+
+    public async Task<IEnumerable<User>?> GetByDepartmentAsync(string dpt)
+    {
+        string query = "Users/GetByDpt";
+        if (!string.IsNullOrEmpty(dpt))
+        {
+            query += $"?selectedDpt={dpt}";
+        }
+        HttpResponseMessage response = await client.GetAsync(query);
+        string content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception(content);
+        }
+        IEnumerable<User>? users = JsonSerializer.Deserialize<IEnumerable<User>>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        })!;
+        return users;
+    }
+
+    public async Task<bool> IsOnHoliday(string username, DateOnly date)
+    {
+        string uri = "Users/GetHoliday";
+        if (!string.IsNullOrEmpty(username))
+        {
+            uri += $"?username={username}";
+        }
+        if (date != DateOnly.MinValue)
+        {
+            uri += $"?date={date}";
+        }
+        
+        HttpResponseMessage response = await client.GetAsync(uri);
+        string content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception(content);
+        }
+        bool answer = JsonSerializer.Deserialize<bool>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        })!;
+        return answer;
+    }
+    
+    //TODO review
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!rethink
     private static string ConstructQuery(string? department, string?  skillOne, int? reqScoreOne, string? skillTwo, int? reqScoreTwo, string? skillThree, int? reqScoreThree)
     {

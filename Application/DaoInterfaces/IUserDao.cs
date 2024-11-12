@@ -9,8 +9,8 @@ public interface IUserDao
     Task<IEnumerable<User>> GetAsync(SearchUserParametersDto searchParameters);
     
     //log in
-    Task<User?> GetByUsernameAsync(string username); 
-    
-    
-    
+    Task<User?> GetByUsernameAsync(string username);
+    Task<IEnumerable<User>?> GetByDepartmentAsync(string dpt);
+    Task<DateOnly> SoonestAvailabilityForUser(string username);
+  Task<bool> IsOnHoliday(string username, DateOnly date);
 }

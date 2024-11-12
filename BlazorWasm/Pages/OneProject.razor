@@ -143,13 +143,11 @@ else
                         <label>
                             @if (isEditing)
                             {
-                                <input type="checkbox" @bind="project.IsInvoicable"/>
-                                <strong>Invoicable Project</strong>
+                                <input type="checkbox" @bind="project.IsInvoicable"/><strong>Invoicable Project</strong>
                             }
                             else
                             {
-                                <input type="checkbox" disabled="true" checked="@project.IsInvoicable"/>
-                                <strong>Invoicable Project</strong>
+                                <input type="checkbox" disabled="true" checked="@project.IsInvoicable"/><strong>Invoicable Project</strong>
                             }
                         </label>
                     </td>
