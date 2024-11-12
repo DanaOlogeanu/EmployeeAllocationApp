@@ -4,6 +4,7 @@
 @using Domain.Models
 @inject ITaskProjectService taskProjectService
 @inject ISkillService skillService
+@inject ITaskSkillService taskSkillService
 
 <div class="center-container">
     <div class="container">
@@ -46,18 +47,14 @@
                     </InputSelect>
                 </div>
 
-                
                 <div class="form-group">
                     <label for="start-date">Start Date:</label>
-                    @* <InputDate id="start-date" class="form-control" @bind-Value="taskProject.StartDate" /> *@
-                      <input id="start-date" type="date" @bind="taskProject.StartDate" class="form-control"  />
+                    <input id="start-date" type="date" @bind="taskProject.StartDate" class="form-control" />
                 </div>
 
                 <div class="form-group">
                     <label for="deadline">Deadline:</label>
-                    @* <InputDate id="deadline" class="form-control" @bind-Value="taskProject.Deadline" /> *@
-                       <input id="deadline" type="date" @bind="taskProject.Deadline" class="form-control"  />
-                    
+                    <input id="deadline" type="date" @bind="taskProject.Deadline" class="form-control" />
                 </div>
 
                 <div class="form-group">
@@ -85,12 +82,12 @@
         {
             <!-- Read-Only Mode -->
             <div class="task-details">
-            <p><strong>Name:</strong> @taskProject?.Name</p>
-            <p><strong>Project ID:</strong> @taskProject?.ProjectId</p>
-            <p><strong>Assigned To:</strong> @(string.IsNullOrWhiteSpace(taskProject?.OwnerUsername) ? "Unassigned" : taskProject.OwnerUsername)</p>
-            <p><strong>Estimate (hours):</strong> @taskProject?.Estimate</p>
+                <p><strong>Name:</strong> @taskProject?.Name</p>
+                <p><strong>Project ID:</strong> @taskProject?.ProjectId</p>
+                <p><strong>Assigned To:</strong> @(string.IsNullOrWhiteSpace(taskProject?.OwnerUsername) ? "Unassigned" : taskProject.OwnerUsername)</p>
+                <p><strong>Estimate (hours):</strong> @taskProject?.Estimate</p>
                 <p><strong>Task Status:</strong> @taskProject?.TaskStatusEnum</p>
-                <p><strong>Start Date:</strong>@taskProject?.StartDate.ToString()</p>
+                <p><strong>Start Date:</strong> @taskProject?.StartDate.ToString()</p>
                 <p><strong>Deadline:</strong> @taskProject?.Deadline.ToString()</p>
                 <p><strong>Dependent On:</strong> @taskProject?.DependentOn</p>
                 <p><strong>Order No:</strong> @taskProject?.OrderNo</p>
@@ -101,6 +98,34 @@
         }
 
         <h4 class="section-header">Required Skills</h4>
+        @if (taskSkills != null && taskSkills.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Skill Name</th>
+                        <th>Proficiency</th>
+                        <th></th> <!-- Column for delete icon -->
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var taskSkill in taskSkills)
+                    {
+                        <tr>
+                            <td>@taskSkill.SkillName</td>
+                            <td>@taskSkill.Proficiency</td>
+                            <td>
+                               <span @onclick="() => DeleteSkill(taskSkill.Id)" class="delete-icon">❌</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No skills added to this task yet.</p>
+        }
 
         @if (showAddSkillForm)
         {
@@ -153,6 +178,7 @@
         }
     </div>
 </div>
+
 
 
 
@@ -346,11 +372,9 @@
 @* *@
 
 
-
 @code {
-
     [CascadingParameter]
-    public Task<AuthenticationState> AuthState { get; set; } = null!; //added to remember the logged in claims
+    public Task<AuthenticationState> AuthState { get; set; } = null!; // added to remember the logged-in claims
 
     [Parameter]
     public int Id { get; set; }
@@ -369,20 +393,18 @@
     private double? orderNo;
     private string notes;
 
+    private List<TaskSkill> taskSkills; // needed for task skills
 
-    private List<TaskSkill> taskSkills; //??????needed new????? todo get task skills
-    
-    //add task skills 
+    // add task skills
     private string selectedSkill;
     private Proficiency selectedProficiency;
     private List<string> categories = new List<string>();
     private string? selectedCategory;
-    private List<string>? skills = new List<string>(); 
+    private List<string>? skills = new List<string>();
 
     // UI States
     private bool isEditMode = false;
     private bool showAddSkillForm = false;
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -393,7 +415,8 @@
             taskProject = await taskProjectService.GetByIdAsync(@Id);
             categories = await skillService.GetUniqueCategories();
 
-    //TODO  loading existing taskskills >get task skills by task id
+            // Load existing task skills by task project id
+            taskSkills = (await taskSkillService.GetAsync(null, null, taskProject?.ProjectId)).ToList();
         }
         catch (Exception e)
         {
@@ -402,9 +425,6 @@
         }
     }
 
-    
-    
-    
     private void EnableEdit()
     {
         isEditMode = true;
@@ -417,7 +437,7 @@
 
     private async Task HandleSave()
     {
-    // Simulate saving the task to the database
+        // Simulate saving the task to the database
         await taskProjectService.UpdateAsync(taskProject);
         isEditMode = false;
     }
@@ -425,16 +445,14 @@
     private void ShowAddSkillForm()
     {
         showAddSkillForm = true;
-    //drop downs no need for this
-    //   newSkillName = string.Empty;
-    //   newSkillProficiency = ProficiencyLevelEnum.Beginner;
     }
 
     private async Task AddSkill()
     {
-    // Add the skill to the list (simulating database save)
-    // taskSkills.Add(new SkillModel { Name = newSkillName, Proficiency = newSkillProficiency });
-    //TODO add new taskSkill
+        // Add the skill to the list (simulating database save)
+        TaskSkillCreationDto dto = new TaskSkillCreationDto(taskProject!.ProjectId, selectedSkill, selectedProficiency);
+        TaskSkill createdSkill = await taskSkillService.CreateAsync(dto);
+        taskSkills.Add(createdSkill);
         showAddSkillForm = false;
     }
 
@@ -443,10 +461,9 @@
         showAddSkillForm = false;
     }
 
-    
     private async Task LoadSkills(ChangeEventArgs category)
     {
-    // Get the selected category
+        // Get the selected category
         selectedCategory = category.Value?.ToString();
         try
         {
@@ -462,4 +479,20 @@
         }
     }
 
+    private async Task DeleteSkill(int taskSkillId)
+    {
+        try
+        {
+            await taskSkillService.DeleteAsync(taskSkillId);
+            taskSkills = taskSkills.Where(ts => ts.Id != taskSkillId).ToList();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
 }
+
+
+

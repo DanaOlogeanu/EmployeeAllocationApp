@@ -19,6 +19,12 @@
 
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Pages\ViewUserSkills.css">
+        <DependentUpon>ViewUserSkills.razor</DependentUpon>
+      </None>
+    </ItemGroup>
+
 
 
 
