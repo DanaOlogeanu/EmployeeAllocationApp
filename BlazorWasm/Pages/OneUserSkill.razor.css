@@ -1,0 +1,56 @@
+/* Error and Success Message Styles */
+.message {
+    text-align: center;
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+/* Success Message */
+.message.success {
+    color: green;
+}
+
+/* Error Message */
+.message.error {
+    color: red;
+}
+
+/* Table Styles */
+.table-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 60%;
+    margin: 20px auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table tr td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.skillview {
+    font-size: 16px;
+}
+
+/* Button Styles */
+.acceptbtn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.acceptbtn:hover {
+    background-color: #218838;
+}

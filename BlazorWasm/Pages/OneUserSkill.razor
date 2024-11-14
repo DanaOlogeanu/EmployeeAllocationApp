@@ -3,46 +3,51 @@
 @using HttpClients.ClientInterfaces
 @using Domain.Dtos
 @using Domain.Models
-<h3>Skill</h3>
 
-@if (userSkill == null)
-{
-    <p>No skill to display</p>
-}
-else
-{
-    <div class="table-container">
+<div class="table-container">
+    <!-- Page Header inside the container for consistent styling -->
+    <h3>Skill</h3>
+
+    @if (userSkill == null)
+    {
+        <p>No skill to display</p>
+    }
+    else
+    {
         <table class="table">
             <tr>
                 <td class="skillview">Skill: @userSkill.SkillName</td>
             </tr>
             <tr>
                 <td class="skillview">
-                                    <!-- Add dropdown for Proficiency -->
-                                    Proficiency: 
-                                    <select @bind="userSkill.Proficiency">
-                                        @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
-                                        {
-                                            <option value="@prof">@prof</option>
-                                        }
-                                    </select>
+                    Proficiency: 
+                    <select @bind="userSkill.Proficiency">
+                        @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
+                        {
+                            <option value="@prof">@prof</option>
+                        }
+                    </select>
                 </td>
             </tr>
             <tr>
                 <td class="skillview">
-                    <!-- Add input for Notes -->
                     Notes: 
                     <input type="text" @bind="userSkill.Notes" />
                 </td>
-           </tr>
+            </tr>
         </table>
-    </div>
-}
 
-<div class="button-row">
-        <!-- Add Save button -->
-        <button @onclick="SaveChanges" class="acceptbtn">Save</button>
-  </div>
+        <div class="button-row">
+            <button @onclick="SaveChanges" class="acceptbtn">Save</button>
+        </div>
+
+        <!-- Display success/error messages if available -->
+        @if (!string.IsNullOrEmpty(msg))
+        {
+            <p class="message">@msg</p>
+        }
+    }
+</div>
 
 @* <div class="button-row"> *@
     @*         <button @onclick="@(() => RemoveProduct(product.Id))"  class="deletebtn">Delete product</button>   <!--how to add disabled button for password as well???? --> *@
@@ -52,12 +57,13 @@ else
     @* { *@
     @*     <label style="color: red">@msg</label> *@
         
-    @code {
+
+@code {
     [Parameter]
     public int Id { get; set; }
     
     private string msg = "";
-   private UserSkillBasicDto? userSkill;
+    private UserSkillBasicDto? userSkill;
     
     protected override async Task OnInitializedAsync()
     {
@@ -65,27 +71,26 @@ else
     
         try
         {
-            userSkill = await UserSkillService.GetByIdAsync(@Id);
+            userSkill = await UserSkillService.GetByIdAsync(Id);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             msg = e.Message;
         }
-        
     }
-        private async Task SaveChanges()
+    
+    private async Task SaveChanges()
+    {
+        try
         {
-            try
-            {
-                await UserSkillService.UpdateAsync(userSkill);
-                msg = "Changes saved successfully!";
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                msg = e.Message;
-            }
+            await UserSkillService.UpdateAsync(userSkill);
+            msg = "Changes saved successfully!";
         }
-
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
 }

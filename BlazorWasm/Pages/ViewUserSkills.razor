@@ -6,91 +6,96 @@
 @inject IUserSkillService UserSkillService
 @inject NavigationManager navMgr
 
+<h3 class="main-header">My Skills</h3>
 
-@* @attribute [Authorize]   *@
-@* need to be logged in for access *@
-
-
-<h3>Skills</h3>
-
-<div class="toolbar">
-    <button @onclick="MoveToSkill" class="acceptbtn">ADD NEW SKILL</button>
-    <div class="toolbar-buttons" style="float: right;">
-        <button @onclick="UpdateSkills" class="toolbarbtn" disabled="@(!isAnyRowSelected)">Update</button>
-        <button @onclick="ShowDeleteConfirmation" class="toolbarbtn" disabled="@(!isAnyRowSelected)">Delete</button>
-        <button @onclick="SaveChanges" class="toolbarbtn" disabled="@(!isAnyRowSelected)">Save Changes</button>
-        <button @onclick="CancelChanges" class="toolbarbtn" disabled="@(!isAnyRowSelected)">Cancel</button>
+<div class="card">
+    <div class="toolbar">
+        <button @onclick="MoveToSkill" class="btn-primary">ADD NEW SKILL</button>
+        <div class="toolbar-buttons">
+            <button @onclick="SaveChanges" class="save" disabled="@(!isAnyRowSelected)">Save Changes</button>
+            <button @onclick="UpdateSkills" class="btn-primary" disabled="@(!isAnyRowSelected)">Update</button>
+            <button @onclick="ShowDeleteConfirmation" class="cancel" disabled="@(!isAnyRowSelected)">Delete</button>
+            <button @onclick="CancelChanges" class="cancel" disabled="@(!isAnyRowSelected)">Cancel</button>
+        </div>
     </div>
+
+    @if (userSkills == null)
+    {
+        <p>Loading skills...</p>
+    }
+    else if (!userSkills.Any())
+    {
+        <p>No skills to display</p>
+    }
+    else
+    {
+        @foreach (var category in userSkills.GroupBy(skill => skill.Skill.Category))
+        {
+            <div class="category-section">
+                <h4 class="category-title" @onclick="() => ToggleCategory(category.Key)">
+                    @category.Key (@category.Count())
+                    <span class="dropdown-icon">@((expandedCategories.Contains(category.Key)) ? "▲" : "▼")</span>
+                </h4>
+                @if (expandedCategories.Contains(category.Key))
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Skill Name</th>
+                                <th>Proficiency</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in category)
+                            {
+                                <tr class="@GetRowClass(item)" @onclick="() => ToggleSelection(item)">
+                                    <td>@item.Skill.Name</td>
+                                    <td>
+                                        @if (isEditing && selectedSkills.Contains(item))
+                                        {
+                                            <select @bind="item.Proficiency" @onclick:stopPropagation="true">
+                                                @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
+                                                {
+                                                    <option value="@prof">@prof</option>
+                                                }
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            @item.Proficiency
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (isEditing && selectedSkills.Contains(item))
+                                        {
+                                            <input type="text" @bind="item.Notes" @onclick:stopPropagation="true" />
+                                        }
+                                        else
+                                        {
+                                            @item.Notes
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        }
+    }
+
+    @if (showConfirmationDialog)
+    {
+        <ConfirmationDialog Title="Delete Skills" Message="Are you sure you want to delete the selected skills?" OnClose="OnDeleteConfirmation" />
+    }
+
+    @if (showSuccessMessage)
+    {
+        <SuccessMessage Message="@successMessage" OnClose="CloseSuccessMessage" />
+    }
 </div>
 
-@if (userSkills == null)
-{
-}
-else if (!userSkills.Any())
-{
-    <p>No skills to display</p>
-}
-else
-{
-    @foreach (var category in userSkills.GroupBy(skill => skill.Skill.Category))
-    {
-        <h4>@category.Key (@category.Count())</h4>
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Skill Name</th>
-                <th>Proficiency</th>
-                <th>Notes</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in category)
-            {
-                <tr class="@GetRowClass(item)" @onclick="() => ToggleSelection(item)">
-                    <td>@item.Skill.Name</td>
-                    <td>
-                        @if (isEditing && selectedSkills.Contains(item))
-                        {
-                             <select @bind="item.Proficiency" @onclick:stopPropagation="true">
-                                @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
-                                {
-                                    <option value="@prof">@prof</option>
-                                }
-                            </select>
-                        }
-                        else
-                        {
-                            @item.Proficiency
-                        }
-                    </td>
-                    <td>
-                        @if (isEditing && selectedSkills.Contains(item))
-                        {
-                            <input type="text" @bind="item.Notes" @onclick:stopPropagation="true" />
-                        }
-                        else
-                        {
-                            @item.Notes
-                        }
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    }
-}
-
-
-
-@if (showConfirmationDialog)
-{
-    <ConfirmationDialog Title="Delete Skills" Message="Are you sure you want to delete the selected skills?" OnClose="OnDeleteConfirmation" />
-}
-
-@if (showSuccessMessage)
-{
-    <SuccessMessage Message="@successMessage" OnClose="CloseSuccessMessage" />
-}
 
 @code {
     [CascadingParameter]
@@ -107,6 +112,7 @@ else
     private bool showConfirmationDialog = false;
     private bool showSuccessMessage = false;
     private string successMessage = "";
+    private HashSet<string> expandedCategories = new();
 
     
     
@@ -156,6 +162,18 @@ else
         //Claim usernameClaim = claims.First(claim => claim.Type.Equals("Name"));
         string name = usernameClaim.Value; //if int-> int.Parse(idClaim.Value);
         return name;
+    }
+    
+    private void ToggleCategory(string category)
+    {
+        if (expandedCategories.Contains(category))
+        {
+            expandedCategories.Remove(category);
+        }
+        else
+        {
+            expandedCategories.Add(category);
+        }
     }
     
     private void ToggleSelection(UserSkill skill)

@@ -9,7 +9,6 @@
 @attribute [Authorize]
 
   
-     
 @if (categories == null)
 {
     <label>Loading skill categories...</label>
@@ -20,13 +19,12 @@ else if (!categories.Any())
 }
 else
 {
-    <h3>Add a new Skill</h3>
+    <h3 class="form-title">Add a new Skill</h3>
 
-    <div class="form-group field">
-        <div>
-            <label>Skill Category:</label>
-            <select @onchange="LoadSkills">
-                
+    <div class="form-container">
+        <div class="form-group">
+            <label class="form-label">Skill Category:</label>
+            <select @onchange="LoadSkills" class="form-select">
                 <option>Choose category</option>
                 @foreach (string category in categories)
                 {
@@ -34,17 +32,16 @@ else
                 }
             </select>
         </div>
-        @* <button @onclick="AddSkill" class="acceptbtn">Create</button>   *@
         
-        <div>
+        <div class="form-group">
             @if (skills == null || !skills.Any())
             {
                 <label>Loading skills...</label>
             }
             else
             {
-                <label>Skill Name:</label>
-                <select @bind="selectedSkillName">
+                <label class="form-label">Skill Name:</label>
+                <select @bind="selectedSkillName" class="form-select">
                     <option>Choose skill</option>
                     @foreach (string skill in skills)
                     {
@@ -52,33 +49,28 @@ else
                     }
                 </select>
             }
-            
         </div>
         
-        <div class="form-group field">
-            <label>Proficiency:</label>
-             <select @bind="selectedProficiency">
-                                <option>Choose proficiency</option>
-                                @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
-                                {
-                                    <option value="@prof">@prof</option>
-                                }
-                                    </select>
+        <div class="form-group">
+            <label class="form-label">Proficiency:</label>
+            <select @bind="selectedProficiency" class="form-select">
+                <option>Choose proficiency</option>
+                @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
+                {
+                    <option value="@prof">@prof</option>
+                }
+            </select>
         </div>
-        
-         @* <div class="form-group field"> *@
-         @*            <label>Proficiency:</label> *@
-         @*            <input type="text" @bind="proficiency"/> *@
-         @*        </div> *@
-        
-        <div class="form-group field">
-            <label>Notes:</label>
-            <input type="text" @bind="notes"/>
+
+        <div class="form-group">
+            <label class="form-label">Notes:</label>
+            <input type="text" @bind="notes" class="form-input"/>
         </div>
+
         <div class="button-row">
             @if (!string.IsNullOrEmpty(msg))
             {
-                <label style="color: green">@msg</label>
+                <p class="error-message">@msg</p>
             }
             <button @onclick="Create" class="acceptbtn">Add Skill</button>
         </div>
@@ -89,6 +81,8 @@ else
 {
     <SuccessMessage Message="@successMessage" OnClose="CloseSuccessMessage" />
 }
+
+
 @code {
     
     [CascadingParameter]
