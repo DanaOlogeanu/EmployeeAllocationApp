@@ -13,4 +13,5 @@ public interface IUserDao
     Task<IEnumerable<User>?> GetByDepartmentAsync(string dpt);
     Task<DateOnly> SoonestAvailabilityForUser(string username);
   Task<bool> IsOnHoliday(string username, DateOnly date);
+  
 }

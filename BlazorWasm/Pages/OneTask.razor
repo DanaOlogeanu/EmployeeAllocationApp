@@ -6,7 +6,8 @@
 @inject ISkillService skillService
 @inject IUserService userService
 @inject IDepartmentService dptService
-@inject ITaskSkillService taskSkillService;
+@inject ITaskSkillService taskSkillService
+@inject IUserSkillService userSkillService
 
 <div class="center-container">
     <div class="container">
@@ -186,6 +187,9 @@
         
         @* Assignment of user to task *@
         <h4 class="section-header">Assign Task</h4>
+      
+        
+        
         @if (showAddAssignmentForm)
         {
             <EditForm Model="departments"  class="form-container">
@@ -199,58 +203,62 @@
                         }
                     </select>
                 </div>
-                
-    
+        
+        
                 @* New user and availability *@
-
+        
                 <!-- Display Users with Availability -->
-                @if (usersByDpt != null && usersByDpt.Any()) 
+                @if (usersByDpt != null && usersByDpt.Any())
                 {
-
+        
                     <h5>Users Availability in @selectedDpt:</h5>
                     <table class="table table-striped">
                         <thead>
                         <tr>
                             <th>UserName</th>
                             <th>Name</th>
+                            <th>User Skill Match Score</th>
                             <th>Estimated Start Date</th>
                             <th>Estimated Deadline</th>
+        
                             <th> </th>
                         </tr>
                         </thead>
                         <tbody>
                         @foreach (User user in usersByDpt)
                         {
-                            <tr>  
+                            <tr>
                                 <td>@user.Username</td>
                                 <td>@user.Name</td>
-                                <td>@userAvailability[user.Username]</td> 
-                                 <td>@userDeadline[user.Username]</td> 
-                                  
+                                 <td>@userSkillScore[user] %</td>
+                                <td>@userAvailability[user.Username]</td>
+                                 <td>@userDeadline[user.Username] </td>
+        
                                 <td>
                                     <button type="submit" class="acceptbtn" @onclick="() => AssignTaskToUser(user.Username)">Assign User</button>
                                     <button type="button" class="cancelbtn" @onclick="CancelAddAssign">Cancel</button>
                                 </td>
-                            </tr> 
+                            </tr>
                         }
                         </tbody>
                     </table>
                 }
                   <div class="button-group">
-                               
-                                 
+        
+        
                                 </div>
             </EditForm>
-        } 
+        }
         else
         {
             <button class="acceptbtn" @onclick="ShowAddAssignmentForm">Assign task </button>
         }
-    
+        
 
         @* needed *@
     </div>
 </div>
+
 
 @code {
 
@@ -460,33 +468,34 @@
     private Dictionary<string, DateOnly> userAvailability;
     private Dictionary<string, DateOnly> userDeadline;
  
-    private async Task LoadUsers(ChangeEventArgs department)
-    {
-        selectedDpt = department.Value?.ToString();
-        try
-        {
-            userAvailability = new();
-            userDeadline = new();
-            if (!string.IsNullOrWhiteSpace(selectedDpt))
-            {
-                usersByDpt = await userService.GetByDepartmentAsync(selectedDpt);
-                foreach (var user in usersByDpt)
-                {
-                    var userAvailabilityvar = await SoonestAvailabilityForUser(user.Username);
-                    var userDeadlinevar =  await calculateTaskDeadline(user.Username, taskProject.Estimate, user.ProjectHoursPerDay, userAvailabilityvar);
-                    userAvailability[user.Username] = userAvailabilityvar;
-                    userDeadline[user.Username] = userDeadlinevar;
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            msg = e.Message;
-        }
-       
-    }
-    
+    // private async Task LoadUsers(ChangeEventArgs department)
+    // {
+    //     selectedDpt = department.Value?.ToString();
+    //     try
+    //     {
+    //         userAvailability = new();
+    //         userDeadline = new();
+    //         if (!string.IsNullOrWhiteSpace(selectedDpt))
+    //         {
+    //             usersByDpt = await userService.GetByDepartmentAsync(selectedDpt);
+    //             foreach (var user in usersByDpt)
+    //             {
+    //                 var userAvailability = await SoonestAvailabilityForUser(user.Username);
+    //                 var userDeadline =  await calculateTaskDeadline(user.Username, taskProject.Estimate, user.ProjectHoursPerDay, userAvailability);
+    //              //   var userScore = await GetUserScoreForTask(usersByDpt, taskSkills);
+    //                 userAvailability[user.Username] = userAvailability;
+    //                 userDeadline[user.Username] = userDeadline;
+    //                // userScores[user] = userScore;
+    //             }
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e);
+    //         msg = e.Message;
+    //     }
+    //    
+    // }
+    //
    
         
 
@@ -522,4 +531,142 @@
         showAddAssignmentForm = false;
     }
     
-}
+    //skills
+    private Dictionary<User,int> userSkillScore;
+    // private async Task<int> GetUserScoreForTask(User user, List<TaskSkill> taskSkills)
+    // {
+    // //identify the skill with highest req value as is most relevant
+    //     var highestReqSkill = taskSkills.OrderByDescending(s => s.Proficiency).First();
+    //     int totalScore = 0;
+    //         foreach (var reqSkill in taskSkills)
+    //         {
+    //             var userSkill = user.UserSkills.FirstOrDefault(s => s.SkillName == reqSkill.SkillName);
+    //             int userSkillLevel = (int)(userSkill != null ? userSkill.Proficiency : 0);
+    //             int requiredSkillLevel = (int)reqSkill.Proficiency;
+    // // calculate the score based on the difference between user skill proficiency level and req skill proficiency level
+    //             int skillScore = userSkillLevel - requiredSkillLevel;
+    // //give extra weight to the highest req skill 
+    //             if (reqSkill.SkillName == highestReqSkill.SkillName)
+    //             {
+    //                 skillScore *=  2; 
+    //             }
+    //             totalScore += skillScore;
+    //         }
+    //     return totalScore;
+    // }
+    
+    private async Task<int> GetUserScoreForTask(User user, List<TaskSkill> taskSkills)
+    {
+    // Identify the skill with the highest required proficiency
+        var highestReqSkill = taskSkills.OrderByDescending(s => s.Proficiency).First();
+        const int MaxProficiency = (int)Proficiency.Expert; // Expert Level
+        int totalScore = 0;
+        int totalScoreForTask = 0;
+        foreach (var reqSkill in taskSkills)
+        {
+    // Get the user's skill level or 0 if not found
+            IEnumerable<UserSkill> userSkills = await userSkillService.GetUserSkills(user.Username);
+            var userSkill = userSkills.FirstOrDefault(s => s.SkillName.Equals(reqSkill.SkillName));
+            int userSkillLevel = userSkill != null ? (int)userSkill.Proficiency : 0;
+            int requiredSkillLevel = (int)reqSkill.Proficiency;
+    // Apply extra weight for the most critical skill
+            if (reqSkill.SkillName == highestReqSkill.SkillName)
+            {
+                userSkillLevel *= 2; // Weight multiplier for highest relevance
+                requiredSkillLevel *= 2;
+            }
+            totalScore += userSkillLevel;
+            totalScoreForTask += requiredSkillLevel;
+        }
+        int scoreAsPercentage = (totalScore * 100) / totalScoreForTask; // perfect match 100% , skills score over task score >100%, less <100%
+        int scoreWhereZeroIsPerfectMatch = totalScore - totalScoreForTask;
+        return scoreAsPercentage;
+    }
+    
+    private async Task LoadUsers(ChangeEventArgs department)
+    {
+        selectedDpt = department.Value?.ToString();
+        try
+        {
+            userSkillScore = new Dictionary<User, int>();
+            userAvailability = new();
+            userDeadline = new();
+            if (!string.IsNullOrWhiteSpace(selectedDpt))
+            {
+                usersByDpt = await userService.GetByDepartmentAsync(selectedDpt);
+                foreach (var user in usersByDpt)
+                {
+                    var userAvailabilityvar = await SoonestAvailabilityForUser(user.Username);
+                    var userDeadlinevar = await calculateTaskDeadline(user.Username, taskProject.Estimate, user.ProjectHoursPerDay, userAvailabilityvar);
+                    var userScore = await GetUserScoreForTask(user, taskSkills);
+                    userAvailability[user.Username] = userAvailabilityvar;
+                    userDeadline[user.Username] = userDeadlinevar;
+                    userSkillScore[user] = userScore;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
+
+    
+    // private async Task<int> GetUserScoreForTask(IEnumerable<User> usersByDpt, List<TaskSkill> taskSkills)
+    // {
+    //     userScores = new Dictionary<User, int>();
+    //     
+    // //identify the skill with highest req value as is most relevant
+    //     var highestReqSkill = taskSkills.OrderByDescending(s => s.Proficiency).First();
+    //     foreach (var user in usersByDpt)
+    //     {
+    //         int totalScore = 0;
+    //         foreach (var reqSkill in taskSkills)
+    //         {
+    //             var userSkill = user.UserSkills.FirstOrDefault(s => s.SkillName == reqSkill.SkillName);
+    //             int userSkillLevel = (int)(userSkill != null ? userSkill.Proficiency : 0);
+    //             int requiredSkillLevel = (int)reqSkill.Proficiency;
+    // // calculate the score based on the difference between user skill proficiency level and req skill proficiency level
+    //             int skillScore = userSkillLevel - requiredSkillLevel;
+    // //give extra weight to the highest req skill 
+    //             if (reqSkill.SkillName == highestReqSkill.SkillName)
+    //             {
+    //                 skillScore *=  2; 
+    //             }
+    //             totalScore += skillScore;
+    //         }
+    //         userScores.Add(user,totalScore);
+    //     }
+    //     
+    // }
+
+    
+    
+    // private async Task GetUserScoreForTask(ICollection<UserSkill> userskills, List<TaskSkill> taskSkills)
+    // {
+    //     userScores = new Dictionary<string, int>();
+    //     
+    //     //identify the skill with highest req value as is most relevant
+    //     var highestReqSkill = taskSkills.OrderByDescending(s => s.Proficiency).First();
+    //     foreach (var uSkill in userskills)
+    //     {
+    //         int totalScore = 0;
+    //         foreach (var reqSkill in taskSkills)
+    //         {
+    //             var userSkill = userskills.FirstOrDefault(s => s.SkillName == reqSkill.SkillName);
+    //             int userSkillLevel = (int)(userSkill != null ? userSkill.Proficiency : 0);
+    //             int requiredSkillLevel = (int)reqSkill.Proficiency;
+    //             // calculate the score based on the difference between user skill proficiency level and req skill proficiency level
+    //             int skillScore = userSkillLevel - requiredSkillLevel;
+    //             //give extra weight to the highest req skill 
+    //             if (reqSkill.SkillName == highestReqSkill.SkillName)
+    //             {
+    //                 skillScore *=  2; 
+    //             }
+    //             totalScore += skillScore;
+    //         }
+    //         userScores.Add();
+    //     }
+    }
+    

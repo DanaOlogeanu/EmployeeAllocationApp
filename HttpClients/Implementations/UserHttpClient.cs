@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Domain.Dtos;
 using Domain.Models;
 using HttpClients.ClientInterfaces;
@@ -96,7 +97,11 @@ public class UserHttpClient: IUserService
         }
         IEnumerable<User>? users = JsonSerializer.Deserialize<IEnumerable<User>>(content, new JsonSerializerOptions
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
+                //
+            // ReferenceHandler = ReferenceHandler.Preserve, // Ensure references are handled correctly
+            // DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull // Ignore null values
+            //
         })!;
         return users;
     }

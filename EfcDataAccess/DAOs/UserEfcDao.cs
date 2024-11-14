@@ -30,13 +30,24 @@ public class UserEfcDao:IUserDao
 
     public async Task<IEnumerable<User>?> GetByDepartmentAsync(string selectedDpt)
     {
-        IQueryable<User> usersQuery = context.Users.Include(user => user.Department).AsQueryable();
+        IQueryable<User> usersQuery = context.Users.Include(user => user.Department).Include(user=>user.UserSkills).ThenInclude(us=>us.Skill ).AsQueryable();
         if (!string.IsNullOrEmpty(selectedDpt))
         {
             usersQuery = usersQuery.Where(u => u.Department.Name.ToLower().Equals(selectedDpt.ToLower()));
         }
        
         IEnumerable<User>? result = await usersQuery.ToListAsync();
+        foreach (var user in result)
+        {
+            if (user.UserSkills == null)
+            {
+                Console.WriteLine($"User {user.Username} has no UserSkills loaded.");
+            }
+            else
+            {
+                Console.WriteLine($"User {user.Username} has {user.UserSkills.Count} UserSkills loaded.");
+            }
+        }
         return result;
     }
 
