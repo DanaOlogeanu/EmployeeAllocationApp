@@ -6,10 +6,12 @@ public class TaskProject
 {
     public int Id { get; set; }
     public string Name { get; set; }
+    
+    public Project Project { get; set; }
     public int ProjectId { get; set; }
     public User? Owner { get; set; }  
-    public string? OwnerUsername { get; set; }
-    public int? Estimate { get; set; } //hours?
+    public string? OwnerUsername { get; set; }  //assignee
+    public int? Estimate { get; set; } //hours
     public DateOnly? StartDate { get; set; }
     public DateOnly? Deadline { get; set; }
     public int? DependentOn { get; set; } //if dependecy on another task - referenced by seq.no

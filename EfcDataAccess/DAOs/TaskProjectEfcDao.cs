@@ -82,6 +82,7 @@ public class TaskProjectEfcDao:ITaskProjectDao
         TaskProject? found = await context.TasksProject
             //  .AsNoTracking()
             .Include(us => us.TaskSkills) 
+            .Include(us =>us.Project)
             .SingleOrDefaultAsync(us=> us.Id == id);
         return found;
     }
@@ -104,7 +105,7 @@ public class TaskProjectEfcDao:ITaskProjectDao
         List<TaskProject> result = await query.ToListAsync();
         return result; 
     }
-    }
+}
 
 
     // public async Task<Project> CreateAsync(Project project)

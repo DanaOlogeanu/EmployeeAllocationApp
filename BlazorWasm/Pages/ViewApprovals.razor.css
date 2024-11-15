@@ -1,0 +1,29 @@
+.status-requested {
+    background-color: yellow;
+    color: black;
+    font-weight: bold;
+}
+
+.status-approved {
+    background-color: green;
+    color: white;
+    font-weight: bold;
+}
+
+.status-not-approved {
+    background-color: red;
+    color: white;
+    font-weight: bold;
+}
+
+/* Style the project link */
+.project-link {
+    color: black;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.project-link:hover {
+    font-weight: bold;
+    cursor: pointer;
+}

@@ -39,6 +39,7 @@ public class AppContext:DbContext
         modelBuilder.Entity<TaskAssignmentLog>().HasKey(tal => tal.Id);
         modelBuilder.Entity<TaskSkill>().HasKey(ts => ts.Id);
         modelBuilder.Entity<Holiday>().HasKey(a => a.Id);
+        
         // modelBuilder.Entity<Company>().HasKey(company => company.Id);
         // modelBuilder.Entity<SubCategory>().HasKey(subCategory => subCategory.Id);
         // modelBuilder.Entity<Category>().HasKey(Category => Category.Id);

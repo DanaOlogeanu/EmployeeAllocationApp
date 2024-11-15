@@ -25,6 +25,6 @@ builder.Services.AddScoped<ITaskProjectService, TaskProjectHttpClient>();
 builder.Services.AddScoped<IDepartmentService, DepartmentHttpClient>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthProvider>();
 builder.Services.AddScoped<ITaskSkillService, TaskSkillHttpClient>();
-
+builder.Services.AddScoped<ITaskApprovalService, TaskApprovalHttpClient>();
 AuthorizationPolicies.AddPolicies(builder.Services);  //same policies as in WebApi
 await builder.Build().RunAsync();

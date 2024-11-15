@@ -1,0 +1,186 @@
+@page "/ViewApprovals"
+@using Domain.Models
+@using System.Security.Claims
+@using Domain.Dtos
+@using HttpClients.ClientInterfaces
+@inject ITaskApprovalService taskApprovalService
+@inject ITaskProjectService taskProjectService
+@inject NavigationManager navMgr
+
+<h3>Tasks for Approval</h3>
+
+@if (!string.IsNullOrEmpty(msg))
+{
+    <p class="text-danger">@msg</p>
+}
+
+@if (tasksApprovals == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Task ID</th>
+             <th>Task Name</th>
+            @* <th>Username</th> *@
+            <th>Assigned To</th>
+            <th>Task Start Date</th>
+             <th>Task Deadline</th>
+            <th>Status</th>
+             <th>Date of request</th>
+            <th>Comments</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var approval in tasksApprovals)
+        {
+            <tr>
+                @if (editingTaskApproval == approval)
+                {
+                    <!-- Editable Row -->
+                    <td readonly>@approval.TaskProjectId</td>
+                    <td readonly>@approval.TaskProject.Name </td>                       
+                    @* <td>@approval.OwnerUsername</td> *@
+                    <td readonly>@approval.TaskProject.OwnerUsername</td>
+                    <td readonly>@approval.TaskProject.StartDate</td>
+                    <td readonly>@approval.TaskProject.Deadline</td>
+                    <td >
+                        <select @bind="approval.Status" class="form-select">
+                            @foreach (ApprovalStatus status in Enum.GetValues(typeof(ApprovalStatus)))
+                            {
+                                <option value="@status">@status</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <input readonly type="date" @bind-value="approval.Date" class="form-control"/>
+                    </td>
+                    <td>
+                        <input @bind="approval.Comments" class="form-control"/>
+                    </td>
+                   
+                    <td>
+                        <button class="btn btn-success" @onclick="() => SaveApproval(approval)">Save</button>
+                        <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+                    </td>
+                }
+                else
+                {
+                    <!-- Read-Only Row -->
+                    <td>@approval.TaskProjectId</td>
+                    @* <td> <a href="/OneTask/@approval.TaskProjectId" class="project-link">@approval.TaskProject.Name</a></td>  TODO     *@ 
+                    <td>@approval.TaskProject.Name</td>   
+                    @* <td>@approval.OwnerUsername</td> *@
+                    <td>@approval.TaskProject.OwnerUsername</td>
+                    <td>@approval.TaskProject.StartDate</td>
+                    <td>@approval.TaskProject.Deadline</td>
+                    <td class="@GetStatusClass(approval.Status)">@approval.Status</td>
+                    <td>@approval.Date</td>
+                    <td>@approval.Comments</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditApproval(approval)">Edit</button>
+                    </td>
+                }
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+
+@code {
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!; //added to remember the logged in claims
+
+    private IEnumerable<TaskApproval>? tasksApprovals;
+    private string msg = "";
+    private TaskApproval? editingTaskApproval; // Tracks the currently edited approval
+
+    // private int id;
+    //  private int? taskProjectId;
+    // private string? taskProjectName
+    private string? username;
+    
+    // private ApprovalStatus status;
+    // private string? comments;
+    // private DateOnly date;
+
+    
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        msg = "";
+
+        try
+        {
+            username = await GetUsernameAsync();
+            tasksApprovals = await taskApprovalService.GetApprovalsManager(username);
+            
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+
+    }
+
+
+
+
+    // Start editing the selected approval
+    private void EditApproval(TaskApproval approval)
+    {
+        editingTaskApproval = approval; // Set the approval to edit mode
+    }
+
+    // Cancel editing
+    private void CancelEdit()
+    {
+        editingTaskApproval = null; // Clear the editing state
+    }
+
+    // Save changes to the approval
+    private async Task SaveApproval(TaskApproval approval)
+    {
+        try
+        {
+            TaskApprovalBasicDto taskApproval = new(approval.Id, approval.TaskProjectId, approval.OwnerUsername, approval.Status, approval.Comments, approval.Date);
+           await taskApprovalService.UpdateAsync(taskApproval);
+            editingTaskApproval = null; // Clear editing state
+            msg = "Task approval updated successfully!";
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = $"Error updating task approval: {e.Message}";
+        }
+    }
+
+    // Fetch the logged-in username
+    private async Task<string> GetUsernameAsync()
+    {
+        var authState = await AuthState;
+        var user = authState.User;
+        return user.Identity?.Name ?? throw new Exception("User not logged in.");
+    }
+
+    //color display for status 
+    private string GetStatusClass(ApprovalStatus status)
+    {
+        return status switch
+        {
+            ApprovalStatus.Requested => "status-requested",
+            ApprovalStatus.Approved => "status-approved",
+            ApprovalStatus.NotApproved => "status-not-approved",
+            _ => string.Empty
+            };
+    }
+    
+}
