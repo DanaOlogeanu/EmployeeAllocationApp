@@ -1,4 +1,8 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using HttpClients.ClientInterfaces
+@inject ITaskApprovalService taskApprovalService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Employee Allocation</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -9,12 +13,14 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
+        
+        
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="viewUserSkills">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Skills
@@ -30,6 +36,14 @@
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Projects
             </NavLink>
         </div>
+
+        
+        
+        
+        
+        
+        
+        
         
         
         
@@ -43,21 +57,193 @@
         
         
         <div class="nav-item px-3">
-                                   <NavLink class="nav-link" href="viewApprovals">
-                                       <span class="oi oi-list-rich" aria-hidden="true"></span> Task Approvals
-                                   </NavLink>
-                               </div>
+            <AuthorizeView Roles="Manager">
+                <Authorized>
+                    @* Call RefreshPendingApprovals when the user is authorized as Manager *@
+                    @if (isUserManager)
+                    {
+                        <NavLink class="@($"nav-link {notificationClass}")" href="viewApprovals">
+                            <span class="oi oi-list-rich" aria-hidden="true"></span>
+                            Task Approvals
+                            @(PendingApprovals > 0 ? $" ({PendingApprovals})" : "")
+                        </NavLink>
+                    }
+                </Authorized>
+            </AuthorizeView>
+        </div>
     </nav>
 </div>
+      @code {
+          [CascadingParameter]
+          public Task<AuthenticationState> AuthState { get; set; } = null!;
+      
+          private bool collapseNavMenu = true;
+          private bool isUserManager = false; // Variable to check if user is a Manager
+          private int PendingApprovals = 0;
+          private string notificationClass = string.Empty;
+      
+          private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+      
+          private void ToggleNavMenu()
+          {
+              collapseNavMenu = !collapseNavMenu;
+          }
+      
+          // We can call RefreshPendingApprovals from OnAfterRenderAsync
+          // to ensure the method is called after the component has been rendered
+          protected override async Task OnAfterRenderAsync(bool firstRender)
+          {
+              if (!firstRender)
+              {
+                  try
+                  {
+                      var authState = await AuthState;
+                      var user = authState.User;
 
-@code {
-    private bool collapseNavMenu = true;
+          // Ensure the user is authenticated and has the "Manager" role
+                      if (user.Identity?.IsAuthenticated == true && user.IsInRole("Manager"))
+                      {
+                          isUserManager = true; // The user is a manager
+                          await RefreshPendingApprovals();
+                          StateHasChanged(); // Trigger re-render
+                      }
+                      else
+                      {
+                          isUserManager = false;
+                      }
+                      
+                  }
+                  catch (Exception ex)
+                  {
+          // Handle any errors that might occur (e.g., network issues, null references)
+                      Console.Error.WriteLine($"Error: {ex.Message}");
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-
-}
+          // Set the isUserManager flag to false in case of an error
+                      isUserManager = false;
+                  }
+                
+              }
+          }
+      
+          // This method fetches the pending approval count
+          private async Task RefreshPendingApprovals()
+          {
+              try
+              {
+                  var authState = await AuthState;
+                  var user = authState.User;
+      
+                  if (!user.Identity?.IsAuthenticated ?? true)
+                  {
+                      Console.Error.WriteLine("User not authenticated.");
+                      return;
+                  }
+      
+                  string username = user.Identity.Name ?? throw new Exception("User has no name.");
+                  PendingApprovals = await taskApprovalService.GetPendingApprovalAsync(username);
+      
+                  notificationClass = PendingApprovals > 0 ? "has-notification" : string.Empty;
+              }
+              catch (Exception e)
+              {
+                  Console.Error.WriteLine($"Error fetching pending approvals: {e.Message}");
+                  PendingApprovals = 0;
+                  notificationClass = string.Empty;
+              }
+          }
+      }
+  
+    
+    
+        
+    @*          *@
+@*          *@
+@*          *@
+@*          *@
+@*          *@
+@*          *@
+@*          *@
+@*         <div class="nav-item px-3"> *@
+@*          <AuthorizeView Roles="ManagerOnly"> *@
+@*                 <Authorized> *@
+@*               *@
+@*                  <NavLink class="@($"nav-link {notificationClass}")" href="viewApprovals"> *@
+@*                      <span class="oi oi-list-rich" aria-hidden="true"></span> *@
+@*                      Task Approvals *@
+@*                      @(PendingApprovals > 0 ? $" ({PendingApprovals})" : "") *@
+@*                  </NavLink> *@
+@*               *@
+@*                 </Authorized> *@
+@*                  </AuthorizeView> *@
+@*         </div> *@
+@*         $1$ <div class="nav-item px-3"> #1# *@
+@*         $1$                            <NavLink class="nav-link" href="viewApprovals"> #1# *@
+@*         $1$                                <span class="oi oi-list-rich" aria-hidden="true"></span> Task Approvals #1# *@
+@*         $1$                            </NavLink> #1# *@
+@*         $1$                        </div> #1# *@
+@*     </nav> *@
+@* </div> *@
+@* *@
+@* @code { *@
+@*     [CascadingParameter] *@
+@*     public Task<AuthenticationState> AuthState { get; set; } = null!; //added to remember the logged in claims *@
+@*      *@
+@*     private bool collapseNavMenu = true; *@
+@* *@
+@*     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null; *@
+@* *@
+@*     private void ToggleNavMenu() *@
+@*     { *@
+@*         collapseNavMenu = !collapseNavMenu; *@
+@*     } *@
+@*      *@
+@*     //notification  *@
+@*     private int PendingApprovals = 0; *@
+@*     private string notificationClass = string.Empty; *@
+@* *@
+@*      *@
+@*     //logged in user manager *@
+@*     //private bool isUserLoggedIn = false; *@
+@*   //  private bool isUserManager = false; *@
+@*      *@
+@*     protected override async Task OnInitializedAsync() *@
+@*     { *@
+@*          *@
+@*         await RefreshPendingApprovals(); *@
+@*     } *@
+@* *@
+@*     //!!!!!!!!!FOR UPDATES manually call RefreshPendingApprovals after any action that might change the number of pending approvals. *@
+@*     // Call this method whenever you want to update the pending count *@
+@*     private async Task RefreshPendingApprovals() *@
+@*     { *@
+@*         try *@
+@*         { *@
+@*                 string user = await GetUsernameAsync(); *@
+@*     // Replace with your actual API endpoint to get the pending approvals count (assign) *@
+@*                  PendingApprovals = await taskApprovalService.GetPendingApprovalAsync(user); *@
+@*     ///var response = await Http.GetFromJsonAsync<PendingApprovalResponse>("api/tasks/pending-approvals"); *@
+@*                 // PendingApprovals = response?.PendingCount ?? 0; // If API returns 0, PendingApprovals is set to 0 *@
+@* *@
+@*     // Set the notification class based on PendingApprovals *@
+@*                 notificationClass = PendingApprovals > 0 ? "has-notification" : string.Empty; *@
+@*              *@
+@*         } *@
+@*        catch (Exception e) *@
+@*         { *@
+@*             Console.Error.WriteLine($"Error fetching pending approvals: {e.Message}"); *@
+@*             PendingApprovals = 0; // Handle errors by default to 0 in case of error *@
+@*             notificationClass = string.Empty; *@
+@*         } *@
+@*          *@
+@*     } *@
+@*      *@
+@*      *@
+@*     // Fetch the logged-in username *@
+@*     private async Task<string> GetUsernameAsync() *@
+@*     { *@
+@*         var authState = await AuthState; *@
+@*         var user = authState.User; *@
+@*         return user.Identity?.Name ?? throw new Exception("User not logged in."); *@
+@*     } *@
+@* *@
+@* } *@

@@ -84,4 +84,28 @@ public class TaskApprovalHttpClient:ITaskApprovalService
         )!;   // null-suppressor "!"
         return taskApproval;
     }
+
+    public async Task<int> GetPendingApprovalAsync(string username)
+    {
+        string uri = "/TasksApprovals/NoPending";
+        if (!string.IsNullOrEmpty(username))
+        {
+            uri += $"?userName={username}";
+        }
+        HttpResponseMessage response = await client.GetAsync(uri);
+        string result = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            // Log the error response for troubleshooting
+            Console.WriteLine($"Error: {result}");
+            throw new Exception($"Error fetching number of user approvals: {response.ReasonPhrase}");
+        }
+       
+        Console.WriteLine(result);
+        int pendingNo = JsonSerializer.Deserialize<int>(result, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        })!;
+        return pendingNo;
+    }
 }

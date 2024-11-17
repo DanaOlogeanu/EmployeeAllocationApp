@@ -10,6 +10,7 @@ public class AuthorizationPolicies
             {
                 options.AddPolicy("MustBeManager", a =>
                     a.RequireAuthenticatedUser().RequireClaim("Role", "Manager", "Project Manager"));  // 2 values
+                options.AddPolicy("ManagerOnly", policy => policy.RequireRole("Manager"));
             });
         }
 }

@@ -76,6 +76,22 @@ public class TasksApprovalsController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+
+    [HttpGet ("noPending") ]
+    public async Task<ActionResult<int>> GetPendingApprovalAsync([FromQuery] string username)
+    {
+        try
+        {
+            int pendingCount = await taskApprovalLogic.GetPendingApprovalAsync(username);
+            return Ok(pendingCount);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500, e.Message);
+        }
+    }
+    
     
     
 }

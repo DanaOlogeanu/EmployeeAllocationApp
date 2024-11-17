@@ -6,6 +6,8 @@
 @inject ITaskApprovalService taskApprovalService
 @inject ITaskProjectService taskProjectService
 @inject NavigationManager navMgr
+@attribute [Authorize]
+
 
 <h3>Tasks for Approval</h3>
 
@@ -155,6 +157,19 @@ else
            await taskApprovalService.UpdateAsync(taskApproval);
             editingTaskApproval = null; // Clear editing state
             msg = "Task approval updated successfully!";
+            //task status update
+            if (approval.Status.Equals(ApprovalStatus.Approved))
+            {
+                var task = await taskProjectService.GetByIdAsync(approval.TaskProjectId);
+                task.TaskStatusEnum = TaskStatusEnum.Approved;
+                await taskProjectService.UpdateAsync(task);
+            }
+            else if(approval.Status.Equals(ApprovalStatus.NotApproved))
+            {
+                var task = await taskProjectService.GetByIdAsync(approval.TaskProjectId);
+                task.TaskStatusEnum = TaskStatusEnum.Actioned;
+                await taskProjectService.UpdateAsync(task);
+            }
         }
         catch (Exception e)
         {

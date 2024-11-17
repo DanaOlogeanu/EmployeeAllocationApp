@@ -64,6 +64,11 @@ public class TaskApprovalLogic:ITaskApprovalLogic
         return new TaskApprovalBasicDto ( taskApproval.Id, taskApproval.TaskProjectId,taskApproval.OwnerUsername, taskApproval.Status, taskApproval.Comments, taskApproval.Date);
     }
 
+    public Task<int> GetPendingApprovalAsync(string username)
+    {
+        return approvalDao.GetPendingApprovalAsync(username);
+    }
+
 
     private void ValidateData(TaskApprovalCreationDto dto)
     {
@@ -75,4 +80,6 @@ public class TaskApprovalLogic:ITaskApprovalLogic
             throw new Exception("Invalid TaskProjectId.");
         
     }
+    
+    
 }

@@ -66,3 +66,37 @@
         overflow-y: auto;
     }
 }
+
+/*notification*/
+.has-notification {
+    color: red; /* Make the text red */
+    font-weight: bold; /* Optional: make the text bold */
+    animation: blink 1s infinite; /* Blinking effect */
+}
+
+/* Keyframes for blinking */
+@keyframes blink {
+    0% {
+        opacity: 1; /* Fully visible */
+    }
+    50% {
+        opacity: 0.5; /* Half visible (blinking effect) */
+    }
+    100% {
+        opacity: 1; /* Fully visible */
+    }
+}
+
+/* Notification dot */
+.has-notification::after {
+    content: " "; /* Empty content to create the dot */
+    position: absolute;
+    top: -5px; /* Adjust based on your layout */
+    right: -10px; /* Adjust based on your layout */
+    width: 10px; /* Size of the dot */
+    height: 10px; /* Size of the dot */
+    background-color: red; /* Dot color */
+    border-radius: 50%; /* Make it circular */
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.8); /* Optional glowing effect */
+    animation: blink 1s infinite; /* Blink the dot too */
+}

@@ -50,4 +50,13 @@ public class TaskApprovalEfcDao:ITaskApprovalDao
             .SingleOrDefaultAsync(us=> us.Id == id);
         return found;
     }
+
+    public async Task<int> GetPendingApprovalAsync(string username)
+    {
+        
+        return await context.TasksApprovals
+            .Where(ta=>ta.OwnerUsername.Equals(username))
+            .Where(ta => ta.Status.Equals(ApprovalStatus.Requested))
+            .CountAsync();
+    }
 }
