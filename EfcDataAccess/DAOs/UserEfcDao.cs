@@ -19,14 +19,12 @@ public class UserEfcDao:IUserDao
     
     public async Task<User?> GetByUsernameAsync(string userName)
     {
-        // User? user = await context.Users.FindAsync(id);   //takes type int
-        // return user;
-
-        User? existing = await context.Users.FirstOrDefaultAsync(u =>
-            u.Username.ToLower().Equals(userName.ToLower())
-        );
+        User? existing = await context.Users
+            .Include(u => u.Department) // Ensure the Department is included
+            .FirstOrDefaultAsync(u => u.Username.ToLower().Equals(userName.ToLower()));
         return existing;
     }
+
 
     public async Task<IEnumerable<User>?> GetByDepartmentAsync(string selectedDpt)
     {

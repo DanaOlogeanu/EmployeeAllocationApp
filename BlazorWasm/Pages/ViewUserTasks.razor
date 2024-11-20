@@ -1,0 +1,173 @@
+@page "/ViewUserTasks/{username?}"
+@inject ITaskProjectService TaskProjectService
+@inject IProjectService ProjectService
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Domain.Models
+@using Domain.Dtos
+@using HttpClients.ClientInterfaces
+
+<h3 class="page-header">@pageHeader</h3>
+
+<div class="card">
+    @if (isLoading)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else if (!string.IsNullOrEmpty(msg))
+    {
+        <p class="text-danger">@msg</p>
+    }
+    else if (groupedTasks == null || groupedTasks.Count == 0)
+    {
+        <p>No tasks assigned.</p>
+    }
+    else
+    {
+        @foreach (var projectGroup in groupedTasks)
+        {
+            var projectName = projectNames.ContainsKey(projectGroup.Key) ? projectNames[projectGroup.Key] : "Unknown Project";
+            <div class="project-header">
+                <span class="project-link" @onclick="() => NavigateToProject(projectGroup.Key)">Project: @projectGroup.Key - @projectName</span>
+                <span class="dropdown-icon" @onclick:stopPropagation="true" @onclick="() => ToggleProject(projectGroup.Key)">
+                    @((expandedProjects.Contains(projectGroup.Key)) ? "▲" : "▼")
+                </span>
+            </div>
+            @if (expandedProjects.Contains(projectGroup.Key))
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="small-column"></th>
+                            <th>Task Name</th>
+                            <th>Status</th>
+                            <th>Estimated Hours</th>
+                            <th>Start Date</th>
+                            <th>Deadline</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var task in projectGroup.Value.Select((task, index) => new { Task = task, Index = index + 1 }))
+                        {
+                            <tr>
+                                <td class="small-column">@task.Index</td>
+                                <td><a class="task-link" @onclick="() => NavigateToTask(task.Task.Id)">@task.Task.Name</a></td>
+                                <td>@task.Task.TaskStatusEnum</td>
+                                <td>@task.Task.Estimate</td>
+                                <td>@task.Task.StartDate</td>
+                                <td>@task.Task.Deadline</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Username { get; set; }
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!;
+
+    private Dictionary<int, List<TaskProject>> groupedTasks = new();
+    private readonly Dictionary<int, string> projectNames = new();
+    private string? msg;
+    private bool isLoading = true;
+    private readonly HashSet<int> expandedProjects = new();
+    private string pageHeader = "My Tasks";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string? username = Username;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                username = await GetUsernameAsync();
+                if (string.IsNullOrEmpty(username))
+                {
+                    msg = "User is not authenticated.";
+                    return;
+                }
+            }
+            else
+            {
+                var userName = await GetUserNameAsync(username);
+                pageHeader = $"{userName} Tasks";
+            }
+
+            var tasks = (await TaskProjectService.GetTasksUser(username)).ToList();
+            groupedTasks = tasks.GroupBy(task => task.ProjectId)
+                                .ToDictionary(group => group.Key, group => group.ToList());
+
+            foreach (var projectId in groupedTasks.Keys)
+            {
+                var project = await ProjectService.GetByIdAsync(projectId);
+                if (project != null)
+                {
+                    projectNames[projectId] = project.ProjectName;
+                }
+            }
+
+            // Initially expand all project sections
+            expandedProjects.UnionWith(groupedTasks.Keys);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task<string?> GetUsernameAsync()
+    {
+        var authState = await AuthState;
+        var user = authState.User;
+
+        var usernameClaim = user.Claims.FirstOrDefault(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
+        if (usernameClaim == null)
+        {
+            return null;
+        }
+
+        return usernameClaim.Value;
+    }
+
+    private async Task<string> GetUserNameAsync(string username)
+    {
+        var user = await UserService.GetByUsernameAsync(username);
+        return user?.Name ?? username;
+    }
+
+    private void ToggleProject(int projectId)
+    {
+        if (expandedProjects.Contains(projectId))
+        {
+            expandedProjects.Remove(projectId);
+        }
+        else
+        {
+            expandedProjects.Add(projectId);
+        }
+    }
+
+    private void NavigateToTask(int taskId)
+    {
+        NavigationManager.NavigateTo($"/oneTask/{taskId}");
+    }
+
+    private void NavigateToProject(int projectId)
+    {
+        NavigationManager.NavigateTo($"/oneProject/{projectId}");
+    }
+}

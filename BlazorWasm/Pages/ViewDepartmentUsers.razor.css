@@ -1,0 +1,89 @@
+/* Main Header */
+.page-header {
+    font-size: 2em;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Department and Users Headers */
+h4, h5 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #444;
+}
+
+/* Centered Department Name */
+.centered-department-name {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Card Container */
+.card-container {
+    margin: auto;
+    width: 80%;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fdfdfd;
+    padding: 25px;
+}
+
+/* Table Container */
+.table-container {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Styled Table */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.styled-table th {
+    color: #555;
+    font-weight: bold;
+    text-align: left;
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+/* Task Link */
+.task-link {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* User Name */
+.user-name {
+    font-size: 1.1em; 
+}
+
+.task-link:hover {
+    font-weight: bold; 
+    color: black; 
+}
+
+/* Additional styling for better aesthetics */
+.text-danger {
+    color: #d9534f;
+}
+
+p {
+    font-size: 1em;
+    color: #666;
+}

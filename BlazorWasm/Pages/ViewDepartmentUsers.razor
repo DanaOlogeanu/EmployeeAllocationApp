@@ -1,0 +1,123 @@
+@page "/ViewDepartmentUsers"
+@using HttpClients.ClientInterfaces
+@using Domain.Models
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<h3 class="page-header">My Team Assignments</h3>
+
+@if (isLoading)
+{
+    <p>Loading department information...</p>
+}
+else if (!string.IsNullOrEmpty(msg))
+{
+    <p class="text-danger">@msg</p>
+}
+else
+{
+    <div class="card-container">
+        <div class="centered-department-name">
+            <h4>Department: @departmentName</h4>
+        </div>
+        
+        @if (!users.Any())
+        {
+            <p>No users to display.</p>
+        }
+        else
+        {
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Employee Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in users)
+                        {
+                            <tr @onclick="() => NavigateToUserTasks(user.Username)">
+                                <td class="task-link user-name">@user.Name</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private IEnumerable<User>? users;
+    private string departmentName = "";
+    private string msg = "";
+    private bool isLoading = true;
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var username = await GetUsernameAsync();
+            if (string.IsNullOrEmpty(username))
+            {
+                msg = "User is not authenticated.";
+                return;
+            }
+
+            departmentName = await GetDepartmentByUsernameAsync(username) ?? "";
+            if (string.IsNullOrEmpty(departmentName))
+            {
+                msg = "Department information is missing.";
+                return;
+            }
+            users = await UserService.GetByDepartmentAsync(departmentName);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task<string?> GetUsernameAsync()
+    {
+        var authState = await AuthState;
+        var user = authState.User;
+
+        var usernameClaim = user.Claims.FirstOrDefault(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
+        if (usernameClaim == null)
+        {
+            return null;
+        }
+
+        return usernameClaim.Value;
+    }
+
+    private async Task<string?> GetDepartmentByUsernameAsync(string username)
+    {
+        try
+        {
+            var user = await UserService.GetByUsernameAsync(username);
+            return user?.Department?.Name;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return null;
+        }
+    }
+
+    private void NavigateToUserTasks(string username)
+    {
+        NavigationManager.NavigateTo($"/ViewUserTasks/{username}");
+    }
+}

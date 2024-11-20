@@ -1,0 +1,92 @@
+/* Main Header */
+.page-header {
+    font-size: 2em;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card Styling */
+.card {
+    background-color: #fdfdfd;
+    padding: 25px;
+    margin: auto;
+    width: 80%;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Project Header */
+.project-header {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #444;
+    background-color: #e0e0e0;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Dropdown Icon */
+.dropdown-icon {
+    font-size: 0.8em;
+    color: #555;
+    margin-left: 5px;
+}
+
+/* Table */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.table th,
+.table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    min-width: 150px;
+}
+
+.table th {
+    color: #555;
+    font-weight: bold;
+    text-align: left;
+}
+
+.table tbody tr:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+/* Small Column */
+.small-column {
+    width: 30px; 
+}
+
+/* Task Link */
+.task-link {
+    color: black; 
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.task-link:hover {
+    font-weight: bold; 
+    color: black; 
+}
+
+
+.text-danger {
+    color: #d9534f;
+}
+
+p {
+    font-size: 1em;
+    color: #666;
+}
