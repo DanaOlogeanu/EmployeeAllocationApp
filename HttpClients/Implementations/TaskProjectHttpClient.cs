@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Domain.Dtos;
 using Domain.Models;
 using HttpClients.ClientInterfaces;
@@ -44,7 +45,7 @@ public class TaskProjectHttpClient:ITaskProjectService
         TaskProjectBasicDto taskProject = JsonSerializer.Deserialize<TaskProjectBasicDto>(content, 
             new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,  ReferenceHandler = ReferenceHandler.Preserve 
             }
         )!;   // null-suppressor "!"
         return taskProject;
@@ -82,7 +83,7 @@ public class TaskProjectHttpClient:ITaskProjectService
             Console.WriteLine(result);
             IEnumerable<TaskProject> tasksProject = JsonSerializer.Deserialize<IEnumerable<TaskProject>>(result, new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,  ReferenceHandler = ReferenceHandler.Preserve 
             })!;
             return tasksProject;
         }

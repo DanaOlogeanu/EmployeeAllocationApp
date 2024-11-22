@@ -1,4 +1,5 @@
 using Application.DaoInterfaces;
+using Domain.Dtos;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -47,6 +48,27 @@ public class ProjectEfcDao:IProjectDao
         if (!string.IsNullOrEmpty(username))
         {
             projectsQuery = projectsQuery.Where(u => u.Owner.Username == username);
+        }
+   
+        List<Project> result = await projectsQuery.ToListAsync();
+        return result; 
+    }
+
+    public async Task<Project> DuplicateProject(Project originalProject, string username)
+    {
+        EntityEntry<Project> added = await context.Projects.AddAsync(originalProject);
+        await context.SaveChangesAsync();
+        return added.Entity;
+    }
+
+    public async Task<List<Project>> GetProjectsByTagAsync(string tag)
+    {
+        
+        IQueryable<Project> projectsQuery = context.Projects.Include(p=>p.Tasks).ThenInclude( t=>t.TaskSkills).Include(p => p.Owner)
+            .AsQueryable();
+        if (!string.IsNullOrEmpty(tag))
+        {
+            projectsQuery = projectsQuery.Where(u => u.TagName == tag);
         }
    
         List<Project> result = await projectsQuery.ToListAsync();

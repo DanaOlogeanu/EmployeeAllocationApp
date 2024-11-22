@@ -90,3 +90,15 @@ p {
     font-size: 1em;
     color: #666;
 }
+
+
+.project-link {
+    color: black;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.project-link:hover {
+    font-weight: bold;
+    cursor: pointer;
+}

@@ -100,3 +100,6 @@
     box-shadow: 0 0 5px rgba(255, 0, 0, 0.8); /* Optional glowing effect */
     animation: blink 1s infinite; /* Blink the dot too */
 }
+.nav-link {
+    position: relative; /* Needed for ::after positioning */
+}

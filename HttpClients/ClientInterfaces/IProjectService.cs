@@ -10,4 +10,8 @@ public interface IProjectService
 
     Task UpdateAsync(ProjectBasicDto dto);
     Task<IEnumerable<Project>> GetProjects(string username);
+    
+    Task<Project> DuplicateProject(ProjectBasicDto originalProject, string username);
+    
+    Task<List<ProjectBasicDto>>GetProjectsByTagAsync(string tag);
 }

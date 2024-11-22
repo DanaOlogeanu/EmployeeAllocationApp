@@ -2,6 +2,7 @@
 @using HttpClients.ClientInterfaces
 @using Domain.Dtos
 @using Domain.Models
+@inject NavigationManager navMgr
 @inject ITaskProjectService taskProjectService
 @inject ISkillService skillService
 @inject IUserService userService
@@ -9,6 +10,7 @@
 @inject ITaskSkillService taskSkillService
 @inject IUserSkillService userSkillService
 @inject ITaskApprovalService taskApprovalService
+@inject ITaskAssignmentLogService taskAssignmentLogService
 <div class="center-container">
     <div class="container">
         <h3 class="page-header">Task Overview</h3>
@@ -86,14 +88,15 @@
             </EditForm>
         }
         else
-        {
+        {  <button class="acceptbtn" @onclick="EnableEdit">Edit Task</button>  
             <!-- Read-Only Mode -->
             <div class="task-details">
                 <p><strong>Name:</strong> @taskProject?.Name</p>
                 @* <p><a href="/OneProject/@taskProject.ProjectId" class="project-link"><strong>Project ID:</strong> @taskProject?.ProjectId</a></p> TODO *@
-                <p><strong>Project ID:</strong> @taskProject?.ProjectId</p>
+                <p><a href="/OneProject/@taskProject?.ProjectId" class="project-link"><strong>Project ID:</strong> @taskProject?.ProjectId</a></p>
+                
                 <p><strong>Assigned To:</strong> @(string.IsNullOrWhiteSpace(taskProject?.OwnerUsername) ? "Unassigned" : taskProject.OwnerUsername)</p>
-                <p><strong>Estimate (hours):</strong> @taskProject?.Estimate</p>
+                <p><strong>Estimate:</strong> @taskProject?.Estimate Hours</p>
                 <p><strong>Task Status:</strong> @taskProject?.TaskStatusEnum</p>
                 <p><strong>Start Date:</strong>@taskProject?.StartDate.ToString()</p>
                 <p><strong>Deadline:</strong> @taskProject?.Deadline.ToString()</p>
@@ -101,10 +104,10 @@
                 <p><strong>Order No:</strong> @taskProject?.OrderNo</p>
                 <p><strong>Notes:</strong> @taskProject?.Notes</p>
             </div>
-
-            <button class="acceptbtn" @onclick="EnableEdit">Edit Task</button>
         }
 
+        
+        
         <h4 class="section-header">Required Skills</h4>
 
          @if (taskSkills != null && taskSkills.Any())
@@ -187,10 +190,10 @@
         }
         
         @* Assignment of user to task *@
-        <h4 class="section-header">Assign Task</h4>
-      
-        
-        
+        <div>
+        <h4 class="section-header">Assign Task</h4>    
+        <button class="btn btn-primary" @onclick="MoveToLogs">View Task Assignment Log</button>
+        </div>
         @if (showAddAssignmentForm)
         {
             <EditForm Model="departments"  class="form-container">
@@ -252,11 +255,13 @@
         }
         else
         {
+            
+            
             <button class="acceptbtn" @onclick="ShowAddAssignmentForm">Assign task </button>
         }
         
-
-        @* needed *@
+     
+        
     </div>
 </div>
 
@@ -342,7 +347,7 @@
 
     private async Task AddSkill()
     {
-        TaskSkillCreationDto dto = new TaskSkillCreationDto(taskProject!.ProjectId, selectedSkill, selectedProficiency);
+        TaskSkillCreationDto dto = new TaskSkillCreationDto(taskProject!.Id, selectedSkill, selectedProficiency);
         TaskSkill createdSkill = await taskSkillService.CreateAsync(dto);
         taskSkills.Add(createdSkill);
         showAddSkillForm = false;
@@ -509,6 +514,7 @@
     private TaskApproval taskApproval;
     private async Task AssignTaskToUser(string username)
     {
+        string currentUser = await GetUsernameAsync();
         if (username != null)
         {
             taskProject.OwnerUsername = username;
@@ -516,6 +522,7 @@
             taskProject.Deadline = userDeadline[username];
             taskProject.TaskStatusEnum = TaskStatusEnum.Requested;
             await taskProjectService.UpdateAsync(taskProject);
+            
     //   StateHasChanged(); //to reload
         }
         foreach (User user in usersByDpt)
@@ -524,8 +531,10 @@
             {
                 TaskApprovalCreationDto dto = new(taskProject.Id, user.Username, ApprovalStatus.Requested);
               taskApproval = await taskApprovalService.CreateAsync(dto);
+                
             }
         }
+        await taskAssignmentLogService.CreateAsync(new TaskAssignmentLogCreationDto(taskProject.Id,currentUser , username));
         showAddAssignmentForm = false;
     }
 
@@ -616,9 +625,21 @@
             msg = e.Message;
         }
     }
-
     
-    // private async Task<int> GetUserScoreForTask(IEnumerable<User> usersByDpt, List<TaskSkill> taskSkills)
+    // // Fetch the logged-in username *@
+    private async Task<string> GetUsernameAsync()
+    {
+        var authState = await AuthState;
+        var user = authState.User;
+        return user.Identity?.Name ?? throw new Exception("User not logged in.");
+    }
+
+    private async Task MoveToLogs()
+    {
+        navMgr.NavigateTo("/AssignmentLogs/taskProject/" + taskProject.Id);
+
+    }
+// private async Task<int> GetUserScoreForTask(IEnumerable<User> usersByDpt, List<TaskSkill> taskSkills)
     // {
     //     userScores = new Dictionary<User, int>();
     //     
@@ -673,5 +694,5 @@
     //         }
     //         userScores.Add();
     //     }
-    }
+}  
     

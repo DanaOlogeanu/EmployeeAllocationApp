@@ -76,5 +76,36 @@ public class ProjectsController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+
+    [HttpPost ("duplicate")]
+    public async Task<ActionResult<Project>> DuplicateProject([FromBody]ProjectBasicDto originalProject,[FromQuery]string username)
+    {
+        if (originalProject == null || string.IsNullOrEmpty(username))
+        {
+            return BadRequest("Project data or username is missing.");
+        }
+
+        // Call the service to duplicate the project
+        var newProject = await projectLogic.DuplicateProject(originalProject, username);
+
+        return Ok(newProject);
+    }
+
+  
+    
+    [HttpGet ("viewProjectsByTag")]
+    public async Task<ActionResult<List<ProjectBasicDto>>> GetProjectsByTagAsync([FromQuery] string tag)
+    {
+        try
+        {
+            List<ProjectBasicDto> projects = await projectLogic.GetProjectsByTagAsync(tag);
+            return Ok (projects);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500, e.Message);
+        }
+    }
 }
     

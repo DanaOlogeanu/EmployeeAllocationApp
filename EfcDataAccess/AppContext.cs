@@ -16,7 +16,7 @@ public class AppContext:DbContext
     public DbSet<TaskAssignmentLog> TaskAssignmentLogs { get; set; }
     public DbSet<TaskSkill> TaskSkills { get; set; }
     public DbSet<Holiday> Holidays { get; set; }
-    
+  
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         // optionsBuilder.UseSqlite("Data Source = EmployeeAllocation.db");  //initial 

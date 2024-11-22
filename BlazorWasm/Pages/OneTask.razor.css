@@ -95,12 +95,153 @@
     margin-bottom: 20px;
     color: #333;
 }
+
 .project-link {
     color: black;
     text-decoration: none;
     font-weight: normal;
 }
+
 .project-link:hover {
     font-weight: bold;
     cursor: pointer;
 }
+
+/* Grid Layout for Fields */
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Three columns */
+    gap: 15px; /* Space between grid items */
+    margin-top: 15px;
+}
+
+.grid-layout .form-group, .grid-layout p {
+    margin: 0; /* Reset margin for grid items */
+    text-align: center; /* Center-align text */
+}
+
+/* Name, Project ID, and Notes */
+.form-group, .task-details > p {
+    margin-bottom: 20px; /* Space between rows */
+}
+
+/* Updated Button Group */
+.button-group {
+    display: flex;
+    justify-content: center; /* Center the buttons */
+    gap: 15px; /* Space between buttons */
+}
+
+button {
+    display: inline-block;
+    margin: 0 auto; /* Center single buttons */
+}
+
+
+
+/*!* Center the page header *!*/
+/*.page-header, .section-header {*/
+/*    text-align: center;*/
+/*    font-size: 24px;*/
+/*    margin-bottom: 20px;*/
+/*}*/
+
+/*!* General Form Styling *!*/
+/*.form-container {*/
+/*    width: 60%;*/
+/*    margin: 20px auto;*/
+/*    padding: 15px;*/
+/*    border: 1px solid #ddd;*/
+/*    border-radius: 5px;*/
+/*    background-color: #f9f9f9;*/
+/*}*/
+
+/*.form-group {*/
+/*    margin-bottom: 15px;*/
+/*}*/
+
+/*.form-group label {*/
+/*    display: block;*/
+/*    font-weight: bold;*/
+/*    margin-bottom: 5px;*/
+/*}*/
+
+/*.form-control {*/
+/*    width: 100%;*/
+/*    padding: 8px;*/
+/*    border: 1px solid #ccc;*/
+/*    border-radius: 4px;*/
+/*    box-sizing: border-box;*/
+/*}*/
+
+/*!* Task Details *!*/
+/*.task-details p {*/
+/*    margin: 10px 0;*/
+/*    font-size: 16px;*/
+/*}*/
+
+/*!* Button Group *!*/
+/*.button-group {*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*}*/
+
+/*.acceptbtn, .cancelbtn {*/
+/*    padding: 10px 20px;*/
+/*    font-size: 16px;*/
+/*    border: none;*/
+/*    border-radius: 5px;*/
+/*    cursor: pointer;*/
+/*}*/
+
+/*.acceptbtn {*/
+/*    background-color: #4CAF50;*/
+/*    color: white;*/
+/*}*/
+
+/*.cancelbtn {*/
+/*    background-color: #f44336;*/
+/*    color: white;*/
+/*}*/
+
+/*.acceptbtn:hover {*/
+/*    background-color: #45a049;*/
+/*}*/
+
+/*.cancelbtn:hover {*/
+/*    background-color: #d32f2f;*/
+/*}*/
+
+/*!* Centered Card Layout *!*/
+/*.center-container {*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    padding: 20px;*/
+/*    background-color: #f5f5f5;*/
+/*}*/
+
+/*.container {*/
+/*    width: 60%;*/
+/*    max-width: 800px;*/
+/*    background-color: #ffffff;*/
+/*    padding: 20px;*/
+/*    border-radius: 10px;*/
+/*    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
+/*}*/
+
+/*!* Page Header *!*/
+/*.page-header, .section-header {*/
+/*    text-align: center;*/
+/*    font-size: 24px;*/
+/*    margin-bottom: 20px;*/
+/*    color: #333;*/
+/*}*/
+/*.project-link {*/
+/*    color: black;*/
+/*    text-decoration: none;*/
+/*    font-weight: normal;*/
+/*}*/
+/*.project-link:hover {*/
+/*    font-weight: bold;*/
+/*    cursor: pointer;*/
+/*}*/

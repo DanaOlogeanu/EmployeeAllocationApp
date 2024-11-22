@@ -62,8 +62,18 @@ builder.Services.AddScoped<IDepartmentDao, DepartmentEfcDao>();
 builder.Services.AddScoped<ITaskApprovalLogic, TaskApprovalLogic>();
 builder.Services.AddScoped<ITaskApprovalDao, TaskApprovalEfcDao>(); 
 
+builder.Services.AddScoped<ITaskAssignmentLogLogic, TaskAssignmentLogLogic>();
+builder.Services.AddScoped<ITaskAssignmentLogDao, TaskAssignmentLogEfcDao>(); 
 //database 
 builder.Services.AddDbContext<AppContext>();
+
+//reload error-This tells the serializer to ignore circular references.
+// builder.Services.AddControllers()
+//     .AddJsonOptions(options =>
+//     {
+//         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+//         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+//     });
 
 
 //??

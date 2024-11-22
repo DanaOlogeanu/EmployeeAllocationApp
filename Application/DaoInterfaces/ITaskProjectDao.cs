@@ -11,4 +11,10 @@ public interface ITaskProjectDao
     Task UpdateAsync(TaskProject project);
     
     Task<IEnumerable<TaskProject>> GetTasksUser(string username);
+    
+    
+    
+    
+
+ 
 }

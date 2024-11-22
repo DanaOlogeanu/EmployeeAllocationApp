@@ -32,4 +32,5 @@ public class ProjectBasicDto
         ProjectPriority = projectPriority;
         Tasks = tasks;
     }
+    
 }

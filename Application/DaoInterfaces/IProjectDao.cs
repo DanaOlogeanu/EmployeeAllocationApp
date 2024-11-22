@@ -1,3 +1,4 @@
+using Domain.Dtos;
 using Domain.Models;
 
 namespace Application.DaoInterfaces;
@@ -10,4 +11,8 @@ public interface IProjectDao
     Task UpdateAsync(Project project);
     
     Task<IEnumerable<Project>> GetProjects(string username);
+
+    Task<Project> DuplicateProject(Project originalProject, string username);
+
+    Task <List<Project>> GetProjectsByTagAsync(string tag);
 }
