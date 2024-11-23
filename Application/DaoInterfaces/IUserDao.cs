@@ -14,4 +14,5 @@ public interface IUserDao
     Task<DateOnly> SoonestAvailabilityForUser(string username);
   Task<bool> IsOnHoliday(string username, DateOnly date);
   
+  
 }

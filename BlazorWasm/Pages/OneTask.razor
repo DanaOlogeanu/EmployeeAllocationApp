@@ -11,10 +11,13 @@
 @inject IUserSkillService userSkillService
 @inject ITaskApprovalService taskApprovalService
 @inject ITaskAssignmentLogService taskAssignmentLogService
-<div class="center-container">
-    <div class="container">
-        <h3 class="page-header">Task Overview</h3>
 
+
+
+<div class="center-container">
+<div class="container">
+    <h3 class="page-header">Task Overview</h3>
+    <div>
         @if (isEditMode)
         {
             <!-- Editable Mode -->
@@ -88,182 +91,246 @@
             </EditForm>
         }
         else
-        {  <button class="acceptbtn" @onclick="EnableEdit">Edit Task</button>  
+        {    
+            <div class="button-group">
+                <button class="acceptbtn" @onclick="EnableEdit">Edit Task</button>  
+            </div>
             <!-- Read-Only Mode -->
             <div class="task-details">
                 <p><strong>Name:</strong> @taskProject?.Name</p>
-                @* <p><a href="/OneProject/@taskProject.ProjectId" class="project-link"><strong>Project ID:</strong> @taskProject?.ProjectId</a></p> TODO *@
+            
                 <p><a href="/OneProject/@taskProject?.ProjectId" class="project-link"><strong>Project ID:</strong> @taskProject?.ProjectId</a></p>
-                
-                <p><strong>Assigned To:</strong> @(string.IsNullOrWhiteSpace(taskProject?.OwnerUsername) ? "Unassigned" : taskProject.OwnerUsername)</p>
-                <p><strong>Estimate:</strong> @taskProject?.Estimate Hours</p>
-                <p><strong>Task Status:</strong> @taskProject?.TaskStatusEnum</p>
-                <p><strong>Start Date:</strong>@taskProject?.StartDate.ToString()</p>
-                <p><strong>Deadline:</strong> @taskProject?.Deadline.ToString()</p>
-                <p><strong>Dependent On:</strong> @taskProject?.DependentOn</p>
-                <p><strong>Order No:</strong> @taskProject?.OrderNo</p>
+                <div class="two-column-fields">
+                    <p><strong>Assigned To:</strong> @(string.IsNullOrWhiteSpace(taskProject?.OwnerUsername) ? "Unassigned" : taskProject.OwnerUsername)</p>
+                    <p><strong>Estimate:</strong> @taskProject?.Estimate Hours</p>
+                    <p><strong>Task Status:</strong> @taskProject?.TaskStatusEnum</p>
+                    <p><strong>Start Date:</strong>@taskProject?.StartDate.ToString()</p>
+                    <p><strong>Dependent On:</strong> @taskProject?.DependentOn</p>
+                    <p><strong>Deadline:</strong> @taskProject?.Deadline.ToString()</p>
+              
+                    @* <p><strong>Order No:</strong> @taskProject?.OrderNo</p> *@
+                </div>
                 <p><strong>Notes:</strong> @taskProject?.Notes</p>
             </div>
         }
-
+    </div>
         
-        
-        <h4 class="section-header">Required Skills</h4>
+    @* add   *@
+@* </div> *@
+</div>
+    @* <div class="center-container"> *@
+    <div class="container">
+        @* add *@
+        <div>
+            <h4 class="section-header">Task Required Skills</h4>
 
-         @if (taskSkills != null && taskSkills.Any())
-                {
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Skill Name</th>
-                                <th>Proficiency</th>
-                                <th></th> <!-- Column for delete icon -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var taskSkill in taskSkills)
-                            {
-                                <tr>
-                                    <td>@taskSkill.SkillName</td>
-                                    <td>@taskSkill.Proficiency</td>
-                                    <td>
-                                       <span @onclick="() => DeleteSkill(taskSkill.Id)" class="delete-icon">❌</span>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-                else
-                {
-                    <p>No skills added to this task yet.</p>
-                }
-        
-        @if (showAddSkillForm)
-        {
-            <EditForm Model="skills" OnValidSubmit="AddSkill" class="form-container">
-                <div class="form-group">
-                    <label for="category">Skill Category:</label>
-                    <select id="category" class="form-control"  @onchange="LoadSkills">
-                        <option value="">Choose category</option>
-                        @foreach (string category in categories)
-                        {
-                            <option value="@category">@category</option>
-                        }
-                    </select>
-                </div>
+            @if (taskSkills != null && taskSkills.Any())
+            {
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Skill Name</th>
+                        <th>Proficiency</th>
+                        <th></th> <!-- Column for delete icon -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var taskSkill in taskSkills)
+                    {
+                        <tr>
+                            <td>@taskSkill.SkillName</td>
+                            <td>@taskSkill.Proficiency</td>
+                            <td>
+                                <span @onclick="() => DeleteSkill(taskSkill.Id)" class="delete-icon">❌</span>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No skills added to this task yet.</p>
+            }
 
-                @if (skills != null && skills.Any())
-                {
+            @if (showAddSkillForm)
+            {
+                <EditForm Model="skills" OnValidSubmit="AddSkill" class="form-container">
                     <div class="form-group">
-                        <label for="skill-name">Skill Name:</label>
-                        <select id="skill-name" class="form-control" @bind="selectedSkill">
-                            <option value="">Choose skill</option>
-                            @foreach (string skill in skills)
+                        <label for="category">Skill Category:</label>
+                        <select id="category" class="form-control" @onchange="LoadSkills">
+                            <option value="">Choose category</option>
+                            @foreach (string category in categories)
                             {
-                                <option value="@skill">@skill</option>
+                                <option value="@category">@category</option>
                             }
                         </select>
                     </div>
-                }
 
-                <div class="form-group">
-                    <label for="proficiency">Proficiency:</label>
-                    <select id="proficiency" class="form-control" @bind="selectedProficiency">
-                        <option value="">Choose proficiency</option>
-                        @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
-                        {
-                            <option value="@prof">@prof</option>
-                        }
-                    </select>
-                </div>
+                    @if (skills != null && skills.Any())
+                    {
+                        <div class="form-group">
+                            <label for="skill-name">Skill Name:</label>
+                            <select id="skill-name" class="form-control" @bind="selectedSkill">
+                                <option value="">Choose skill</option>
+                                @foreach (string skill in skills)
+                                {
+                                    <option value="@skill">@skill</option>
+                                }
+                            </select>
+                        </div>
+                    }
 
+                    <div class="form-group">
+                        <label for="proficiency">Proficiency:</label>
+                        <select id="proficiency" class="form-control" @bind="selectedProficiency">
+                            <option value="">Choose proficiency</option>
+                            @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
+                            {
+                                <option value="@prof">@prof</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="acceptbtn">Add Skill</button>
+                        <button type="button" class="cancelbtn" @onclick="CancelAddSkill">Cancel</button>
+                    </div>
+                </EditForm>
+            }
+            else
+            {
                 <div class="button-group">
-                    <button type="submit" class="acceptbtn">Add Skill</button>
-                    <button type="button" class="cancelbtn" @onclick="CancelAddSkill">Cancel</button>
+                    <button class="acceptbtn" @onclick="ShowAddSkillForm">Add Task Skill</button>
                 </div>
-            </EditForm>
-        }
-        else
-        {
-            <button class="acceptbtn" @onclick="ShowAddSkillForm">Add Task Required Skill</button>
-        }
-        
-        @* Assignment of user to task *@
-        <div>
-        <h4 class="section-header">Assign Task</h4>    
-        <button class="btn btn-primary" @onclick="MoveToLogs">View Task Assignment Log</button>
+            }
+
         </div>
-        @if (showAddAssignmentForm)
-        {
-            <EditForm Model="departments"  class="form-container">
-                <div class="form-group">
-                    <label for="department">User Department:</label>
-                    <select id="department" class="form-control"  @onchange="LoadUsers">
-                        <option value="">Choose department</option>
-                        @foreach (string department in departments)
-                        {
-                            <option value="@department">@department</option>
-                        }
-                    </select>
-                </div>
+
         
-        
-                @* New user and availability *@
-        
-                <!-- Display Users with Availability -->
-                @if (usersByDpt != null && usersByDpt.Any())
-                {
-        
-                    <h5>Users Availability in @selectedDpt:</h5>
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>UserName</th>
-                            <th>Name</th>
-                            <th>User Skill Match Score</th>
-                            <th>Estimated Start Date</th>
-                            <th>Estimated Deadline</th>
-        
-                            <th> </th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (User user in usersByDpt)
-                        {
-                            <tr>
-                                <td>@user.Username</td>
-                                <td>@user.Name</td>
-                                 <td>@userSkillScore[user] %</td>
-                                <td>@userAvailability[user.Username]</td>
-                                 <td>@userDeadline[user.Username] </td>
-        
-                                <td>
-                                    <button type="submit" class="acceptbtn" @onclick="() => AssignTaskToUser(user.Username)">Assign User</button>
-                                    <button type="button" class="cancelbtn" @onclick="CancelAddAssign">Cancel</button>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                }
-                  <div class="button-group">
-        
-        
-                                </div>
-            </EditForm>
-        }
-        else
-        {
-            
-            
-            <button class="acceptbtn" @onclick="ShowAddAssignmentForm">Assign task </button>
-        }
-        
-     
-        
-    </div>
+    @* add   *@
+@* </div> *@
 </div>
+    @* <div class="center-container"> *@
+    <div class="container">
+        @* add *@
+        
+        <div>
+            @* Assignment of user to task *@
+            <div>
+                <h4 class="section-header">Task Assignment</h4>
+            </div>
+
+            @if (showAddAssignmentForm)
+            {
+                <EditForm Model="departments" class="form-container">
+                    <div class="form-group">
+                        <label for="department">User Department:</label>
+                        <select id="department" class="form-control" @onchange="LoadUsers">
+                            <option value="">Choose department</option>
+                            @foreach (string department in departments)
+                            {
+                                <option value="@department">@department</option>
+                            }
+                        </select>
+                    </div>
+
+                    @* New user and availability *@
+
+                    <!-- Display Users with Availability -->
+                    @if (usersByDpt != null && usersByDpt.Any())
+                    {
+                        <h5>Users Availability in @selectedDpt:</h5>
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>UserName</th>
+                                <th>Name</th>
+                                <th>User Skill Match Score</th>
+                                <th>Estimated Start Date</th>
+                                <th>Estimated Deadline</th>
+
+                                <th> </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (User user in usersByDpt)
+                            {
+                                <tr>
+                                    <td>@user.Username</td>
+                                    <td>@user.Name</td>
+                                    <td>@userSkillScore[user] %</td>
+                                    <td>@userAvailability[user.Username]</td>
+                                    <td>@userDeadline[user.Username] </td>
+
+                                    <td>
+                                        <button type="submit" class="acceptbtn" @onclick="() => AssignTaskToUser(user.Username)">Assign User</button>
+                                        <button type="button" class="cancelbtn" @onclick="CancelAddAssign">Cancel</button>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    }
+
+                </EditForm>
+            }
+            else
+            {
+                <div class="button-group">
+                    <button class="btn btn-primary" @onclick="ShowAddAssignmentForm">Assign task </button>
+                </div>
+            }
+        </div>
+
+        
+    @* add   *@
+@* </div> *@
+</div>
+    @* <div class="center-container"> *@
+    <div class="container">
+        @* add *@
+        
+        <div>
+            <h4 class="section-header">Assignment Approval Status</h4>
+            <div class="button-group">
+                <button class="btn btn-primary" style="margin-bottom: 10px;" @onclick="MoveToLogs">Task Assignment Log</button>
+            </div>
+            @* add *@
+            @if (approvals == null || !approvals.Any())
+            {
+                <p>No approvals available for this task.</p>
+            }
+            else
+            {
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Task ID</th>
+                        <th>Approver</th>
+                        <th>Status</th>
+                        <th>Date of assignment</th>
+                        <th>Comments</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var approval in approvals)
+                    {
+                        <tr>
+                            <td>@approval.TaskProjectId</td>
+                            <td>@approval.OwnerUsername</td>
+                            <td>@approval.Status</td>
+                            <td>@approval.Date</td>
+                            <td>@approval.Comments</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+    </div>
+    </div>
 
 
 @code {
@@ -288,7 +355,7 @@
     private string notes;
 
 
-    private List<TaskSkill> taskSkills; //??????needed new????? todo get task skills
+    private List<TaskSkill> taskSkills; 
 
     //add task skills 
     private string selectedSkill;
@@ -303,6 +370,10 @@
     //UI States Assignment
     private bool showAddAssignmentForm = false;
 
+    
+    //to view task approval details
+    private List<TaskApprovalBasicDto>? approvals;
+    
     protected override async Task OnInitializedAsync()
     {
         msg = "";
@@ -314,7 +385,8 @@
             departments = await dptService.GetUniqueDepartmentsAsync();
          // Load existing task skills by task project id
             taskSkills = (await taskSkillService.GetAsync(null, null, taskProject?.Id)).ToList();
-            
+            var taskProjectId = taskProject.Id;
+            approvals = (await taskApprovalService.GetByTaskIdAsync(taskProjectId)).ToList();
         }
         catch (Exception e)
         {
@@ -445,7 +517,8 @@
     }
 
 
-
+   
+    
     public bool IsWeekend(DateOnly date)
     {
         if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
@@ -473,37 +546,7 @@
     private Dictionary<string, DateOnly> userAvailability;
     private Dictionary<string, DateOnly> userDeadline;
  
-    // private async Task LoadUsers(ChangeEventArgs department)
-    // {
-    //     selectedDpt = department.Value?.ToString();
-    //     try
-    //     {
-    //         userAvailability = new();
-    //         userDeadline = new();
-    //         if (!string.IsNullOrWhiteSpace(selectedDpt))
-    //         {
-    //             usersByDpt = await userService.GetByDepartmentAsync(selectedDpt);
-    //             foreach (var user in usersByDpt)
-    //             {
-    //                 var userAvailability = await SoonestAvailabilityForUser(user.Username);
-    //                 var userDeadline =  await calculateTaskDeadline(user.Username, taskProject.Estimate, user.ProjectHoursPerDay, userAvailability);
-    //              //   var userScore = await GetUserScoreForTask(usersByDpt, taskSkills);
-    //                 userAvailability[user.Username] = userAvailability;
-    //                 userDeadline[user.Username] = userDeadline;
-    //                // userScores[user] = userScore;
-    //             }
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         Console.WriteLine(e);
-    //         msg = e.Message;
-    //     }
-    //    
-    // }
-    //
    
-        
-
     private void ShowAddAssignmentForm()
     {
         showAddAssignmentForm = true;
@@ -529,9 +572,12 @@
         {
             if (user.Role.Equals("Manager"))
             {
-                TaskApprovalCreationDto dto = new(taskProject.Id, user.Username, ApprovalStatus.Requested);
+                TaskApprovalCreationDto dto = new(taskProject.Id, user.Username, ApprovalStatus.Requested);  //TODO add assined to aka taskProject.OwnerUsername
               taskApproval = await taskApprovalService.CreateAsync(dto);
-                
+                //added
+                TaskApprovalBasicDto added = new(taskApproval.Id,taskApproval.TaskProjectId, taskApproval.OwnerUsername, taskApproval.Status, taskApproval.Comments, taskApproval.Date);
+                approvals.Add(added);
+                //added
             }
         }
         await taskAssignmentLogService.CreateAsync(new TaskAssignmentLogCreationDto(taskProject.Id,currentUser , username));
@@ -547,27 +593,6 @@
     //SKILLS
     
     private Dictionary<User,int> userSkillScore;
-    // private async Task<int> GetUserScoreForTask(User user, List<TaskSkill> taskSkills)
-    // {
-    // //identify the skill with highest req value as is most relevant
-    //     var highestReqSkill = taskSkills.OrderByDescending(s => s.Proficiency).First();
-    //     int totalScore = 0;
-    //         foreach (var reqSkill in taskSkills)
-    //         {
-    //             var userSkill = user.UserSkills.FirstOrDefault(s => s.SkillName == reqSkill.SkillName);
-    //             int userSkillLevel = (int)(userSkill != null ? userSkill.Proficiency : 0);
-    //             int requiredSkillLevel = (int)reqSkill.Proficiency;
-    // // calculate the score based on the difference between user skill proficiency level and req skill proficiency level
-    //             int skillScore = userSkillLevel - requiredSkillLevel;
-    // //give extra weight to the highest req skill 
-    //             if (reqSkill.SkillName == highestReqSkill.SkillName)
-    //             {
-    //                 skillScore *=  2; 
-    //             }
-    //             totalScore += skillScore;
-    //         }
-    //     return totalScore;
-    // }
     
     private async Task<int> GetUserScoreForTask(User user, List<TaskSkill> taskSkills)
     {
@@ -639,60 +664,6 @@
         navMgr.NavigateTo("/AssignmentLogs/taskProject/" + taskProject.Id);
 
     }
-// private async Task<int> GetUserScoreForTask(IEnumerable<User> usersByDpt, List<TaskSkill> taskSkills)
-    // {
-    //     userScores = new Dictionary<User, int>();
-    //     
-    // //identify the skill with highest req value as is most relevant
-    //     var highestReqSkill = taskSkills.OrderByDescending(s => s.Proficiency).First();
-    //     foreach (var user in usersByDpt)
-    //     {
-    //         int totalScore = 0;
-    //         foreach (var reqSkill in taskSkills)
-    //         {
-    //             var userSkill = user.UserSkills.FirstOrDefault(s => s.SkillName == reqSkill.SkillName);
-    //             int userSkillLevel = (int)(userSkill != null ? userSkill.Proficiency : 0);
-    //             int requiredSkillLevel = (int)reqSkill.Proficiency;
-    // // calculate the score based on the difference between user skill proficiency level and req skill proficiency level
-    //             int skillScore = userSkillLevel - requiredSkillLevel;
-    // //give extra weight to the highest req skill 
-    //             if (reqSkill.SkillName == highestReqSkill.SkillName)
-    //             {
-    //                 skillScore *=  2; 
-    //             }
-    //             totalScore += skillScore;
-    //         }
-    //         userScores.Add(user,totalScore);
-    //     }
-    //     
-    // }
-
-    
-    
-    // private async Task GetUserScoreForTask(ICollection<UserSkill> userskills, List<TaskSkill> taskSkills)
-    // {
-    //     userScores = new Dictionary<string, int>();
-    //     
-    //     //identify the skill with highest req value as is most relevant
-    //     var highestReqSkill = taskSkills.OrderByDescending(s => s.Proficiency).First();
-    //     foreach (var uSkill in userskills)
-    //     {
-    //         int totalScore = 0;
-    //         foreach (var reqSkill in taskSkills)
-    //         {
-    //             var userSkill = userskills.FirstOrDefault(s => s.SkillName == reqSkill.SkillName);
-    //             int userSkillLevel = (int)(userSkill != null ? userSkill.Proficiency : 0);
-    //             int requiredSkillLevel = (int)reqSkill.Proficiency;
-    //             // calculate the score based on the difference between user skill proficiency level and req skill proficiency level
-    //             int skillScore = userSkillLevel - requiredSkillLevel;
-    //             //give extra weight to the highest req skill 
-    //             if (reqSkill.SkillName == highestReqSkill.SkillName)
-    //             {
-    //                 skillScore *=  2; 
-    //             }
-    //             totalScore += skillScore;
-    //         }
-    //         userScores.Add();
-    //     }
+ 
 }  
     

@@ -6,7 +6,7 @@ public class TaskApprovalCreationDto
 {
     
     public int TaskProjectId { get; set; }
-    public string OwnerUsername { get; set; }
+    public string OwnerUsername { get; set; }  //manager
     public ApprovalStatus Status { get; set; }
    
 

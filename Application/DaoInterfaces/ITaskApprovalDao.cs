@@ -8,6 +8,7 @@ public interface ITaskApprovalDao
     
     Task<IEnumerable<TaskApproval>> GetApprovalsManager(string username);
     Task UpdateAsync(TaskApproval approval);
-    Task <TaskApproval?> GetByIdAsync(int id);
+    Task <TaskApproval?> GetByIdAsync(int id);  //task approvalId
     Task<int> GetPendingApprovalAsync(string username);
+    Task <List<TaskApproval>?> GetByTaskIdAsync(int taskProjectId);
 }

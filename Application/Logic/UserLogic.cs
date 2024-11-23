@@ -8,10 +8,12 @@ namespace Application.Logic;
 public class UserLogic: IUserLogic
 {
     private readonly IUserDao userDao;
+  
 
     public UserLogic(IUserDao userDao)
     {
         this.userDao = userDao;
+     
     }
     
     public Task<IEnumerable<User>> GetAsync(SearchUserParametersDto searchParameters)
@@ -73,4 +75,7 @@ public class UserLogic: IUserLogic
   {
       return await userDao.IsOnHoliday(username, date);
   }
+
+  
+ 
 }

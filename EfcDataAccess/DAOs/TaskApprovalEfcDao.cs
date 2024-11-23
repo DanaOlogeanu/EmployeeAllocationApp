@@ -50,6 +50,8 @@ public class TaskApprovalEfcDao:ITaskApprovalDao
             .SingleOrDefaultAsync(us=> us.Id == id);
         return found;
     }
+    
+    
 
     public async Task<int> GetPendingApprovalAsync(string username)
     {
@@ -58,5 +60,15 @@ public class TaskApprovalEfcDao:ITaskApprovalDao
             .Where(ta=>ta.OwnerUsername.Equals(username))
             .Where(ta => ta.Status.Equals(ApprovalStatus.Requested))
             .CountAsync();
+    }
+
+    public async Task<List<TaskApproval>?> GetByTaskIdAsync(int taskProjectId)
+    {
+        IQueryable<TaskApproval>? found = context.TasksApprovals
+            //  .AsNoTracking()
+            .Include(us => us.Owner) 
+            .Include(us=>us.TaskProject)
+            .Where(us=> us.TaskProjectId == taskProjectId).AsQueryable();
+        return await found.ToListAsync();
     }
 }
