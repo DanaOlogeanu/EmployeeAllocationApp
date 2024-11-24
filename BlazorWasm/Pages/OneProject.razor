@@ -27,7 +27,9 @@ else
                 }
                 else
                 {
-                    <button class="btn-primary" @onclick="ToggleEdit">Edit Project</button>
+                    <AuthorizeView Roles="Admin, Manager,Project Manager"> 
+                        <button class="btn-primary" @onclick="ToggleEdit">Edit Project</button>
+                    </AuthorizeView>
                 }
             </div>
 
@@ -184,7 +186,7 @@ else
                             <td>@(string.IsNullOrWhiteSpace(task.OwnerUsername) ? "Unassigned" : task.OwnerUsername)</td>
 
                             <td>
-                                @if (forLinks[task.Id] != null)
+                                @if (forLinks.ContainsKey(task.Id) && forLinks[task.Id] != null)
                                 {
                                     <a href="/OneTask/@forLinks[task.Id].Id" class="project-link">@forLinks[task.Id].OrderNo. @forLinks[task.Id].Name</a>
                                 }
@@ -203,13 +205,17 @@ else
                 <p class="no-data-msg">No tasks available for this project.</p>
             }
 
+            <AuthorizeView Roles="Admin, Manager,Project Manager"> 
             <!-- Add Task Button -->
             <div style="text-align: center; padding-top: 10px;">
                 <button class="btn-primary" @onclick="ToggleTaskForm">Add Task</button>
             </div>
+                </AuthorizeView>
         </div>
+
     </div>
 
+    
     <!-- Task Input Form -->
     @if (isAddingTask)
     {
@@ -301,8 +307,6 @@ else
 
 
 
-
-
 @code {
     // [CascadingParameter]
     // public Task<AuthenticationState> AuthState { get; set; } = null!;   //added to remember the logged in claims
@@ -314,30 +318,30 @@ else
     private ProjectBasicDto? project;
 
     //to display link for dependentOn instead of seqNo
-  
-    
+
+
     protected override async Task OnInitializedAsync()
     {
         msg = "";
 
         try
         {
-            forLinks = new Dictionary<int,TaskProjectBasicDto>();
+            forLinks = new Dictionary<int, TaskProjectBasicDto>();
             project = await projectService.GetByIdAsync(@Id);
             foreach (var task in project.Tasks)
             {
-                 TaskProjectBasicDto? taskForLink;
+                TaskProjectBasicDto? taskForLink;
                 int projectId = task.ProjectId;
                 if (task.DependentOn != null)
                 {
                     int sequenceNo = (int)task.DependentOn;
-                    taskForLink = await taskProjectService.GetBySeq(projectId, sequenceNo); 
+                    taskForLink = await taskProjectService.GetBySeq(projectId, sequenceNo);
                 }
                 else
                 {
                     taskForLink = null;
                 }
-                forLinks[task.Id]=taskForLink;
+                forLinks[task.Id] = taskForLink;
             }
         }
         catch (Exception e)
@@ -346,7 +350,8 @@ else
             msg = e.Message;
         }
     }
-    private Dictionary<int,TaskProjectBasicDto> forLinks;
+
+    private Dictionary<int, TaskProjectBasicDto> forLinks;
 
 
     // //TO UPDATE IN SAME PAGE
@@ -382,8 +387,8 @@ else
     private string? notes;
 
 
-  
-    
+
+
     private void ToggleTaskForm()
     {
         isAddingTask = !isAddingTask;
@@ -400,7 +405,7 @@ else
         }
         try
         {
-         
+
             TaskProjectCreationDto dto = new(taskName, @Id, assignee, estimate, taskStatus, startDate, deadline, dependentOn, orderNo, notes);
             TaskProject taskProject = await taskProjectService.CreateAsync(dto);
             navMgr.NavigateTo("/OneTask/" + taskProject.Id);

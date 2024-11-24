@@ -25,73 +25,73 @@
                 <DataAnnotationsValidator />
                 <ValidationSummary />
                 @* added *@
-   <div class="form-container">
-                <div class="form-group">
-                    <label for="task-name">Name:</label>
-                    <InputText id="task-name" class="form-control" @bind-Value="taskProject.Name" />
-                </div>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="task-name">Name:</label>
+                        <InputText id="task-name" class="form-control" @bind-Value="taskProject.Name" />
+                    </div>
 
-                <div class="form-group">
-                    <label for="project-id">Project ID:</label>
-                    <InputNumber id="project-id" class="form-control" @bind-Value="taskProject.ProjectId" readonly />
-                </div>
+                    <div class="form-group">
+                        <label for="project-id">Project ID:</label>
+                        <InputNumber id="project-id" class="form-control" @bind-Value="taskProject.ProjectId" readonly />
+                    </div>
 
-                <div class="form-group">
-                    <label for="assigned-to">Assigned To:</label>
-                    <InputText id="assigned-to" class="form-control" @bind-Value="taskProject.OwnerUsername" readonly/>
-                </div>
+                    <div class="form-group">
+                        <label for="assigned-to">Assigned To:</label>
+                        <InputText id="assigned-to" class="form-control" @bind-Value="taskProject.OwnerUsername" readonly/>
+                    </div>
 
-                <div class="form-group">
-                    <label for="estimate">Estimate (hours):</label>
-                    <InputNumber id="estimate" class="form-control" @bind-Value="taskProject.Estimate" />
-                </div>
+                    <div class="form-group">
+                        <label for="estimate">Estimate (hours):</label>
+                        <InputNumber id="estimate" class="form-control" @bind-Value="taskProject.Estimate" />
+                    </div>
 
-                <div class="form-group">
-                    <label for="status">Task Status:</label>
-                    <InputSelect id="status" class="form-control" @bind-Value="taskProject.TaskStatusEnum">
-                        @foreach (var status in Enum.GetValues(typeof(TaskStatusEnum)))
-                        {
-                            <option value="@status">@status</option>
-                        }
-                    </InputSelect>
-                </div>
+                    <div class="form-group">
+                        <label for="status">Task Status:</label>
+                        <InputSelect id="status" class="form-control" @bind-Value="taskProject.TaskStatusEnum">
+                            @foreach (var status in Enum.GetValues(typeof(TaskStatusEnum)))
+                            {
+                                <option value="@status">@status</option>
+                            }
+                        </InputSelect>
+                    </div>
 
                 
-                <div class="form-group">
-                    <label for="start-date">Start Date:</label>
-                    @* <InputDate id="start-date" class="form-control" @bind-Value="taskProject.StartDate" /> *@
-                    <input id="start-date" type="date" @bind="taskProject.StartDate" class="form-control"  />
-                </div>
+                    <div class="form-group">
+                        <label for="start-date">Start Date:</label>
+                        @* <InputDate id="start-date" class="form-control" @bind-Value="taskProject.StartDate" /> *@
+                        <input id="start-date" type="date" @bind="taskProject.StartDate" class="form-control"  />
+                    </div>
 
-                <div class="form-group">
-                    <label for="deadline">Deadline:</label>
-                    @* <InputDate id="deadline" class="form-control" @bind-Value="taskProject.Deadline" /> *@
-                    <input id="deadline" type="date" @bind="taskProject.Deadline" class="form-control"  />
+                    <div class="form-group">
+                        <label for="deadline">Deadline:</label>
+                        @* <InputDate id="deadline" class="form-control" @bind-Value="taskProject.Deadline" /> *@
+                        <input id="deadline" type="date" @bind="taskProject.Deadline" class="form-control"  />
                     
-                </div>
+                    </div>
 
-                <div class="form-group">
-                    <label for="dependent-on">Dependent On:</label>
-                    <InputNumber id="dependent-on" class="form-control" @bind-Value="taskProject.DependentOn" />
-                </div>
+                    <div class="form-group">
+                        <label for="dependent-on">Dependent On:</label>
+                        <InputNumber id="dependent-on" class="form-control" @bind-Value="taskProject.DependentOn" />
+                    </div>
 
-                <div class="form-group">
-                    <label for="order-no">Order No:</label>
-                    <InputNumber id="order-no" class="form-control" @bind-Value="taskProject.OrderNo" />
-                </div>
+                    <div class="form-group">
+                        <label for="order-no">Order No:</label>
+                        <InputNumber id="order-no" class="form-control" @bind-Value="taskProject.OrderNo" />
+                    </div>
 
-                <div class="form-group">
-                    <label for="notes">Notes:</label>
-                    <InputTextArea id="notes" class="form-control" @bind-Value="taskProject.Notes" />
-                </div>
+                    <div class="form-group">
+                        <label for="notes">Notes:</label>
+                        <InputTextArea id="notes" class="form-control" @bind-Value="taskProject.Notes" />
+                    </div>
 
-   <div class="button-group">
-       <button type="submit" class="acceptbtn">Save</button>
-       <button type="button" class="cancelbtn" @onclick="CancelEdit">Cancel</button>
-   </div>
+                    <div class="button-group">
+                        <button type="submit" class="acceptbtn">Save</button>
+                        <button type="button" class="cancelbtn" @onclick="CancelEdit">Cancel</button>
+                    </div>
    
-   @* added *@
-      </div>
+                    @* added *@
+                </div>
             </EditForm>
         }
         else
@@ -116,7 +116,7 @@
                         <p><a class="project-link" @onclick="() => NavigateToTask(taskForLink?.Id,taskForLink?.ProjectId)"><strong>Dependent on Task:</strong> @taskForLink?.Id - @taskForLink?.Name</a></p>
                     }
                     else{
-                    <p><strong>Dependent on:</strong> No dependencies.</p>
+                        <p><strong>Dependent on:</strong> No dependencies.</p>
                     }
                     <p><strong>Deadline:</strong> @taskProject?.Deadline.ToString()</p>
               
@@ -126,11 +126,11 @@
             </div>
         }
     </div>
-        
-    @* add   *@
-@* </div> *@
+    
 </div>
-    @* <div class="center-container"> *@
+
+ <AuthorizeView Roles="Admin,Project Manager"> 
+@* <div class="center-container"> *@
     <div class="container">
         @* add *@
         <div>
@@ -167,7 +167,7 @@
 
             @if (showAddSkillForm)
             {
-                <EditForm Model="skills" OnValidSubmit="AddSkill" class="form-container">
+                <EditForm Model="skills" OnValidSubmit="AddSkill" class="form-container" Context="editFormContext">
                     
                     <div class="form-container">
                         
@@ -228,12 +228,12 @@
             }
 
         </div>
-
         
-    @* add   *@
-@* </div> *@
 </div>
-    @* <div class="center-container"> *@
+ </AuthorizeView>  
+
+ <AuthorizeView Roles="Admin, Manager"> 
+@* <div class="center-container"> *@
     <div class="container">
         @* add *@
         
@@ -245,7 +245,7 @@
 
             @if (showAddAssignmentForm)
             {
-                <EditForm Model="departments" class="form-container">
+                <EditForm Model="departments" class="form-container" Context="editFormContext">
                     @* added *@
                     <div class="form-container-large">
                         
@@ -327,51 +327,51 @@
 @* </div> *@
 </div>
     @* <div class="center-container"> *@
-    <div class="container">
-        @* add *@
+ <div class="container">
+     @* add *@
         
-        <div>
-            <h4 class="section-header">Assignment Approval Status</h4>
-            <div class="button-group">
-                <button class="btn btn-primary" style="margin-bottom: 10px;" @onclick="MoveToLogs">Task Assignment Log</button>
-            </div>
-            @* add *@
-            @if (approvals == null || !approvals.Any())
-            {
-                <p>No approvals available for this task.</p>
-            }
-            else
-            {
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th>Task ID</th>
-                        <th>Approver</th>
-                        <th>Status</th>
-                        <th>Date of assignment</th>
-                        <th>Comments</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var approval in approvals)
-                    {
-                        <tr>
-                            <td>@approval.TaskProjectId</td>
-                            <td>@approval.OwnerUsername</td>
-                            <td>@approval.Status</td>
-                            <td>@approval.Date</td>
-                            <td>@approval.Comments</td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-            }
-        </div>
+     <div>
+         <h4 class="section-header">Assignment Approval Status</h4>
+         <div class="button-group">
+             <button class="btn btn-primary" style="margin-bottom: 10px;" @onclick="MoveToLogs">Task Assignment Log</button>
+         </div>
+         @* add *@
+         @if (approvals == null || !approvals.Any())
+         {
+             <p>No approvals available for this task.</p>
+         }
+         else
+         {
+             <table class="table table-bordered">
+                 <thead>
+                 <tr>
+                     <th>Task ID</th>
+                     <th>Approver</th>
+                     <th>Status</th>
+                     <th>Date of assignment</th>
+                     <th>Comments</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 @foreach (var approval in approvals)
+                 {
+                     <tr>
+                         <td>@approval.TaskProjectId</td>
+                         <td>@approval.OwnerUsername</td>
+                         <td>@approval.Status</td>
+                         <td>@approval.Date</td>
+                         <td>@approval.Comments</td>
+                     </tr>
+                 }
+                 </tbody>
+             </table>
+         }
+     </div>
 
+ </div>
+ </AuthorizeView> 
     </div>
-    </div>
-
-
+ 
 @code {
 
     [CascadingParameter]

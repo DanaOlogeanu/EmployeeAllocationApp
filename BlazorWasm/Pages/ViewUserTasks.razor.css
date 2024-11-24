@@ -103,26 +103,27 @@ p {
     cursor: pointer;
 }
 
-
-
-/*Select sorting options*/
-
+/* Select sorting options */
 .sorting-options {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1rem;  
+    margin-bottom: 1rem;
     padding: 0.5rem 1rem;
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    gap: 20px; /* Space between the children elements */
 }
 
-/* Style the label */
+/* Style for checkboxes and labels */
 .sorting-options label {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Space between checkbox and label text */
     font-size: 1rem;
-    margin-right: 0.5rem;
     font-weight: 600;
+    margin: 0; /* Reset margin for alignment */
 }
 
 /* Style the select dropdown */
@@ -154,7 +155,7 @@ p {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease, border-color 0.3s ease;
-    margin-left: 0.5rem;  
+    margin-left: 0.5rem;
 }
 
 /* Button hover effect */
@@ -168,3 +169,68 @@ p {
     background-color: #003366;
     border-color: #003366;
 }
+
+
+/*!*Select sorting options*!*/
+
+/*.sorting-options {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    margin-bottom: 1rem;  */
+/*    padding: 0.5rem 1rem;*/
+/*    background-color: #f9f9f9;*/
+/*    border-radius: 8px;*/
+/*    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);*/
+/*}*/
+
+/*!* Style the label *!*/
+/*.sorting-options label {*/
+/*    font-size: 1rem;*/
+/*    margin-right: 0.5rem;*/
+/*    font-weight: 600;*/
+/*}*/
+
+/*!* Style the select dropdown *!*/
+/*.sorting-options select {*/
+/*    padding: 0.5rem 1rem;*/
+/*    font-size: 1rem;*/
+/*    border: 1px solid #ddd;*/
+/*    border-radius: 4px;*/
+/*    background-color: #fff;*/
+/*    outline: none;*/
+/*    transition: border-color 0.3s ease;*/
+/*}*/
+
+/*.sorting-options select:hover {*/
+/*    border-color: #007bff;*/
+/*}*/
+
+/*.sorting-options select:focus {*/
+/*    border-color: #0056b3;*/
+/*}*/
+
+/*!* Style the button *!*/
+/*.sorting-options button {*/
+/*    padding: 0.5rem 1rem;*/
+/*    font-size: 1rem;*/
+/*    border: 1px solid #007bff;*/
+/*    background-color: #007bff;*/
+/*    color: #fff;*/
+/*    border-radius: 4px;*/
+/*    cursor: pointer;*/
+/*    transition: background-color 0.3s ease, border-color 0.3s ease;*/
+/*    margin-left: 0.5rem;  */
+/*}*/
+
+/*!* Button hover effect *!*/
+/*.sorting-options button:hover {*/
+/*    background-color: #0056b3;*/
+/*    border-color: #004085;*/
+/*}*/
+
+/*!* Button active (clicked) effect *!*/
+/*.sorting-options button:active {*/
+/*    background-color: #003366;*/
+/*    border-color: #003366;*/
+/*}*/

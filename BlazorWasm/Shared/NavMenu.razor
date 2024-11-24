@@ -2,6 +2,8 @@
 @inject ITaskApprovalService taskApprovalService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
+
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Employee Allocation</a>
@@ -20,24 +22,49 @@
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        @* *@
-        @* <div class="nav-item px-3"> *@
-        @*     <NavLink class="nav-link" href="viewUserSkills"> *@
-        @*         <span class="oi oi-list-rich" aria-hidden="true"></span> Skills *@
-        @*     </NavLink> *@
-        @* </div> *@
-        @* <div class="nav-item px-3"> *@
-        @*     <NavLink class="nav-link" href="CreateProject"> *@
-        @*         <span class="oi oi-list-rich" aria-hidden="true"></span> New Project *@
-        @*     </NavLink> *@
-        @* </div> *@
-        @* <div class="nav-item px-3"> *@
-        @*     <NavLink class="nav-link" href="viewProjects"> *@
-        @*         <span class="oi oi-list-rich" aria-hidden="true"></span> Projects *@
-        @*     </NavLink> *@
-        @* </div> *@
 
-        
+          <div class="nav-item px-3">
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href=" ">
+                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Add user
+                                </NavLink>
+                            </div>
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href=" ">
+                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Add project tag
+                                </NavLink>
+                            </div>
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="  ">
+                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Add department
+                                </NavLink>
+                            </div>
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="viewUserSkills">
+                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Skills
+                                </NavLink>
+                            </div>
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="viewProjects">
+                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Projects
+                                </NavLink>
+                            </div>
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="viewUserTasks">
+                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Tasks
+                                </NavLink>
+                            </div>
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="viewDepartmentUsers">
+                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Team Tasks
+                                </NavLink>
+                            </div>
+
+                        </Authorized>
+                    </AuthorizeView>
+                </div>
           
         <div class="nav-item px-3">
             <AuthorizeView Roles="Employee">
@@ -47,11 +74,6 @@
                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Skills
                                </NavLink>
                            </div>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="viewProjects">
-                            <span class="oi oi-list-rich" aria-hidden="true"></span> Projects
-                        </NavLink>
-                    </div>
                      <div class="nav-item px-3">
                                 <NavLink class="nav-link" href="viewUserTasks">
                                     <span class="oi oi-list-rich" aria-hidden="true"></span> Tasks 
@@ -65,10 +87,10 @@
                     <AuthorizeView Roles="Project Manager">
                         <Authorized>
                                    <div class="nav-item px-3">
-                                                                <NavLink class="nav-link" href="viewUserSkills">
-                                                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Skills
-                                                                </NavLink>
-                                                            </div>
+                                       <NavLink class="nav-link" href="viewUserSkills">
+                                           <span class="oi oi-list-rich" aria-hidden="true"></span> Skills
+                                           </NavLink>
+                                       </div>
                                    <div class="nav-item px-3">
                                        <NavLink class="nav-link" href="viewProjects">
                                            <span class="oi oi-list-rich" aria-hidden="true"></span> Projects
@@ -89,17 +111,10 @@
                                </NavLink>
                            </div>
                            @* <div class="nav-item px-3"> *@
-                           @*     <NavLink class="nav-link" href="CreateProject"> *@
-                           @*         <span class="oi oi-list-rich" aria-hidden="true"></span> New Project *@
+                           @*     <NavLink class="nav-link" href="viewProjects"> *@
+                           @*         <span class="oi oi-list-rich" aria-hidden="true"></span> Projects *@
                            @*     </NavLink> *@
                            @* </div> *@
-                         
-                           
-                           <div class="nav-item px-3">
-                               <NavLink class="nav-link" href="viewProjects">
-                                   <span class="oi oi-list-rich" aria-hidden="true"></span> Projects
-                               </NavLink>
-                           </div>
                            <div class="nav-item px-3">
                                <NavLink class="nav-link" href="viewDepartmentUsers">
                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Team Tasks
@@ -107,14 +122,15 @@
                            </div>
                            
                            <div>
-                               @if (isUserManager)
-                               {
-                                   <NavLink class="@($"nav-link {notificationClass}")" href="viewApprovals">
-                                       <span class="oi oi-list-rich" aria-hidden="true"></span>
-                                       Task Approvals
-                                       @(PendingApprovals > 0 ? $" ({PendingApprovals})" : "")
-                                   </NavLink>
-                               }
+                               
+                                   @if (isUserManager)
+                                   {
+                                       <NavLink class="@($"nav-link {notificationClass}")" href="viewApprovals">
+                                           <span class="oi oi-list-rich" aria-hidden="true"></span>
+                                           Task Approvals
+                                           @(PendingApprovals > 0 ? $" ({PendingApprovals})" : "")
+                                       </NavLink>
+                                   }
                            </div>
                            
                 </Authorized>
@@ -205,98 +221,4 @@
               }
           }
       }
-  
-    
-    
-        
-    @*          *@
-@*          *@
-@*          *@
-@*          *@
-@*          *@
-@*          *@
-@*          *@
-@*         <div class="nav-item px-3"> *@
-@*          <AuthorizeView Roles="ManagerOnly"> *@
-@*                 <Authorized> *@
-@*               *@
-@*                  <NavLink class="@($"nav-link {notificationClass}")" href="viewApprovals"> *@
-@*                      <span class="oi oi-list-rich" aria-hidden="true"></span> *@
-@*                      Task Approvals *@
-@*                      @(PendingApprovals > 0 ? $" ({PendingApprovals})" : "") *@
-@*                  </NavLink> *@
-@*               *@
-@*                 </Authorized> *@
-@*                  </AuthorizeView> *@
-@*         </div> *@
-@*         $1$ <div class="nav-item px-3"> #1# *@
-@*         $1$                            <NavLink class="nav-link" href="viewApprovals"> #1# *@
-@*         $1$                                <span class="oi oi-list-rich" aria-hidden="true"></span> Task Approvals #1# *@
-@*         $1$                            </NavLink> #1# *@
-@*         $1$                        </div> #1# *@
-@*     </nav> *@
-@* </div> *@
-@* *@
-@* @code { *@
-@*     [CascadingParameter] *@
-@*     public Task<AuthenticationState> AuthState { get; set; } = null!; //added to remember the logged in claims *@
-@*      *@
-@*     private bool collapseNavMenu = true; *@
-@* *@
-@*     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null; *@
-@* *@
-@*     private void ToggleNavMenu() *@
-@*     { *@
-@*         collapseNavMenu = !collapseNavMenu; *@
-@*     } *@
-@*      *@
-@*     //notification  *@
-@*     private int PendingApprovals = 0; *@
-@*     private string notificationClass = string.Empty; *@
-@* *@
-@*      *@
-@*     //logged in user manager *@
-@*     //private bool isUserLoggedIn = false; *@
-@*   //  private bool isUserManager = false; *@
-@*      *@
-@*     protected override async Task OnInitializedAsync() *@
-@*     { *@
-@*          *@
-@*         await RefreshPendingApprovals(); *@
-@*     } *@
-@* *@
-@*     //!!!!!!!!!FOR UPDATES manually call RefreshPendingApprovals after any action that might change the number of pending approvals. *@
-@*     // Call this method whenever you want to update the pending count *@
-@*     private async Task RefreshPendingApprovals() *@
-@*     { *@
-@*         try *@
-@*         { *@
-@*                 string user = await GetUsernameAsync(); *@
-@*     // Replace with your actual API endpoint to get the pending approvals count (assign) *@
-@*                  PendingApprovals = await taskApprovalService.GetPendingApprovalAsync(user); *@
-@*     ///var response = await Http.GetFromJsonAsync<PendingApprovalResponse>("api/tasks/pending-approvals"); *@
-@*                 // PendingApprovals = response?.PendingCount ?? 0; // If API returns 0, PendingApprovals is set to 0 *@
-@* *@
-@*     // Set the notification class based on PendingApprovals *@
-@*                 notificationClass = PendingApprovals > 0 ? "has-notification" : string.Empty; *@
-@*              *@
-@*         } *@
-@*        catch (Exception e) *@
-@*         { *@
-@*             Console.Error.WriteLine($"Error fetching pending approvals: {e.Message}"); *@
-@*             PendingApprovals = 0; // Handle errors by default to 0 in case of error *@
-@*             notificationClass = string.Empty; *@
-@*         } *@
-@*          *@
-@*     } *@
-@*      *@
-@*      *@
-@*     // Fetch the logged-in username *@
-@*     private async Task<string> GetUsernameAsync() *@
-@*     { *@
-@*         var authState = await AuthState; *@
-@*         var user = authState.User; *@
-@*         return user.Identity?.Name ?? throw new Exception("User not logged in."); *@
-@*     } *@
-@* *@
-@* } *@
+
