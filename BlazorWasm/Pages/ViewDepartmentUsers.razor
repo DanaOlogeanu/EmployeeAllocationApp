@@ -49,8 +49,8 @@ else
                     <tbody>
                         @foreach (var user in users)
                         {
-                            <tr>
-                                <td @onclick="() => NavigateToUserTasks(user.Username)" class="task-link user-name">@user.Name</td>
+                            <tr @onclick="() => NavigateToUserTasks(user.Username)" class="task-link user-name">
+                                <td >@user.Name</td>
                                 <td>@user.Username</td>
                                 @* add *@
                                   @foreach (var availability in availabilities[user])

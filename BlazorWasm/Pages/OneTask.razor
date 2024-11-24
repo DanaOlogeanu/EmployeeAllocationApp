@@ -11,7 +11,7 @@
 @inject IUserSkillService userSkillService
 @inject ITaskApprovalService taskApprovalService
 @inject ITaskAssignmentLogService taskAssignmentLogService
-
+@inject IProjectService projectService
 
 
 <div class="center-container">
@@ -24,7 +24,8 @@
             <EditForm Model="taskProject" OnValidSubmit="HandleSave" class="form-container">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
-
+                @* added *@
+   <div class="form-container">
                 <div class="form-group">
                     <label for="task-name">Name:</label>
                     <InputText id="task-name" class="form-control" @bind-Value="taskProject.Name" />
@@ -84,10 +85,13 @@
                     <InputTextArea id="notes" class="form-control" @bind-Value="taskProject.Notes" />
                 </div>
 
-                <div class="button-group">
-                    <button type="submit" class="acceptbtn">Save</button>
-                    <button type="button" class="cancelbtn" @onclick="CancelEdit">Cancel</button>
-                </div>
+   <div class="button-group">
+       <button type="submit" class="acceptbtn">Save</button>
+       <button type="button" class="cancelbtn" @onclick="CancelEdit">Cancel</button>
+   </div>
+   
+   @* added *@
+      </div>
             </EditForm>
         }
         else
@@ -105,7 +109,15 @@
                     <p><strong>Estimate:</strong> @taskProject?.Estimate Hours</p>
                     <p><strong>Task Status:</strong> @taskProject?.TaskStatusEnum</p>
                     <p><strong>Start Date:</strong>@taskProject?.StartDate.ToString()</p>
-                    <p><strong>Dependent On:</strong> @taskProject?.DependentOn</p>
+                    @* <p><strong>Dependent On:</strong> @taskProject?.DependentOn</p> *@
+                    
+                    @if (taskForLink != null)
+                    {
+                        <p><a class="project-link" @onclick="() => NavigateToTask(taskForLink?.Id,taskForLink?.ProjectId)"><strong>Dependent on Task:</strong> @taskForLink?.Id - @taskForLink?.Name</a></p>
+                    }
+                    else{
+                    <p><strong>Dependent on:</strong> No dependencies.</p>
+                    }
                     <p><strong>Deadline:</strong> @taskProject?.Deadline.ToString()</p>
               
                     @* <p><strong>Order No:</strong> @taskProject?.OrderNo</p> *@
@@ -156,52 +168,62 @@
             @if (showAddSkillForm)
             {
                 <EditForm Model="skills" OnValidSubmit="AddSkill" class="form-container">
-                    <div class="form-group">
-                        <label for="category">Skill Category:</label>
-                        <select id="category" class="form-control" @onchange="LoadSkills">
-                            <option value="">Choose category</option>
-                            @foreach (string category in categories)
-                            {
-                                <option value="@category">@category</option>
-                            }
-                        </select>
-                    </div>
-
-                    @if (skills != null && skills.Any())
-                    {
+                    
+                    <div class="form-container">
+                        
                         <div class="form-group">
-                            <label for="skill-name">Skill Name:</label>
-                            <select id="skill-name" class="form-control" @bind="selectedSkill">
-                                <option value="">Choose skill</option>
-                                @foreach (string skill in skills)
+                            <label for="category">Skill Category:</label>
+                            <select id="category" class="form-control" @onchange="LoadSkills">
+                                <option>Choose category</option>
+                                @foreach (string category in categories)
                                 {
-                                    <option value="@skill">@skill</option>
+                                    <option value="@category">@category</option>
                                 }
                             </select>
                         </div>
-                    }
+                        
+                        
+                        @if (skills != null && skills.Any())
+                        {
+                            <div class="form-group">
+                                <label for="skill-name">Skill Name:</label>
+                                <select id="skill-name" class="form-control" @bind="selectedSkill">
+                                    <option>Choose skill</option>
+                                    @foreach (string skill in skills)
+                                    {
+                                        <option value="@skill">@skill</option>
+                                    }
+                                </select>
+                            </div>
+                        
+                        
+                            <div class="form-group">
+                                <label for="proficiency">Proficiency:</label>
+                                <select id="proficiency" class="form-control" @bind="selectedProficiency">
+                                    <option>Choose proficiency</option>
+                                    @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
+                                    {
+                                        <option value="@prof">@prof</option>
+                                    }
+                                </select>
+                            </div>
+                        }
 
-                    <div class="form-group">
-                        <label for="proficiency">Proficiency:</label>
-                        <select id="proficiency" class="form-control" @bind="selectedProficiency">
-                            <option value="">Choose proficiency</option>
-                            @foreach (Proficiency prof in Enum.GetValues(typeof(Proficiency)))
-                            {
-                                <option value="@prof">@prof</option>
-                            }
-                        </select>
+                        <div class="button-group">
+                            <button type="submit" class="acceptbtn">Add Skill</button>
+                            <button type="button" class="cancelbtn" @onclick="CancelAddSkill">Cancel</button>
+                        </div>
+                        
+                      @* added   *@
                     </div>
-
-                    <div class="button-group">
-                        <button type="submit" class="acceptbtn">Add Skill</button>
-                        <button type="button" class="cancelbtn" @onclick="CancelAddSkill">Cancel</button>
-                    </div>
+                    
+                    
                 </EditForm>
             }
             else
             {
                 <div class="button-group">
-                    <button class="acceptbtn" @onclick="ShowAddSkillForm">Add Task Skill</button>
+                    <button class="acceptbtn" @onclick="ShowAddSkillForm">Add Skill</button>
                 </div>
             }
 
@@ -224,54 +246,71 @@
             @if (showAddAssignmentForm)
             {
                 <EditForm Model="departments" class="form-container">
-                    <div class="form-group">
-                        <label for="department">User Department:</label>
-                        <select id="department" class="form-control" @onchange="LoadUsers">
-                            <option value="">Choose department</option>
-                            @foreach (string department in departments)
-                            {
-                                <option value="@department">@department</option>
-                            }
-                        </select>
-                    </div>
+                    @* added *@
+                    <div class="form-container-large">
+                        
+                        <div class="form-group">
+                            <label for="department">User Department:</label>
+                            <select id="department" class="form-control" @onchange="LoadUsers">
+                                <option value="">Choose department</option>
+                                @foreach (string department in departments)
+                                {
+                                    <option value="@department">@department</option>
+                                }
+                            </select>
+                        </div>
 
-                    @* New user and availability *@
+                        @* New user and availability *@
 
-                    <!-- Display Users with Availability -->
-                    @if (usersByDpt != null && usersByDpt.Any())
-                    {
-                        <h5>Users Availability in @selectedDpt:</h5>
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th>UserName</th>
-                                <th>Name</th>
-                                <th>User Skill Match Score</th>
-                                <th>Estimated Start Date</th>
-                                <th>Estimated Deadline</th>
-
-                                <th> </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach (User user in usersByDpt)
-                            {
+                        <!-- Display Users with Availability -->
+                        @if (usersByDpt != null && usersByDpt.Any())
+                        {
+                            <h5>Users Availability in @selectedDpt:</h5>
+                            <table class="table table-striped">
+                                <thead>
                                 <tr>
-                                    <td>@user.Username</td>
-                                    <td>@user.Name</td>
-                                    <td>@userSkillScore[user] %</td>
-                                    <td>@userAvailability[user.Username]</td>
-                                    <td>@userDeadline[user.Username] </td>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Skill Match Score</th>
+                                    <th>Estimated Start Date</th>
+                                    <th>Estimated Deadline</th>
 
-                                    <td>
-                                        <button type="submit" class="acceptbtn" @onclick="() => AssignTaskToUser(user.Username)">Assign User</button>
-                                        <button type="button" class="cancelbtn" @onclick="CancelAddAssign">Cancel</button>
-                                    </td>
+                                    <th> </th>
                                 </tr>
-                            }
-                            </tbody>
-                        </table>
-                    }
+                                </thead>
+                                <tbody>
+                                @foreach (User user in usersByDpt)
+                                {
+                                    <tr>
+                                        <td>@user.Username</td>
+                                        <td>@user.Name</td>
+                                        <td>@userSkillScore[user] %</td>
+                                        <td>@userAvailability[user.Username]</td>
+                                        <td>@userDeadline[user.Username] </td>
+
+                                        <td>
+                                            <button type="submit" class="acceptbtn" @onclick="() => AssignTaskToUser(user.Username)">Assign User</button>
+                                           
+                                        </td>
+                                    </tr>
+                                  
+                                }
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td> 
+                                    <td></td>  
+                                    <td></td>
+                                    <td>
+                                    <button type="button" class="cancelbtn" @onclick="CancelAddAssign">Cancel</button>
+                                   </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        }
+
+                        @* added *@
+                    </div>
 
                 </EditForm>
             }
@@ -373,6 +412,9 @@
     
     //to view task approval details
     private List<TaskApprovalBasicDto>? approvals;
+   
+    //to display link for dependentOn instead of seqNo
+    private TaskProjectBasicDto? taskForLink;
     
     protected override async Task OnInitializedAsync()
     {
@@ -387,6 +429,11 @@
             taskSkills = (await taskSkillService.GetAsync(null, null, taskProject?.Id)).ToList();
             var taskProjectId = taskProject.Id;
             approvals = (await taskApprovalService.GetByTaskIdAsync(taskProjectId)).ToList();
+            
+            int projectId = taskProject.ProjectId;
+            int sequenceNo = (int)taskProject.DependentOn;
+            taskForLink = await taskProjectService.GetBySeq(projectId, sequenceNo);
+           
         }
         catch (Exception e)
         {
@@ -394,7 +441,14 @@
             msg = e.Message;
         }
     }
-    
+
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     await taskProjectService.GetByIdAsync(Id);
+    // }
+
+
+
     private void EnableEdit()
     {
         isEditMode = true;
@@ -565,8 +619,14 @@
             taskProject.Deadline = userDeadline[username];
             taskProject.TaskStatusEnum = TaskStatusEnum.Requested;
             await taskProjectService.UpdateAsync(taskProject);
-            
-    //   StateHasChanged(); //to reload
+            //update project status to Ongoing once a task is assigned 
+            var project = await projectService.GetByIdAsync(taskProject.ProjectId);
+            project.ProjectStatus = ProjectStatus.Ongoing;
+            if (project != null)
+            {
+                await projectService.UpdateAsync(project);
+            }
+            //
         }
         foreach (User user in usersByDpt)
         {
@@ -664,6 +724,15 @@
         navMgr.NavigateTo("/AssignmentLogs/taskProject/" + taskProject.Id);
 
     }
- 
+    
+ //task link for dependent on
+    private async Task NavigateToTask(int? taskId,int? projectId)
+    {
+        if (taskId != null)
+        {
+            navMgr.NavigateTo($"/OneProject/{projectId}");
+            navMgr.NavigateTo($"/OneTask/{taskId}");
+        }
+    }
 }  
     

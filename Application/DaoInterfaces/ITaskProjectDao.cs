@@ -1,3 +1,4 @@
+using Domain.Dtos;
 using Domain.Models;
 
 namespace Application.DaoInterfaces;
@@ -12,7 +13,7 @@ public interface ITaskProjectDao
     
     Task<IEnumerable<TaskProject>> GetTasksUser(string username);
     
-    
+    Task <TaskProject> GetBySeq(int projectId, int sequenceNo);
     
     
 

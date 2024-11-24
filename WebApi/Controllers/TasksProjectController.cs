@@ -75,5 +75,19 @@ public class TasksProjectController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
-    
+
+    [HttpGet ("getBySeq")]
+    public async Task<ActionResult<TaskProjectBasicDto>> GetBySeq([FromQuery]int projectId,[FromQuery] int sequenceNo)
+    {
+        try
+        {
+            TaskProjectBasicDto tasksProject = await taskProjectLogic.GetBySeq(projectId, sequenceNo);
+            return Ok (tasksProject);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500, e.Message);
+        }
+    }
 }

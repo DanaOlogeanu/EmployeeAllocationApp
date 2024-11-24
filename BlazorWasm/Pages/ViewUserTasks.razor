@@ -12,6 +12,19 @@
 <h3 class="page-header">@pageHeader</h3>
 
 <div class="card">
+    @* added *@
+    <div class="sorting-options">
+        <label for="sortField">Sort by: </label>
+        <select id="sortField" @onchange="(e) => ChangeSortField(e.Value.ToString())">
+            <option value="Deadline">Deadline</option>
+            <option value="StartDate">Start Date</option>
+            <option value="Status">Status</option>
+        </select>
+        <button @onclick="ToggleSortDirection">@sortDirection</button>
+    </div>
+    
+    @* added *@
+    
     @if (isLoading)
     {
         <p><em>Loading...</em></p>
@@ -39,27 +52,27 @@
             {
                 <table class="table">
                     <thead>
-                        <tr>
-                            <th class="small-column"></th>
-                            <th>Task Name</th>
-                            <th>Status</th>
-                            <th>Estimated Hours</th>
-                            <th>Start Date</th>
-                            <th>Deadline</th>
-                        </tr>
+                    <tr>
+                        <th class="small-column"></th>
+                        <th>Task Name</th>
+                        <th>Status</th>
+                        <th>Estimated Hours</th>
+                        <th>Start Date</th>
+                        <th>Deadline</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        @foreach (var task in projectGroup.Value.Select((task, index) => new { Task = task, Index = index + 1 }))
-                        {
-                            <tr>
-                                <td class="small-column">@task.Index</td>
-                                <td><a class="task-link" @onclick="() => NavigateToTask(task.Task.Id)">@task.Task.Name</a></td>
-                                <td>@task.Task.TaskStatusEnum</td>
-                                <td>@task.Task.Estimate</td>
-                                <td>@task.Task.StartDate</td>
-                                <td>@task.Task.Deadline</td>
-                            </tr>
-                        }
+                    @foreach (var task in projectGroup.Value.Select((task, index) => new { Task = task, Index = index + 1 }))
+                    {
+                        <tr>
+                            <td class="small-column">@task.Index</td>
+                            <td><a class="task-link" @onclick="() => NavigateToTask(task.Task.Id)">@task.Task.Name</a></td>
+                            <td>@task.Task.TaskStatusEnum</td>
+                            <td>@task.Task.Estimate</td>
+                            <td>@task.Task.StartDate</td>
+                            <td>@task.Task.Deadline</td>
+                        </tr>
+                    }
                     </tbody>
                 </table>
             }
@@ -170,4 +183,58 @@
     {
         NavigationManager.NavigateTo($"/oneProject/{projectId}");
     }
+    
+    //Sorting
+   
+       // Sorting properties
+       private string sortField = "Name"; // Default sorting field
+       private bool isAscending = true;
+       private string sortDirection => isAscending ? "Ascending" : "Descending";
+
+       // Sorting logic
+       private void ChangeSortField(string? field)
+       {
+           if (!string.IsNullOrEmpty(field))
+           {
+               sortField = field;
+               ApplySorting();
+           }
+       }
+
+       private void ToggleSortDirection()
+       {
+           isAscending = !isAscending;
+           ApplySorting();
+       }
+
+    private void ApplySorting()
+    {
+        foreach (var projectId in groupedTasks.Keys.ToList())
+        {
+            var sortedTasks = sortField switch
+            {
+                "Deadline" => isAscending
+                    ? groupedTasks[projectId].OrderBy(task => task.Deadline).ToList()  // Convert to List
+                    : groupedTasks[projectId].OrderByDescending(task => task.Deadline).ToList(),
+
+                "StartDate" => isAscending
+                    ? groupedTasks[projectId].OrderBy(task => task.StartDate).ToList()  // Convert to List
+                    : groupedTasks[projectId].OrderByDescending(task => task.StartDate).ToList(),
+
+                "Status" => isAscending
+                    ? groupedTasks[projectId].OrderBy(task => task.TaskStatusEnum.ToString()).ToList()  // Convert to List
+                    : groupedTasks[projectId].OrderByDescending(task => task.TaskStatusEnum.ToString()).ToList(),
+
+                _ => groupedTasks[projectId] // Default, no sorting
+                };
+
+            groupedTasks[projectId] = sortedTasks;  // Now it is a List<TaskProject>
+        }
+
+        StateHasChanged();
+    }
+
+
+   
+
 }

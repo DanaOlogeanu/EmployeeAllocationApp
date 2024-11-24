@@ -35,7 +35,7 @@ else
                 <!-- Row for Project Name -->
                 <tr>
                     <td colspan="2">
-                        <strong>Project Name:</strong>
+                        <strong>Project Name: </strong>
                         @if (isEditing)
                         {
                             <input type="text" @bind="project.ProjectName"/>
@@ -50,7 +50,7 @@ else
                 <!-- Row for Project Description -->
                 <tr>
                     <td colspan="2">
-                        <strong>Project Description:</strong>
+                        <strong>Project Description: </strong>
                         @if (isEditing)
                         {
                             <textarea @bind="project.Description" rows="3"></textarea>
@@ -65,7 +65,7 @@ else
                 <!-- Row for Project Status and Start Date -->
                 <tr>
                     <td>
-                        <strong>Project Status:</strong>
+                        <strong>Project Status: </strong>
                         @if (isEditing)
                         {
                             <select @bind="project.ProjectStatus">
@@ -81,7 +81,7 @@ else
                         }
                     </td>
                     <td>
-                        <strong>Start Date:</strong>
+                        <strong>Start Date: </strong>
                         @if (isEditing)
                         {
                             <input type="date" @bind="project.StartDate"/>
@@ -96,7 +96,7 @@ else
                 <!-- Other Rows for Project -->
                 <tr>
                     <td>
-                        <strong>Project Priority:</strong>
+                        <strong>Project Priority: </strong>
                         @if (isEditing)
                         {
                             <select @bind="project.ProjectPriority">
@@ -112,7 +112,7 @@ else
                         }
                     </td>
                     <td>
-                        <strong>Deadline:</strong>
+                        <strong>Deadline: </strong>
                         @if (isEditing)
                         {
                             <input type="date" @bind="project.Deadline"/>
@@ -126,7 +126,7 @@ else
 
                 <tr>
                     <td colspan="2">
-                        <strong>Tag:</strong>
+                        <strong>Tag: </strong>
                         @if (isEditing)
                         {
                             <input type="text" @bind="project.TagName"/>
@@ -143,11 +143,13 @@ else
                         <label>
                             @if (isEditing)
                             {
-                                <input type="checkbox" @bind="project.IsInvoicable"/><strong>Invoicable Project</strong>
+                                <input type="checkbox" @bind="project.IsInvoicable"/>
+                                <strong>Invoicable Project</strong>
                             }
                             else
                             {
-                                <input type="checkbox" disabled="true" checked="@project.IsInvoicable"/><strong>Invoicable Project</strong>
+                                <input type="checkbox" disabled="true" checked="@project.IsInvoicable"/>
+                                <strong>Invoicable Project</strong>
                             }
                         </label>
                     </td>
@@ -171,7 +173,7 @@ else
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach (var task in project.Tasks)
+                    @foreach (var task in project.Tasks.OrderBy(t => t.OrderNo))
                     {
                         <tr>
                             <td>@task.OrderNo</td>
@@ -180,7 +182,17 @@ else
                             <td>@task.StartDate.ToString()</td>
                             <td>@task.Deadline.ToString()</td>
                             <td>@(string.IsNullOrWhiteSpace(task.OwnerUsername) ? "Unassigned" : task.OwnerUsername)</td>
-                            <td>@task.DependentOn</td>
+
+                            <td>
+                                @if (forLinks[task.Id] != null)
+                                {
+                                    <a href="/OneTask/@forLinks[task.Id].Id" class="project-link">@forLinks[task.Id].OrderNo. @forLinks[task.Id].Name</a>
+                                }
+                                else
+                                {
+                                    <p></p>
+                                }
+                            </td>
                         </tr>
                     }
                     </tbody>
@@ -301,14 +313,32 @@ else
     private string msg = "";
     private ProjectBasicDto? project;
 
+    //to display link for dependentOn instead of seqNo
+  
+    
     protected override async Task OnInitializedAsync()
     {
         msg = "";
 
         try
         {
+            forLinks = new Dictionary<int,TaskProjectBasicDto>();
             project = await projectService.GetByIdAsync(@Id);
-
+            foreach (var task in project.Tasks)
+            {
+                 TaskProjectBasicDto? taskForLink;
+                int projectId = task.ProjectId;
+                if (task.DependentOn != null)
+                {
+                    int sequenceNo = (int)task.DependentOn;
+                    taskForLink = await taskProjectService.GetBySeq(projectId, sequenceNo); 
+                }
+                else
+                {
+                    taskForLink = null;
+                }
+                forLinks[task.Id]=taskForLink;
+            }
         }
         catch (Exception e)
         {
@@ -316,7 +346,7 @@ else
             msg = e.Message;
         }
     }
-
+    private Dictionary<int,TaskProjectBasicDto> forLinks;
 
 
     // //TO UPDATE IN SAME PAGE
@@ -352,6 +382,8 @@ else
     private string? notes;
 
 
+  
+    
     private void ToggleTaskForm()
     {
         isAddingTask = !isAddingTask;
@@ -361,9 +393,14 @@ else
     {
 
         msg = "";
-
+        if (orderNo == null)
+        {
+            msg = "Please input task order number.";
+            return;
+        }
         try
         {
+         
             TaskProjectCreationDto dto = new(taskName, @Id, assignee, estimate, taskStatus, startDate, deadline, dependentOn, orderNo, notes);
             TaskProject taskProject = await taskProjectService.CreateAsync(dto);
             navMgr.NavigateTo("/OneTask/" + taskProject.Id);

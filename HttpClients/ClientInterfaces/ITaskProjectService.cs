@@ -12,4 +12,6 @@ public interface ITaskProjectService
     Task UpdateAsync(TaskProjectBasicDto dto);
     
     Task<IEnumerable<TaskProject>> GetTasksUser(string username);
+    
+    Task <TaskProjectBasicDto> GetBySeq(int projectId, int sequenceNo);
 }

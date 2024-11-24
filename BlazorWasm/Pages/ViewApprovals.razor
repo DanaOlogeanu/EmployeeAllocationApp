@@ -9,7 +9,7 @@
 @attribute [Authorize]
 
 
-<h3>Tasks for Approval</h3>
+<h3 class="page-header">Tasks for Approval</h3>
 
 @if (!string.IsNullOrEmpty(msg))
 {
@@ -38,7 +38,7 @@ else
         </tr>
         </thead>
         <tbody>
-        @foreach (var approval in tasksApprovals)
+        @foreach (var approval in tasksApprovals.OrderBy(t =>t.Status))  //remove OrderBy if showing change of status
         {
             <tr>
                 @if (editingTaskApproval == approval)

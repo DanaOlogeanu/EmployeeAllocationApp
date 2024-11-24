@@ -14,6 +14,6 @@ public interface ITaskProjectLogic
     Task<IEnumerable<TaskProject>> GetTasksUser(string username);
     
     
-    
+    Task <TaskProjectBasicDto> GetBySeq(int projectId, int sequenceNo);
     
 }
