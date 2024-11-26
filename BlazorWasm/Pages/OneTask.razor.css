@@ -15,6 +15,15 @@
     background-color: #f9f9f9;
 }
 
+.form-container-large
+{
+    width: 90%;
+    margin: 20px auto;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
 .form-group {
     margin-bottom: 15px;
 }
@@ -34,9 +43,26 @@
 }
 
 /* Task Details */
+
+.task-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+}
+
 .task-details p {
     margin: 10px 0;
     font-size: 16px;
+}
+
+.two-column-fields {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 10px; 
+}
+
+.two-column-fields p {
+    margin: 0;
 }
 
 /* Button Group */
@@ -46,6 +72,8 @@
 }
 
 .acceptbtn, .cancelbtn {
+    width: 130px; 
+    height: 40px;
     padding: 10px 20px;
     font-size: 16px;
     border: none;
@@ -72,20 +100,48 @@
 }
 
 /* Centered Card Layout */
+/*.center-container {*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    padding: 20px;*/
+/*    background-color: #f5f5f5;*/
+/*}*/
+
+/*.container {*/
+/*    width: 60%;*/
+/*    max-width: 800px;*/
+/*    background-color: #ffffff;*/
+/*    padding: 20px;*/
+/*    border-radius: 10px;*/
+/*    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
+/*}*/
+
+/* General Page Background */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0; /* Light gray background for the entire page */
+    font-family: Arial, sans-serif;
+}
+
+/* Outer Container for Page Centering */
 .center-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* Stack containers vertically */
+    align-items: center;
     padding: 20px;
+    gap: 20px; /* Spacing between individual containers */
     background-color: #f5f5f5;
 }
 
+/* Inner Containers */
 .container {
-    width: 60%;
-    max-width: 800px;
-    background-color: #ffffff;
+    width: 80%; /* Adjust the width of the container */
+    max-width: 1000px; /* Ensure it doesn't grow too large on wide screens */
+    background-color: #ffffff; /* White background for individual containers */
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
 
 /* Page Header */
@@ -95,12 +151,50 @@
     margin-bottom: 20px;
     color: #333;
 }
+
 .project-link {
     color: black;
     text-decoration: none;
     font-weight: normal;
 }
+
 .project-link:hover {
     font-weight: bold;
     cursor: pointer;
 }
+
+/* Grid Layout for Fields */
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 15px; 
+    margin-top: 15px;
+}
+
+.grid-layout .form-group, .grid-layout p {
+    margin: 0;
+    text-align: center; 
+}
+
+/* Name, Project ID, and Notes */
+.form-group, .task-details > p {
+    margin-bottom: 20px;
+}
+
+/* Button Group */
+.button-group {
+    display: flex;
+    justify-content: center; 
+    gap: 15px; 
+}
+
+button {
+    display: inline-block;
+    margin: 0 auto; 
+}
+
+/*div {*/
+/*    margin-bottom: 30px;*/
+/*  */
+/*}*/
+

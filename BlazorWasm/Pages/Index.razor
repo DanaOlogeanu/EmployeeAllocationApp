@@ -13,14 +13,23 @@
                 <div class="card-body">
                     <h5 class="card-title">Skills</h5>
                     <p class="card-text">Manage skills: create skills or view existing ones.</p>
-                    <div class="d-flex justify-content-around">
-                        <a class="btn btn-primary" href="/CreateUserSkill">Create Skill</a>
-                        <a class="btn btn-secondary" href="/ViewUserSkills">View Skills</a>
-                    </div>
+                    <AuthorizeView Roles ="Project Manager,Employee">
+                        <div class="d-flex justify-content-around">
+                            <a class="btn btn-primary" href="/CreateUserSkill">Add new Skill</a>
+                            <a class="btn btn-secondary" href="/ViewUserSkills">View Skills</a>
+                        </div>
+                    </AuthorizeView>
+                     <AuthorizeView Roles =" Manager">
+                         <div class="d-flex justify-content-around">
+                             <a class="btn btn-primary" href="/CreateUserSkill">Add new Skill</a>
+                             <a class="btn btn-secondary" href="/ViewUserSkills">Team Skills Matrix</a>
+                             </div>
+                         </AuthorizeView>
                 </div>
             </div>
         </div>
 
+       
         <!-- Projects Card -->
         <div class="col-sm-12 col-md-6 col-lg-4">
             <div class="card">
@@ -28,14 +37,23 @@
                 <div class="card-body">
                     <h5 class="card-title">Projects</h5>
                     <p class="card-text">Manage projects: create or view existing projects.</p>
-                    <div class="d-flex justify-content-around">
-                        <a class="btn btn-primary" href="/CreateProject">Create Project</a>
-                        <a class="btn btn-secondary" href="/ViewProjects">View Projects</a>
-                    </div>
+                    <AuthorizeView Roles ="Project Manager">
+                        <div class="d-flex justify-content-around">
+                            <a class="btn btn-primary" href="/CreateProject">Add new Project</a>
+                            <a class="btn btn-secondary" href="/ViewProjects">View Projects</a>
+                        </div>
+                    </AuthorizeView>
+                      <AuthorizeView Roles ="Manager,Employee">
+                          <div class="d-flex justify-content-around">
+                              <a class="btn btn-primary" href=" ">Search Projects</a>
+                          </div>
+                          </AuthorizeView>
+                    
                 </div>
             </div>
         </div>
-
+       
+        
          <!-- Tasks Card -->
          <div class="col-sm-12 col-md-6 col-lg-4">
              <div class="card">
@@ -43,10 +61,25 @@
                  <div class="card-body">
                      <h5 class="card-title">Tasks</h5>
                      <p class="card-text">Manage tasks: update or view existing ones.</p>
-                     <div class="d-flex justify-content-around">
-                         <a class="btn btn-primary" href="/create-project">Update Tasks</a>
-                         <a class="btn btn-secondary" href="/view-projects">View Tasks</a>
-                     </div>
+                     <AuthorizeView Roles ="Employee">
+                         <div class="d-flex justify-content-around">
+                             
+                             <a class="btn btn-primary" href="/create-project">Search Tasks</a>
+                             <a class="btn btn-secondary" href="/ViewUserTasks">View Tasks</a>
+                         </div>
+                     </AuthorizeView>
+                     <AuthorizeView Roles ="Manager">
+                         <div class="d-flex justify-content-around">
+                             <a class="btn btn-primary" href="/create-project">Search Tasks</a>
+                             <a class="btn btn-secondary" href="/ViewDepartmentUsers">Team Tasks Overview</a>
+                         </div>
+                     </AuthorizeView>
+                       <AuthorizeView Roles ="Project Manager">
+                           <div class="d-flex justify-content-around">
+                               <a class="btn btn-primary" href="/create-project">Search Tasks</a>
+                           </div>
+                           </AuthorizeView>
+                     
                  </div>
              </div>
          </div>

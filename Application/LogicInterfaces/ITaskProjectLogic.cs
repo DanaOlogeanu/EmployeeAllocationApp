@@ -14,4 +14,8 @@ public interface ITaskProjectLogic
     Task<IEnumerable<TaskProject>> GetTasksUser(string username);
     Task<IEnumerable<TaskProject>> SearchTasksAsync(SearchTaskProjectParametersDto parameters);
     
+    
+    
+    Task <TaskProjectBasicDto> GetBySeq(int projectId, int sequenceNo);
+    
 }

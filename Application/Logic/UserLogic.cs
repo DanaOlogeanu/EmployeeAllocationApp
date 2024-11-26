@@ -22,7 +22,6 @@ public class UserLogic: IUserLogic
     }
     
     
-    
     //log in
     public async Task<User> ValidateUser(string username, string password)
     {

@@ -1,0 +1,287 @@
+@page "/DuplicateProject"
+@using HttpClients.ClientInterfaces
+@using Domain.Models
+@using Domain.Dtos
+@using System.Security.Claims
+@inject IProjectService projectService
+@inject NavigationManager NavigationManager
+@inject ITagService tagService
+@inject ITaskSkillService skillService
+
+<h3>Select and Duplicate a Project</h3>
+<div>
+@if (categories == null)
+                        {
+                            <label>Loading tag categories...</label>
+                        }
+                        else if (!categories.Any())
+                        {
+                            <label>No tag categories. You need to create a tag first.</label>
+                        }
+                        else
+                        {
+                            <label>Tag Category:</label>
+                            <select @onchange="LoadTags" class="form-control">
+                                <option>Choose category</option>
+                                @foreach (string category in categories)
+                                {
+                                    <option value="@category">@category</option>
+                                }
+                            </select>
+                        }
+                         @if (tags == null || !tags.Any())
+                        {
+                            
+                        }
+                        else
+                        {
+                            <label for="tag">Select Tag:</label>
+                            <select id="tag" class="form-control" @onchange="OnTagChanged">
+                                <option>Choose tag</option>
+                                @foreach (string tag in tags)
+                                {
+                                    <option value="@tag">@tag</option>
+                                }
+                            </select>
+                        }
+</div>
+
+@* *@
+@* <div class="form-group"> *@
+@*     <label for="tagSelect">Select a Tag:</label> *@
+@*     <select id="tagSelect" class="form-control" @onchange="OnTagChanged"> *@
+@*         <option value="" disabled selected>Select a tag...</option> *@
+@*         @foreach (var tag in tags) *@
+@*         { *@
+@*             <option value="@tag">@tag</option> *@
+@*         } *@
+@*     </select> *@
+@* </div> *@
+
+@if (projects != null && projects.Any())
+{
+    <h4>Projects for Selected Tag:</h4>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Project Name</th>
+            <th>Description</th>
+              <th>Project Estimate Hours</th>
+            <th>Tasks (Estimate Hours)</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var project in projects)
+        {
+            <tr>
+                <td><a href="/OneProject/@project.ProjectId" class="project-link">@project.ProjectName</a></td>
+                <td>@project.Description</td>
+                <td>@CalculateProjectEstimate(project)</td>
+                <td>
+                    @if (project.Tasks != null && project.Tasks.Any())
+                    {
+                        <ul>
+                            @foreach (var task in project.Tasks)
+                            {
+                                <li>@task.Name (@task.Estimate h)</li>
+                                
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <span>No tasks available</span>
+                    }
+                </td>
+                <td>
+                    <button class="btn btn-primary btn-sm" @onclick="() => OnDuplicateProject(project)">Duplicate</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else if (!string.IsNullOrEmpty(selectedTag))
+{
+    <p>No projects found for the selected tag.</p>
+}
+
+@if (IsLoading)
+{
+    <p>Loading...</p>
+}
+
+@code {
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!; //added to remember the logged in claims
+    
+    private string msg;
+    private List<string> categories = new List<string>();
+    private string? selectedCategory;
+    
+    private List<string> tags = new();
+    private List<ProjectBasicDto>? projects;
+    private string? selectedTag = null;
+    private bool IsLoading = false;
+    private string username;
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+
+        try
+        {
+            // Fetch the tags for the dropdown (adjust this to your actual service method)
+            categories = await tagService.GetUniqueCategories();
+            // tags = await tagService.GetTags(selectedCategory);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching tags: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+    private async Task LoadTags(ChangeEventArgs category)
+    {
+    // Get the selected category
+        selectedCategory = category.Value?.ToString();
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(selectedCategory))
+            {
+                tags = await tagService.GetTags(selectedCategory);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+    }
+
+    
+    private async Task OnTagChanged(ChangeEventArgs tag)
+    {
+        selectedTag = tag.Value?.ToString();
+        if (string.IsNullOrEmpty(selectedTag))
+            return;
+
+        IsLoading = true;
+
+        try
+        {
+            // Fetch projects based on the selected tag
+            projects = await projectService.GetProjectsByTagAsync(selectedTag);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching projects: {ex.Message}");
+            projects = new List<ProjectBasicDto>(); // Reset to empty if there's an error
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task OnDuplicateProject(ProjectBasicDto project)
+    {
+        try
+        {
+            username = await GetUsernameAsync();
+            // Call a method to duplicate the project
+            var duplicatedProject = await projectService.DuplicateProject(project, username);
+            //
+    // // Loop through each task in the original project to retrieve and duplicate skills
+    //         foreach (var originalTask in project.Tasks)
+    //         {
+    // // Fetch task skills for the current task
+    //             var taskSkills = await skillService.GetAsync(null, null, originalTask.Id);
+    //
+    // // Find the corresponding task in the duplicated project
+    //             var duplicatedTask = duplicatedProject.Tasks.FirstOrDefault(t => t.Name == originalTask.Name + " (Copy)");
+    //
+    //             if (duplicatedTask != null && taskSkills != null)
+    //             {
+    // // Duplicate and save each skill for the duplicated task
+    //                 foreach (var skill in taskSkills)
+    //                 {
+    //                     var newSkillDto = new TaskSkillCreationDto(duplicatedTask.Id, skill.SkillName,skill.Proficiency)
+    //                     {
+    //                         TaskProjectId = duplicatedTask.Id, // Link to the duplicated task
+    //                         SkillName = skill.SkillName,
+    //                         Proficiency = skill.Proficiency
+    //                     };
+    //
+    // // Save the new task skill using the logic interface
+    //                     await skillService.CreateAsync(newSkillDto);
+    //                 }
+    //             }
+    //         }
+            
+            // Redirect or display a success message
+            NavigationManager.NavigateTo($"/OneProject/{duplicatedProject.ProjectId}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error duplicating project: {ex.Message}");
+            // Optionally, display an error message on the page
+        }
+    }
+    
+    private int CalculateProjectEstimate(ProjectBasicDto project)
+    {
+    // If tasks are null or empty, return 0
+        if (project.Tasks == null || !project.Tasks.Any())
+            return 0;
+
+    // Calculate the total estimate
+        return project.Tasks.Sum(task => task.Estimate ?? 0);
+    }
+    
+    // // Fetch the logged-in username *@
+    //  private async Task<string> GetUsernameAsync()
+    //  {
+    //      var authState = await AuthState;
+    //      var user = authState.User;
+    //      return user.Identity?.Name ?? throw new Exception("User not logged in.");
+    //  }
+    
+    //remember userName
+    private async Task<string?> GetUsernameAsync() //using the claims set in blazor/webapi/authController 
+    {
+
+        AuthenticationState authState = await AuthState;
+        ClaimsPrincipal user = authState.User;
+
+    //
+        foreach (var claim in user.Claims)
+        {
+            Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+        }
+
+    // Safely attempt to find the claim
+        Claim? usernameClaim = user.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.Name) ||
+                                                                   claim.Type.Equals("name") ||
+                                                                   claim.Type.Equals("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"));
+
+        if (usernameClaim == null)
+        {
+    // Handle the case where the claim doesn't exist
+            msg = "No username claim found.";
+            return null;
+        }
+    //IEnumerable<Claim> claims = user.Claims;
+    //Claim usernameClaim = claims.First(claim => claim.Type.Equals("Name"));
+        string name = usernameClaim.Value; //if int-> int.Parse(idClaim.Value);
+        return name;
+    }
+    
+    // private void NavigateToProject(int  projectId)
+    // {
+    //     NavigationManager.NavigateTo($"/OneProject/{projectId}");
+    // }
+}

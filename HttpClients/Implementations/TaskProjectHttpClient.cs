@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Domain.Dtos;
 using Domain.Models;
 using HttpClients.ClientInterfaces;
@@ -44,7 +45,7 @@ public class TaskProjectHttpClient:ITaskProjectService
         TaskProjectBasicDto taskProject = JsonSerializer.Deserialize<TaskProjectBasicDto>(content, 
             new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,  ReferenceHandler = ReferenceHandler.Preserve 
             }
         )!;   // null-suppressor "!"
         return taskProject;
@@ -82,10 +83,30 @@ public class TaskProjectHttpClient:ITaskProjectService
             Console.WriteLine(result);
             IEnumerable<TaskProject> tasksProject = JsonSerializer.Deserialize<IEnumerable<TaskProject>>(result, new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,  ReferenceHandler = ReferenceHandler.Preserve 
             })!;
             return tasksProject;
         }
+
+    public async Task<TaskProjectBasicDto> GetBySeq(int projectId, int sequenceNo)
+    {
+        string query = ConstructQuery(projectId,sequenceNo);
+        HttpResponseMessage response = await client.GetAsync("/TasksProject/GetBySeq" + query);
+        string result = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            // Log the error response for troubleshooting
+            Console.WriteLine($"Error: {result}");
+            throw new Exception($"Error fetching user projects: {response.ReasonPhrase}");
+        }
+       
+        Console.WriteLine(result);
+        TaskProjectBasicDto taskProject = JsonSerializer.Deserialize<TaskProjectBasicDto>(result, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,  ReferenceHandler = ReferenceHandler.Preserve 
+        })!;
+        return taskProject;
+    }
     
     
     public async Task<IEnumerable<TaskProject>?> GetTasksByParameters(SearchTaskProjectParametersDto parameters)
@@ -141,5 +162,19 @@ public class TaskProjectHttpClient:ITaskProjectService
             PropertyNameCaseInsensitive = true
         })!;
         return tasksProject;
+    }
+    private static string ConstructQuery( int projectId, int sequenceNo)
+    {
+        string query = "";
+        if (projectId !=null)
+        {
+            query += $"?projectId={projectId}";
+        }
+        if (sequenceNo !=null)
+        {
+            query += string.IsNullOrEmpty(query) ? "?" : "&";
+            query += $"sequenceNo={sequenceNo}";
+        }
+        return query;
     }
 }

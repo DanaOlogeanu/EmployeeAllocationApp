@@ -76,6 +76,23 @@ public class TasksApprovalsController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+    
+    
+    [HttpGet("approvalOneTask")]
+    public async Task<ActionResult<List<TaskApprovalBasicDto>>> GetByTaskId([FromQuery] int taskProjectId)
+    {
+        try
+        {
+          List<TaskApprovalBasicDto> result = await taskApprovalLogic.GetByTaskIdAsync(taskProjectId);
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500, e.Message);
+        }
+    }
+    
 
     [HttpGet ("noPending") ]
     public async Task<ActionResult<int>> GetPendingApprovalAsync([FromQuery] string username)

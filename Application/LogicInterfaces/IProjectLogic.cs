@@ -12,4 +12,8 @@ public interface IProjectLogic
     
     Task<IEnumerable<Project>> GetProjects(string username);
     Task<IEnumerable<Project>> SearchProjectsAsync(SearchProjectParameters parameters);
+    
+    Task<Project> DuplicateProject(ProjectBasicDto originalProject, string username);
+    
+    Task<List<ProjectBasicDto>>GetProjectsByTagAsync(string tag);
 } 

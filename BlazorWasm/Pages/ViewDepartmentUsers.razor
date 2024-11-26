@@ -1,11 +1,13 @@
 @page "/ViewDepartmentUsers"
 @using HttpClients.ClientInterfaces
 @using Domain.Models
+@using Domain.Dtos
 @inject IUserService UserService
+@inject ITaskProjectService taskProjectService
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
 
-<h3 class="page-header">My Team Assignments</h3>
+<h3 class="page-header">Team Project Assignments</h3>
 
 @if (isLoading)
 {
@@ -31,16 +33,36 @@ else
             <div class="table-container">
                 <table class="styled-table">
                     <thead>
-                        <tr>
-                            <th>Employee Name</th>
-                        </tr>
+                    <tr>
+                        <th>Employee Name</th>
+                        <th>Username</th>
+                        
+                       @* add *@
+                         @foreach (var availability in availabilities.First().Value)
+                                                    {
+                                                        <th>@availability.Month</th>
+                                                    }
+                        @* add *@
+
+                    </tr>
                     </thead>
                     <tbody>
                         @foreach (var user in users)
                         {
-                            <tr @onclick="() => NavigateToUserTasks(user.Username)">
-                                <td class="task-link user-name">@user.Name</td>
-                            </tr>
+                            <tr @onclick="() => NavigateToUserTasks(user.Username)" class="task-link user-name">
+                                <td >@user.Name</td>
+                                <td>@user.Username</td>
+                                @* add *@
+                                  @foreach (var availability in availabilities[user])
+                                  {
+                                      <td>
+                                          Assigned: @availability.AssignedHours h<br />
+                                          Available: @availability.FreeHours h<br />
+                                          Utilization: @availability.AssignedPercentage% </td>
+                                  }
+                                @* add *@
+                             </tr>
+                            
                         }
                     </tbody>
                 </table>
@@ -76,6 +98,17 @@ else
                 return;
             }
             users = await UserService.GetByDepartmentAsync(departmentName);
+            
+            ////
+             availabilities = new Dictionary<User, List<MonthlyAvailability>>();
+            foreach(var user in users)
+            {
+                IEnumerable<TaskProject> tasks = await taskProjectService.GetTasksUser(user.Username);
+                List<MonthlyAvailability> availability = await CalculateUserAvailability(user, tasks);
+                availabilities.Add(user,availability);
+            }
+            
+                //////
         }
         catch (Exception e)
         {
@@ -120,4 +153,79 @@ else
     {
         NavigationManager.NavigateTo($"/ViewUserTasks/{username}");
     }
+    
+    
+    /// free vs. busy 
+    Dictionary<User, List<MonthlyAvailability>> availabilities;
+    private async Task<List<MonthlyAvailability>> CalculateUserAvailability(User user, IEnumerable<TaskProject> tasks)
+    {
+        var currentMonth = DateOnly.FromDateTime(DateTime.Now);
+        int monthsAhead = 6;
+        int dailyHours = user.ProjectHoursPerDay ?? 2; // Default to 2 hours if null
+        var availability = new List<MonthlyAvailability>();
+
+        for (int i = 0; i < monthsAhead; i++)
+        {
+            var startOfMonth = currentMonth.AddMonths(i);
+            var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+
+            // Get working days in the month
+            int totalWorkDays = CountWorkDays(startOfMonth, endOfMonth);
+            int totalAvailableHours = totalWorkDays * dailyHours;
+
+            // Calculate occupied hours based on task overlap
+            int occupiedHours = 0;
+            foreach (var task in tasks)
+            {
+                if (task.StartDate.HasValue && task.Deadline.HasValue)
+                {
+                    // Calculate overlap between task and month
+                    var overlapStart = task.StartDate.Value > startOfMonth ? task.StartDate.Value : startOfMonth;
+                    var overlapEnd = task.Deadline.Value < endOfMonth ? task.Deadline.Value : endOfMonth;
+
+                    if (overlapStart <= overlapEnd)
+                    {
+                        int overlapDays = CountWorkDays(overlapStart, overlapEnd);
+                        occupiedHours += overlapDays * dailyHours;
+                    }
+                }
+            }
+
+            // Calculate free hours
+            int freeHours = totalAvailableHours - occupiedHours;
+
+            // Add to results
+            availability.Add(new MonthlyAvailability
+            {
+                Month = startOfMonth.ToString("MMMM yyyy"),
+                AssignedHours = occupiedHours,
+                FreeHours = freeHours,
+                AssignedPercentage = totalAvailableHours > 0 ? (int)Math.Round((double)occupiedHours / totalAvailableHours * 100) : 0
+            });
+        }
+
+        return availability;
+    }
+
+    private int CountWorkDays(DateOnly start, DateOnly end)
+    {
+        int workdays = 0;
+        for (var day = start; day <= end; day = day.AddDays(1))
+        {
+            if (day.DayOfWeek != DayOfWeek.Saturday && day.DayOfWeek != DayOfWeek.Sunday)
+            {
+                workdays++;
+            }
+        }
+        return workdays;
+    }
+
+    public class MonthlyAvailability
+    {
+        public string Month { get; set; }
+        public int AssignedHours { get; set; }
+        public int FreeHours { get; set; }
+        public double AssignedPercentage { get; set; }
+    }
+
 }

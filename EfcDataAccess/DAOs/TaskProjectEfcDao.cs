@@ -37,41 +37,56 @@ public class TaskProjectEfcDao:ITaskProjectDao
             .Where(t => t.OrderNo < task.OrderNo)
             .OrderByDescending(t => t.OrderNo)
             .FirstOrDefault();
-    
-        // Find the next task if it exists
-        var nextTask = project.Tasks
-            .Where(t => t.OrderNo > task.OrderNo)
-            .OrderBy(t => t.OrderNo)
-            .FirstOrDefault();
-
-        // Calculate new OrderNo as midpoint between `previousTask` and `nextTask`
-        double newOrder;
-    
-        if (previousTask == null && nextTask == null)
+        
+        double? newOrder = 0;
+        if (task.OrderNo != null)
         {
-            // No tasks exist yet, so this is the first task
-            newOrder = 1;
+            newOrder = task.OrderNo;
         }
-        else if (previousTask != null && nextTask != null)
+        if (newOrder == 0 && previousTask != null)
         {
-            // Position between previous and next task
-            newOrder = (double)((previousTask.OrderNo + nextTask.OrderNo) / 2.0);
+            newOrder = previousTask.OrderNo;
         }
-        else if (previousTask != null)
-        {
-            // Place after the last task
-            newOrder = (double)(previousTask.OrderNo + 1);
-        }
-        else // nextTask != null
-        {
-            // Place before the first task
-            newOrder = (double)(nextTask.OrderNo - 1);
-        }
-    
-        // Set the new task's OrderNo
         task.OrderNo = newOrder;
-        
-        
+
+        if (task.DependentOn != null && task.DependentOn != 0)
+        {
+            var dependentOnTask = project.Tasks
+                .Where(t => (int)t.OrderNo == task.DependentOn)
+                .FirstOrDefault();
+            if (dependentOnTask != null)
+            {
+                task.DependentOn = dependentOnTask.SequenceNo;
+            }
+            else
+            {
+                task.DependentOn = null;
+            }
+        }
+
+        if (task.OrderNo % 1 != 0)
+        {
+            // Find the other tasks if they exists and update their order number
+            var nextTasks = project.Tasks
+                .Where(t => t.OrderNo > task.OrderNo)
+                .OrderByDescending(t => t.OrderNo)
+                .ToList();
+
+            if (nextTasks != null)
+            {
+                foreach (var taskProject in nextTasks)
+                {
+                    taskProject.OrderNo = taskProject.OrderNo + 1;
+                    await UpdateAsync(taskProject);
+                }
+            }
+
+            if (task.OrderNo != null)
+            {
+                task.OrderNo = Math.Ceiling((double)task.OrderNo);
+            }
+        }
+
         EntityEntry<TaskProject> added = await context.TasksProject.AddAsync(task);
         await context.SaveChangesAsync();
         return added.Entity;
@@ -106,10 +121,6 @@ public class TaskProjectEfcDao:ITaskProjectDao
         List<TaskProject> result = await query.ToListAsync();
         return result; 
     }
-    
-    
-    
-    
 
         public async Task<IEnumerable<TaskProject>> SearchTasksAsync(SearchTaskProjectParametersDto parameters)
         {
@@ -142,98 +153,16 @@ public class TaskProjectEfcDao:ITaskProjectDao
             
             return await query.ToListAsync();
         }
+        
+    public async Task<TaskProject> GetBySeq(int projectId, int sequenceNo)
+    {
+        TaskProject? found = await context.TasksProject
+            .Where (tp=>tp.ProjectId==projectId)
+            .SingleOrDefaultAsync(us=> us.SequenceNo == sequenceNo);
+        return found;
     }
+}
 
 
-
-    // public async Task<Project> CreateAsync(Project project)
-    // {
-    //     // int seqNum = figureOutTheHighestSeqNumplusOne
-    //     // project.setSeqNum(seqNum);
-    //     //set dependency on seq number but order display
-    //     EntityEntry<Project> added = await context.Projects.AddAsync(project);
-    //     await context.SaveChangesAsync();
-    //     return added.Entity;
-    // }
-    //
-    // // public async int figureOutTheHighestSeqNumplusOne(long ProjectOID)
-    // // {
-    // //     // Task.|ProjId = proJid
-    // //     // - highest no seq
-    // //     //     -+1
-    // //     //     
-    // // }
-    
-    
-    
-    //example to set the seq number for create task 
-    // public async Task<Task> CreateTaskAsync(int projectId, string description)
-    // {
-    //     // Retrieve the project by ID, including existing tasks
-    //     var project = await _context.Projects
-    //         .Include(p => p.Tasks)
-    //         .FirstOrDefaultAsync(p => p.ProjectId == projectId);
-    //
-    //     if (project == null)
-    //         throw new Exception("Project not found");
-    //
-    //     // Determine the next sequence number
-    //     int nextSequenceNumber = project.Tasks.Any() ? project.Tasks.Max(t => t.SequenceNumber) + 1 : 1;
-    //
-    //     // Create a new task with the incremented sequence number
-    //     var task = new Task
-    //     {
-    //         ProjectId = projectId,
-    //         Description = description,
-    //         SequenceNumber = nextSequenceNumber
-    //     };
-    //
-    //     // Add and save to the database
-    //     _context.Tasks.Add(task);
-    //     await _context.SaveChangesAsync();
-    //
-    //     return task;
-    // }
-    
-    
-    
-    //example + Order no 
-    //ORDER NO is double so when creating a new task can choose after which task id/order so then it will calculate the midpoint between the selected and next one.
-
-    // public async Task<Task> AddTaskAfterAsync(int projectId, int afterTaskId, string description)
-    // {
-    //     // Retrieve the project and relevant tasks
-    //     var project = await _context.Projects
-    //         .Include(p => p.Tasks)
-    //         .FirstOrDefaultAsync(p => p.ProjectId == projectId);
-    //
-    //     if (project == null)
-    //         throw new Exception("Project not found");
-    //
-    //     // Find the target task and the next task in order
-    //     var afterTask = project.Tasks.FirstOrDefault(t => t.TaskId == afterTaskId);
-    //     var nextTask = project.Tasks
-    //         .Where(t => t.Order > afterTask.Order)
-    //         .OrderBy(t => t.Order)
-    //         .FirstOrDefault();
-    //
-    //     // Calculate new order as midpoint between `afterTask` and `nextTask`
-    //     double newOrder = nextTask != null
-    //         ? (afterTask.Order + nextTask.Order) / 2
-    //         : afterTask.Order + 1; // If no next task, place at the end
-    //
-    //     // Create and add the new task
-    //     var newTask = new Task
-    //     {
-    //         ProjectId = projectId,
-    //         Description = description,
-    //         SequenceNumber = project.Tasks.Any() ? project.Tasks.Max(t => t.SequenceNumber) + 1 : 1,
-    //         Order = newOrder
-    //     };
-    //
-    //     _context.Tasks.Add(newTask);
-    //     await _context.SaveChangesAsync();
-    //
-    //     return newTask;
-    // }
+ 
   

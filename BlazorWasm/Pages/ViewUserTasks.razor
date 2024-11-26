@@ -11,7 +11,28 @@
 
 <h3 class="page-header">@pageHeader</h3>
 
+  
+
+
 <div class="card">
+    
+    <div class="sorting-options">
+        <label><input type="checkbox" @bind="showRequested" />Requested</label>
+        <label><input type="checkbox" @bind="showInProgress" />In Progress</label>
+         <label><input type="checkbox" @bind="showCompleted" />Closed</label>
+        
+        
+        <label for="sortField">Sort by: </label>
+        <select id="sortField" @onchange="(e) => ChangeSortField(e.Value.ToString())">
+            <option value="Deadline">Deadline</option>
+            <option value="StartDate">Start Date</option>
+            <option value="Status">Status</option>
+        </select>
+        <button @onclick="ToggleSortDirection">@sortDirection</button>
+    </div>
+
+
+
     @if (isLoading)
     {
         <p><em>Loading...</em></p>
@@ -22,7 +43,7 @@
     }
     else if (groupedTasks == null || groupedTasks.Count == 0)
     {
-        <p>No tasks assigned.</p>
+        <p>No tasks to display.</p>
     }
     else
     {
@@ -39,27 +60,27 @@
             {
                 <table class="table">
                     <thead>
-                        <tr>
-                            <th class="small-column"></th>
-                            <th>Task Name</th>
-                            <th>Status</th>
-                            <th>Estimated Hours</th>
-                            <th>Start Date</th>
-                            <th>Deadline</th>
-                        </tr>
+                    <tr>
+                        <th class="small-column"></th>
+                        <th>Task Name</th>
+                        <th>Status</th>
+                        <th>Estimated Hours</th>
+                        <th>Start Date</th>
+                        <th>Deadline</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        @foreach (var task in projectGroup.Value.Select((task, index) => new { Task = task, Index = index + 1 }))
-                        {
-                            <tr>
-                                <td class="small-column">@task.Index</td>
-                                <td><a class="task-link" @onclick="() => NavigateToTask(task.Task.Id)">@task.Task.Name</a></td>
-                                <td>@task.Task.TaskStatusEnum</td>
-                                <td>@task.Task.Estimate</td>
-                                <td>@task.Task.StartDate</td>
-                                <td>@task.Task.Deadline</td>
-                            </tr>
-                        }
+                    @foreach (var task in projectGroup.Value.Select((task, index) => new { Task = task, Index = index + 1 }))
+                    {
+                        <tr>
+                            <td class="small-column">@task.Index</td>
+                            <td><a class="task-link" @onclick="() => NavigateToTask(task.Task.Id)">@task.Task.Name</a></td>
+                            <td>@task.Task.TaskStatusEnum</td>
+                            <td>@task.Task.Estimate</td>
+                            <td>@task.Task.StartDate</td>
+                            <td>@task.Task.Deadline</td>
+                        </tr>
+                    }
                     </tbody>
                 </table>
             }
@@ -75,11 +96,12 @@
     public Task<AuthenticationState> AuthState { get; set; } = null!;
 
     private Dictionary<int, List<TaskProject>> groupedTasks = new();
+    private Dictionary<int, List<TaskProject>> groupedTasksFromDatabase = new();  //data from database to use as base for filtering, never changes
     private readonly Dictionary<int, string> projectNames = new();
     private string? msg;
     private bool isLoading = true;
     private readonly HashSet<int> expandedProjects = new();
-    private string pageHeader = "My Tasks";
+    private string pageHeader = "Tasks";
 
     protected override async Task OnInitializedAsync()
     {
@@ -99,13 +121,14 @@
             else
             {
                 var userName = await GetUserNameAsync(username);
-                pageHeader = $"{userName} Tasks";
+                pageHeader = $"{userName}'s Tasks";
             }
 
             var tasks = (await TaskProjectService.GetTasksUser(username)).ToList();
             groupedTasks = tasks.GroupBy(task => task.ProjectId)
                                 .ToDictionary(group => group.Key, group => group.ToList());
-
+            groupedTasksFromDatabase = tasks.GroupBy(task => task.ProjectId)
+                .ToDictionary(group => group.Key, group => group.ToList());
             foreach (var projectId in groupedTasks.Keys)
             {
                 var project = await ProjectService.GetByIdAsync(projectId);
@@ -117,6 +140,9 @@
 
             // Initially expand all project sections
             expandedProjects.UnionWith(groupedTasks.Keys);
+            
+            // Initialize filteredTasks to show all tasks initially
+           // filteredTasks = new Dictionary<int, List<TaskProject>>(groupedTasks);
         }
         catch (Exception e)
         {
@@ -170,4 +196,129 @@
     {
         NavigationManager.NavigateTo($"/oneProject/{projectId}");
     }
+    
+    //Sorting
+   
+       // Sorting properties
+       private string sortField = "Name"; // Default sorting field
+       private bool isAscending = true;
+       private string sortDirection => isAscending ? "Ascending" : "Descending";
+
+       // Sorting logic
+       private void ChangeSortField(string? field)
+       {
+           if (!string.IsNullOrEmpty(field))
+           {
+               sortField = field;
+               ApplySorting();
+           }
+       }
+
+       private void ToggleSortDirection()
+       {
+           isAscending = !isAscending;
+           ApplySorting();
+       }
+
+    private void ApplySorting()
+    {
+        foreach (var projectId in groupedTasks.Keys.ToList())
+        {
+            var sortedTasks = sortField switch
+            {
+                "Deadline" => isAscending
+                    ? groupedTasks[projectId].OrderBy(task => task.Deadline).ToList()  // Convert to List
+                    : groupedTasks[projectId].OrderByDescending(task => task.Deadline).ToList(),
+
+                "StartDate" => isAscending
+                    ? groupedTasks[projectId].OrderBy(task => task.StartDate).ToList()  // Convert to List
+                    : groupedTasks[projectId].OrderByDescending(task => task.StartDate).ToList(),
+
+                "Status" => isAscending
+                    ? groupedTasks[projectId].OrderBy(task => task.TaskStatusEnum.ToString()).ToList()  // Convert to List
+                    : groupedTasks[projectId].OrderByDescending(task => task.TaskStatusEnum.ToString()).ToList(),
+
+                _ => groupedTasks[projectId] // Default, no sorting
+                };
+
+            groupedTasks[projectId] = sortedTasks;  // Now it is a List<TaskProject>
+        }
+
+        StateHasChanged();
+    }
+
+//display tasks checkboxes requested, in progress, completed
+
+
+    private void ApplyFiltering()
+    {
+        groupedTasks = groupedTasksFromDatabase
+            .Where(group => group.Value.Any(task =>
+                (showRequested && task.TaskStatusEnum == TaskStatusEnum.Requested) ||
+                (showCompleted && (task.TaskStatusEnum == TaskStatusEnum.Completed ||
+                 task.TaskStatusEnum == TaskStatusEnum.NotApproved)) ||
+                (showInProgress && task.TaskStatusEnum != TaskStatusEnum.Requested &&
+                 task.TaskStatusEnum != TaskStatusEnum.Completed &&
+                 task.TaskStatusEnum != TaskStatusEnum.NotApproved)
+                ))
+            .ToDictionary(
+                group => group.Key,
+                group => group.Value.Where(task =>
+                    (showRequested && task.TaskStatusEnum == TaskStatusEnum.Requested) ||
+                    (showCompleted && (task.TaskStatusEnum == TaskStatusEnum.Completed ||
+                     task.TaskStatusEnum == TaskStatusEnum.NotApproved)) ||
+                    (showInProgress && task.TaskStatusEnum != TaskStatusEnum.Requested &&
+                     task.TaskStatusEnum != TaskStatusEnum.Completed &&
+                     task.TaskStatusEnum != TaskStatusEnum.NotApproved)
+                    ).ToList()
+            );
+
+        StateHasChanged();  //refresh UI
+    }
+
+    private bool _showRequested = true;
+    private bool _showCompleted = true;
+    private bool _showInProgress = true;
+
+    private bool showRequested
+    {
+        get => _showRequested;
+        set
+        {
+            if (_showRequested != value)
+            {
+                _showRequested = value;
+                ApplyFiltering();
+            }
+        }
+    }
+
+    private bool showCompleted
+    {
+        get => _showCompleted;
+        set
+        {
+            if (_showCompleted != value)
+            {
+                _showCompleted = value;
+                ApplyFiltering();
+            }
+        }
+    }
+
+    private bool showInProgress
+    {
+        get => _showInProgress;
+        set
+        {
+            if (_showInProgress != value)
+            {
+                _showInProgress = value;
+                ApplyFiltering();
+            }
+        }
+    }
+
+
+
 }

@@ -15,6 +15,8 @@ public class TaskProjectBasicDto
     public int? DependentOn { get; set; } //if dependecy on another task - referenced by seq.no
     public double? OrderNo { get; set; } //order of tasks for display
     public string? Notes { get; set; }
+    
+    // ICollection<TaskSkill>? TaskSkills { get; set; }
 
     // New property to track edit mode
    // public bool IsEditing { get; set; } = false;
@@ -34,4 +36,13 @@ public class TaskProjectBasicDto
         Notes = notes;
        
     }
+
+    // public static TaskProjectBasicDto fromModel(TaskProject task)
+    // {
+    //     return new TaskProjectBasicDto(task.Id, task.Name, task.ProjectId, task.OwnerUsername, task.Estimate,
+    //         task.TaskStatusEnum, task.StartDate, task.Deadline, task.DependentOn, task.OrderNo, task.Notes)
+    //     {
+    //         TaskSkills = task.TaskSkills
+    //     };
+    // }
 }

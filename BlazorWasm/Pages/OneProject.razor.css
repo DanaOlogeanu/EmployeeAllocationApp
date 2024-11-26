@@ -13,7 +13,7 @@ body {
 }
 
 .container {
-    width: 60%;
+    width: 80%;
     max-width: 800px;
     background-color: #fff;
     padding: 20px;
@@ -172,16 +172,6 @@ label {
     cursor: pointer;
 }
 
-
-/* Task Link */
-/*.project-link {*/
-/*    color: #007bff;*/
-/*    text-decoration: none;*/
-/*}*/
-
-/*.project-link:hover {*/
-/*    text-decoration: underline;*/
-/*}*/
 
 /* No Data Message */
 .no-data-msg {

@@ -1,0 +1,43 @@
+/* Table column widths */
+.table th:nth-child(1), /* Project Name */
+.table td:nth-child(1) {
+    width: 20%; /* Medium size */
+}
+
+.table th:nth-child(2), /* Description */
+.table td:nth-child(2) {
+    width: 30%; /* Large size */
+}
+
+.table th:nth-child(3), /* Estimate */
+.table td:nth-child(3) {
+    width: 10%; /* Small size */
+}
+
+.table th:nth-child(4), /* Tasks */
+.table td:nth-child(4) {
+    width: 30%; /* Large size */
+}
+
+.table th:nth-child(5), /* Actions */
+.table td:nth-child(5) {
+    width: 10%; /* Small size */
+}
+
+/* Optional: Adjust text wrapping and alignment for cleaner display */
+.table td, .table th {
+    word-wrap: break-word; /* Ensures content wraps within the set width */
+    text-align: left; /* Align text to the left */
+}
+
+/* Style the task link */
+.project-link {
+    color: black;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.project-link:hover {
+    font-weight: bold;
+    cursor: pointer;
+}

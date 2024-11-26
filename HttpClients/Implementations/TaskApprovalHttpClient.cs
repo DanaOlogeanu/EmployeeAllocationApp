@@ -108,4 +108,29 @@ public class TaskApprovalHttpClient:ITaskApprovalService
         })!;
         return pendingNo;
     }
+
+    public async Task<List<TaskApprovalBasicDto>> GetByTaskIdAsync(int taskProjectId)
+
+    {
+        string uri = "/TasksApprovals/ApprovalOneTask";
+        if (!(taskProjectId==null))
+        {
+            uri += $"?taskProjectId={taskProjectId}";
+
+        }
+            HttpResponseMessage response = await client.GetAsync(uri);
+            string content = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception(content);
+            }
+
+            List<TaskApprovalBasicDto> taskApprovals = JsonSerializer.Deserialize<List<TaskApprovalBasicDto>>(content, 
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }
+            )!;   // null-suppressor "!"
+            return taskApprovals;
+    }
 }

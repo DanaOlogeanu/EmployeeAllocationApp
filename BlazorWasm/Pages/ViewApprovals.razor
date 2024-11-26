@@ -9,7 +9,7 @@
 @attribute [Authorize]
 
 
-<h3>Tasks for Approval</h3>
+<h3 class="page-header">Tasks for Approval</h3>
 
 @if (!string.IsNullOrEmpty(msg))
 {
@@ -22,23 +22,24 @@
 }
 else
 {
+    
     <table class="table table-bordered">
         <thead>
         <tr>
             <th>Task ID</th>
-             <th>Task Name</th>
+            <th>Task Name</th>
             @* <th>Username</th> *@
             <th>Assigned To</th>
             <th>Task Start Date</th>
-             <th>Task Deadline</th>
+            <th>Task Deadline</th>
             <th>Status</th>
-             <th>Date of request</th>
+            <th>Date of request</th>
             <th>Comments</th>
             <th>Actions</th>
         </tr>
         </thead>
         <tbody>
-        @foreach (var approval in tasksApprovals)
+        @foreach (var approval in tasksApprovals.OrderBy(t =>t.Date))  //remove OrderBy if showing change of status
         {
             <tr>
                 @if (editingTaskApproval == approval)
@@ -74,9 +75,8 @@ else
                 {
                     <!-- Read-Only Row -->
                     <td>@approval.TaskProjectId</td>
-                    @* <td> <a href="/OneTask/@approval.TaskProjectId" class="project-link">@approval.TaskProject.Name</a></td>  TODO     *@ 
-                    <td>@approval.TaskProject.Name</td>   
-                    @* <td>@approval.OwnerUsername</td> *@
+                    
+                    <td><a href="/OneTask/@approval.TaskProject.Id" class="project-link">@approval.TaskProject.Name</a>></td>   
                     <td>@approval.TaskProject.OwnerUsername</td>
                     <td>@approval.TaskProject.StartDate</td>
                     <td>@approval.TaskProject.Deadline</td>
@@ -85,12 +85,16 @@ else
                     <td>@approval.Comments</td>
                     <td>
                         <button class="btn btn-primary" @onclick="() => EditApproval(approval)">Edit</button>
+                        @* <button class="btn btn-primary" @onclick="() => MoveToLogs(approval.TaskProjectId)">Assignment Log</button> *@
                     </td>
                 }
             </tr>
         }
         </tbody>
     </table>
+    <div>
+         
+    </div>
 }
 
 
@@ -167,7 +171,7 @@ else
             else if(approval.Status.Equals(ApprovalStatus.NotApproved))
             {
                 var task = await taskProjectService.GetByIdAsync(approval.TaskProjectId);
-                task.TaskStatusEnum = TaskStatusEnum.Actioned;
+                task.TaskStatusEnum = TaskStatusEnum.NotApproved;
                 await taskProjectService.UpdateAsync(task);
             }
         }
@@ -198,4 +202,9 @@ else
             };
     }
     
+    // private async Task MoveToLogs(int id)
+    // {
+    //     navMgr.NavigateTo("/AssignmentLogs/" + id);
+    //
+    // }
 }

@@ -11,12 +11,19 @@
 <div class="card">
     <div class="toolbar">
         <button @onclick="MoveToSkill" class="btn-primary">ADD NEW SKILL</button>
-        <div class="toolbar-buttons">
+        <div class="toolbar-button">
+            @if(isEditing)
+            {
             <button @onclick="SaveChanges" class="save" disabled="@(!isAnyRowSelected)">Save Changes</button>
-            <button @onclick="UpdateSkills" class="btn-primary" disabled="@(!isAnyRowSelected)">Update</button>
-            <button @onclick="ShowDeleteConfirmation" class="cancel" disabled="@(!isAnyRowSelected)">Delete</button>
+             }
+            else
+            {
+            <button @onclick="UpdateSkills" class="btn-primary" disabled="@(!isAnyRowSelected)">Edit</button>
+            }
             <button @onclick="CancelChanges" class="cancel" disabled="@(!isAnyRowSelected)">Cancel</button>
+            <button @onclick="ShowDeleteConfirmation" class="delete" disabled="@(!isAnyRowSelected)">Delete</button>
         </div>
+       
     </div>
 
     @if (userSkills == null)

@@ -8,9 +8,9 @@ public class UserSkillBasicDto
     public string UserName { get; set; }
     public string SkillName{ get; set; }
     public Proficiency Proficiency { get; set; }
-    public string Notes { get; set; }
+    public string? Notes { get; set; }
 
-    public UserSkillBasicDto(int userSkillId, string userName, string skillName, Proficiency proficiency, string notes)
+    public UserSkillBasicDto(int userSkillId, string userName, string skillName, Proficiency proficiency, string? notes)
     {
         UserSkillId = userSkillId;
         UserName = userName;

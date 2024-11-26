@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Domain.Dtos;
 using Domain.Models;
 using HttpClients.ClientInterfaces;
@@ -44,7 +45,7 @@ public class ProjectHttpClient: IProjectService
         ProjectBasicDto project = JsonSerializer.Deserialize<ProjectBasicDto>(content, 
             new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,  ReferenceHandler = ReferenceHandler.Preserve 
             }
         )!;   // null-suppressor "!"
         return project;
@@ -82,7 +83,75 @@ public class ProjectHttpClient: IProjectService
         Console.WriteLine(result);
         IEnumerable<Project> projects = JsonSerializer.Deserialize<IEnumerable<Project>>(result, new JsonSerializerOptions
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,  ReferenceHandler = ReferenceHandler.Preserve 
+        })!;
+        return projects;
+    }
+
+    public async Task<Project> DuplicateProject(ProjectBasicDto originalProject, string username)
+    {
+        if (originalProject == null)
+        {
+            throw new ArgumentNullException(nameof(originalProject), "Original project cannot be null.");
+        }
+
+        if (string.IsNullOrEmpty(username))
+        {
+            throw new ArgumentException("Username cannot be null or empty.", nameof(username));
+        }
+
+        // Construct the URI with the username query parameter
+        string uri = $"/Projects/Duplicate?userName={Uri.EscapeDataString(username)}";
+
+        // Send the POST request with the original project data
+        HttpResponseMessage response = await client.PostAsJsonAsync(uri, originalProject);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            string content = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Error duplicating project: {content}");
+        }
+
+        // Deserialize and return the duplicated project
+        Project project = await response.Content.ReadFromJsonAsync<Project>();
+        return project;
+    }
+    
+    // public async Task<Project> DuplicateProject(ProjectBasicDto originalProject,string username)
+    // {
+    //  
+    //     
+    //     HttpResponseMessage response = await client.PostAsJsonAsync("/Projects/Duplicate",originalProject);
+    //     if (!response.IsSuccessStatusCode)
+    //     {
+    //         string content = await response.Content.ReadAsStringAsync();
+    //         throw new Exception(content);
+    //     }
+    //
+    //     Project project = await response.Content.ReadFromJsonAsync<Project>();
+    //     return project;  
+    // }
+
+    public async Task<List<ProjectBasicDto>> GetProjectsByTagAsync(string tag)
+    {
+        string uri = "/Projects/ViewProjectsByTag";
+        if (!string.IsNullOrEmpty(tag))
+        {
+            uri += $"?tag={tag}";
+        }
+        HttpResponseMessage response = await client.GetAsync(uri);
+        string result = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            // Log the error response for troubleshooting
+            Console.WriteLine($"Error: {result}");
+            throw new Exception($"Error fetching user projects: {response.ReasonPhrase}");
+        }
+       
+        Console.WriteLine(result);
+        List<ProjectBasicDto> projects = JsonSerializer.Deserialize<List<ProjectBasicDto>>(result, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,  ReferenceHandler = ReferenceHandler.Preserve 
         })!;
         return projects;
     }

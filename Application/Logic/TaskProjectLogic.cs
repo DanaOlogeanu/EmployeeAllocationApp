@@ -79,4 +79,11 @@ public class TaskProjectLogic:ITaskProjectLogic
     {
         return taskProjectDao.SearchTasksAsync(parameters);
     }
+
+    public async Task<TaskProjectBasicDto> GetBySeq(int projectId, int sequenceNo)
+    {
+        TaskProject? task = await taskProjectDao.GetBySeq(projectId,sequenceNo);
+        
+        return new TaskProjectBasicDto (task.Id, task.Name, task.ProjectId, task.OwnerUsername,task.Estimate, task.TaskStatusEnum, task.StartDate, task.Deadline,task.DependentOn, task.OrderNo , task.Notes);
+    }
 }

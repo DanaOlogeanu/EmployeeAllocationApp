@@ -22,7 +22,7 @@ h4, h5 {
 /* Card Container */
 .card-container {
     margin: auto;
-    width: 80%;
+    width: 95%;  
     border-radius: 6px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background-color: #fdfdfd;

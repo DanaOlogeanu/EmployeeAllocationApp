@@ -1,0 +1,75 @@
+@page "/AssignmentLogs/taskProject/{taskProjectId:int}"
+@using HttpClients.ClientInterfaces
+@using Domain.Dtos
+@inject ITaskAssignmentLogService assignLogService
+
+<h3>Project Task Assignment Log</h3>
+@if (taskAssignmentLogs == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="log-table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Task Id</th>
+            <th>Assigned By</th>
+            <th>Assigned To</th>
+            <th>Date</th>
+            
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var log in taskAssignmentLogs)
+        {
+            <tr>
+                <td>@log.Id</td>
+                <td><a href="/OneTask/@log.TaskProjectId" class="project-link"> @log.TaskProjectId</a> </td>
+                <td>@log.AssignedBy</td>
+                <td>@log.AssignedTo</td>
+                <td>@log.Date</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!;   //added to remember the logged in claims
+    
+    [Parameter]
+    public int taskProjectId { get; set; }
+    
+    private List<TaskAssignmentLogBasicDto>? taskAssignmentLogs;
+    private string msg = "";
+   // private string username;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        msg = "";
+
+        try
+        {
+            //username = await GetUsernameAsync();
+            taskAssignmentLogs = await assignLogService.GetTaskAssignmentLogsForProject(@taskProjectId);
+            
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            msg = e.Message;
+        }
+
+    }
+    
+    // // Fetch the logged-in username *@
+    private async Task<string> GetUsernameAsync()
+    {
+        var authState = await AuthState;
+        var user = authState.User;
+        return user.Identity?.Name ?? throw new Exception("User not logged in.");
+    }
+}

@@ -13,4 +13,6 @@ public interface ITaskProjectService
     
     Task<IEnumerable<TaskProject>> GetTasksUser(string username);
     Task<IEnumerable<TaskProject>?> GetTasksByParameters(SearchTaskProjectParametersDto parameters);
+    
+    Task <TaskProjectBasicDto> GetBySeq(int projectId, int sequenceNo);
 }

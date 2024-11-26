@@ -64,6 +64,18 @@ public class TaskApprovalLogic:ITaskApprovalLogic
         return new TaskApprovalBasicDto ( taskApproval.Id, taskApproval.TaskProjectId,taskApproval.OwnerUsername, taskApproval.Status, taskApproval.Comments, taskApproval.Date);
     }
 
+   public async Task<List<TaskApprovalBasicDto>> GetByTaskIdAsync(int taskProjectId)
+    {
+        List<TaskApprovalBasicDto> result= new List<TaskApprovalBasicDto>();
+        List<TaskApproval> approvals =await approvalDao.GetByTaskIdAsync(taskProjectId);
+        foreach (TaskApproval approval in approvals)
+        {
+            var p = new TaskApprovalBasicDto ( approval.Id, approval.TaskProjectId,approval.OwnerUsername, approval.Status, approval.Comments, approval.Date);
+            result.Add(p);
+        }
+        return result;
+    }
+   
     public Task<int> GetPendingApprovalAsync(string username)
     {
         return approvalDao.GetPendingApprovalAsync(username);

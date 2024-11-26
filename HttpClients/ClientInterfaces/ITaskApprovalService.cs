@@ -14,4 +14,6 @@ public interface ITaskApprovalService
     Task <TaskApprovalBasicDto?> GetByIdAsync(int id);
     
     Task<int> GetPendingApprovalAsync(string username);
+    
+    Task <List<TaskApprovalBasicDto>> GetByTaskIdAsync(int id);
 }
