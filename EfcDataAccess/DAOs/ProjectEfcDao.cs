@@ -1,4 +1,5 @@
 using Application.DaoInterfaces;
+using Domain.Dtos;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -51,5 +52,45 @@ public class ProjectEfcDao:IProjectDao
    
         List<Project> result = await projectsQuery.ToListAsync();
         return result; 
+    }
+   
+    public async Task<IEnumerable<Project>> SearchProjectsAsync(SearchProjectParameters parameters)
+    {
+        IQueryable<Project> query = context.Projects.AsQueryable();
+
+        if (!string.IsNullOrEmpty(parameters.ProjectName))
+        {
+            query = query.Where(p => p.ProjectName.Contains(parameters.ProjectName));
+        }
+        if (!string.IsNullOrEmpty(parameters.OwnerUsername))
+        {
+            query = query.Where(p => p.OwnerUsername == parameters.OwnerUsername);
+        }
+        if (parameters.IsInvoicable.HasValue)
+        {
+            query = query.Where(p => p.IsInvoicable == parameters.IsInvoicable);
+        }
+        if (parameters.StartDate.HasValue)
+        {
+            query = query.Where(p => p.StartDate >= parameters.StartDate);
+        }
+        if (parameters.Deadline.HasValue)
+        {
+            query = query.Where(p => p.Deadline <= parameters.Deadline);
+        }
+        if (parameters.ProjectStatus.HasValue)
+        {
+            query = query.Where(p => p.ProjectStatus == parameters.ProjectStatus);
+        }
+        if (!string.IsNullOrEmpty(parameters.TagName))
+        {
+            query = query.Where(p => p.TagName == parameters.TagName);
+        }
+        if (parameters.ProjectPriority.HasValue)
+        {
+            query = query.Where(p => p.ProjectPriority == parameters.ProjectPriority);
+        }
+
+        return await query.ToListAsync();
     }
 }

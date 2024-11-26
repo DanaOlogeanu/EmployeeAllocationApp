@@ -1,0 +1,135 @@
+@page "/projectsOverview"
+@using Domain.Models
+@using HttpClients.ClientInterfaces
+@using Domain.Dtos
+@inject HttpClient HttpClient
+@inject IProjectService ProjectService
+@inject NavigationManager Navigation
+
+<h3 class="main-header">Projects Overview</h3>
+
+<div class="card">
+    <div class="filter-header" @onclick="ToggleFilters">
+        <span>Add search filters</span>
+        <span class="filter-icon">@filterIcon</span>
+    </div>
+    <div class="filter-content" style="@(showFilters ? "display:block;" : "display:none;")">
+        <div class="filter-row">
+            <div class="form-group">
+                <label for="ProjectName">Project Name</label>
+                <input type="text" class="form-control" id="ProjectName" @bind="filterParameters.ProjectName" />
+            </div>
+            <div class="form-group">
+                <label for="OwnerUsername">Owner Username</label>
+                <input type="text" class="form-control" id="OwnerUsername" @bind="filterParameters.OwnerUsername" />
+            </div>
+            <div class="form-group">
+                <label for="IsInvoicable">Is Invoicable</label>
+                <input type="checkbox" class="form-check-input" id="IsInvoicable" @bind="filterParameters.IsInvoicable" />
+            </div>
+        </div>
+        <div class="filter-row">
+            <div class="form-group">
+                <label for="StartDate">Start Date</label>
+                <input type="date" class="form-control" id="StartDate" @bind="filterParameters.StartDate" />
+            </div>
+            <div class="form-group">
+                <label for="Deadline">Deadline</label>
+                <input type="date" class="form-control" id="Deadline" @bind="filterParameters.Deadline" />
+            </div>
+            <div class="form-group">
+                <label for="ProjectStatus">Project Status</label>
+                <select class="form-control" id="ProjectStatus" @bind="filterParameters.ProjectStatus">
+                    <option value="">Select Status</option>
+                    @foreach (var status in Enum.GetValues(typeof(ProjectStatus)).Cast<ProjectStatus>())
+                    {
+                        <option value="@status">@status</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="TagName">Tag Name</label>
+                <input type="text" class="form-control" id="TagName" @bind="filterParameters.TagName" />
+            </div>
+            <div class="form-group">
+                <label for="ProjectPriority">Project Priority</label>
+                <select class="form-control" id="ProjectPriority" @bind="filterParameters.ProjectPriority">
+                    <option value="">Select Priority</option>
+                    @foreach (var priority in Enum.GetValues(typeof(Priority)).Cast<Priority>())
+                    {
+                        <option value="@priority">@priority</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <button class="btn btn-primary" @onclick="ApplyFilters">Search</button>
+    </div>
+</div>
+
+@if (projects == null)
+{
+    <p>Loading projects...</p>
+}
+else if (!projects.Any())
+{
+    <p>No projects found</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Project ID</th>
+                <th>Project Name</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th>Priority</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in projects)
+            {
+                <tr>
+                    <td><a @onclick="() => NavigateToProjectDetails(project.ProjectId)">@project.ProjectId</a></td>
+                    <td><a @onclick="() => NavigateToProjectDetails(project.ProjectId)">@project.ProjectName</a></td>
+                    <td>@project.StartDate</td>
+                    <td>@project.Deadline</td>
+                    <td>@project.OwnerUsername</td>
+                    <td>@project.ProjectStatus</td>
+                    <td>@project.ProjectPriority</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<Project> projects;
+    private SearchProjectParameters filterParameters = new SearchProjectParameters();
+    private bool showFilters = false;
+    private string filterIcon = "🔍"; // Initial filter icon
+
+    protected override async Task OnInitializedAsync()
+    {
+        var parameters = new SearchProjectParameters(); // Retrieve all projects
+        projects = await ProjectService.GetProjectsByParameters(parameters);
+    }
+
+    private async Task ApplyFilters()
+    {
+        projects = await ProjectService.GetProjectsByParameters(filterParameters);
+    }
+
+    private void ToggleFilters()
+    {
+        showFilters = !showFilters;
+        filterIcon = showFilters ? "⬆️" : "🔍"; // Toggle filter icon
+    }
+
+    private void NavigateToProjectDetails(int projectId)
+    {
+        Navigation.NavigateTo($"/oneProject/{projectId}");
+    }
+}

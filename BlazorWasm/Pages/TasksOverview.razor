@@ -1,0 +1,118 @@
+@page "/TasksOverview"
+@using Domain.Models
+@using HttpClients.ClientInterfaces
+@using Domain.Dtos
+@inject HttpClient HttpClient
+@inject ITaskProjectService TaskService
+@inject NavigationManager Navigation
+
+<h3 class="main-header">Tasks Overview</h3>
+
+<div class="card">
+    <div class="filter-header" @onclick="ToggleFilters">
+        <span>Add search filters</span>
+        <span class="filter-icon">@filterIcon</span>
+    </div>
+    <div class="filter-content" style="@(showFilters ? "display:block;" : "display:none;")">
+        <div class="filter-row">
+            <div class="form-group">
+                <label for="TaskId">Task ID</label> 
+                <input type="number" class="form-control" id="TaskId" @bind="filterParameters.Id"/>
+            </div>
+            <div class="form-group">
+                <label for="TaskName">Task Name</label>
+                <input type="text" class="form-control" id="TaskName" @bind="filterParameters.TaskName"/>
+            </div>
+            <div class="form-group">
+                <label for="OwnerUsername">Owner Username</label>
+                <input type="text" class="form-control" id="OwnerUsername" @bind="filterParameters.OwnerUsername"/>
+            </div>
+            <div class="form-group">
+                <label for="StartDate">Start Date</label>
+                <input type="date" class="form-control" id="StartDate" @bind="filterParameters.StartDate"/>
+            </div>
+            <div class="form-group">
+                <label for="Deadline">Deadline</label>
+                <input type="date" class="form-control" id="Deadline" @bind="filterParameters.Deadline"/>
+            </div>
+        </div>
+        <div class="filter-row">
+            <div class="form-group">
+                <label for="TaskStatus">Task Status</label>
+                <select class="form-control" id="TaskStatus" @bind="filterParameters.TaskStatus">
+                    <option value="">Select Status</option>
+                    @foreach (var status in Enum.GetValues(typeof(TaskStatusEnum)).Cast<TaskStatusEnum>())
+                    {
+                        <option value="@status">@status</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <button class="btn btn-primary" @onclick="ApplyFilters">Search</button>
+    </div>
+</div>
+
+@if (tasks == null)
+{
+    <p>Loading tasks...</p>
+}
+else if (!tasks.Any())
+{
+    <p>No tasks found</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Task ID</th>
+                <th>Task Name</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Owner</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var task in tasks)
+            {
+                <tr>
+                    <td>
+                        <NavLink class="nav-link" href="@($"oneTask/{task.Id}")">@task.Id</NavLink>
+                    </td>
+                    <td>
+                        <NavLink class="nav-link" href="@($"oneTask/{task.Id}")">@task.Name</NavLink>
+                    </td>
+                    <td>@task.StartDate</td>
+                    <td>@task.Deadline</td>
+                    <td>@task.OwnerUsername</td>
+                    <td>@task.TaskStatusEnum</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<TaskProject>? tasks;
+    private readonly SearchTaskProjectParametersDto filterParameters = new SearchTaskProjectParametersDto();
+    private bool showFilters = false;
+    private string filterIcon = "🔍"; // Initial filter icon
+
+    protected override async Task OnInitializedAsync()
+    {
+        var parameters = new SearchTaskProjectParametersDto(); // Retrieve all tasks
+        tasks = await TaskService.GetTasksByParameters(parameters);
+    }
+
+    private async Task ApplyFilters()
+    {
+        tasks = await TaskService.GetTasksByParameters(filterParameters);
+    }
+
+    private void ToggleFilters()
+    {
+        showFilters = !showFilters;
+        filterIcon = showFilters ? "⬆️" : "🔍"; // Toggle filter icon
+    }
+}

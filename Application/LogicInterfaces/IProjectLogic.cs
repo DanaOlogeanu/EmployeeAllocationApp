@@ -11,4 +11,5 @@ public interface IProjectLogic
     Task UpdateAsync(ProjectBasicDto dto);
     
     Task<IEnumerable<Project>> GetProjects(string username);
+    Task<IEnumerable<Project>> SearchProjectsAsync(SearchProjectParameters parameters);
 } 

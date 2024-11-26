@@ -1,4 +1,4 @@
-@page "/viewUserSkills"
+@page "/viewUserSkills/{Username?}"
 @using Domain.Models
 @using HttpClients.ClientInterfaces
 @using System.Security.Claims
@@ -6,7 +6,7 @@
 @inject IUserSkillService UserSkillService
 @inject NavigationManager navMgr
 
-<h3 class="main-header">My Skills</h3>
+<h3 class="main-header">@headerText</h3>
 
 <div class="card">
     <div class="toolbar">
@@ -96,16 +96,15 @@
     }
 </div>
 
-
 @code {
     [CascadingParameter]
     public Task<AuthenticationState> AuthState { get; set; } = null!;   //added to remember the logged in claims
    
+    [Parameter]
+    public string? Username { get; set; }
+    private string headerText = "";
     private IEnumerable<UserSkill>? userSkills;   
     private string msg = "";
-    private string? userName;
-    //private string? skillName;
-    //private int? proficiency;
     private bool isEditing = false;
     private bool isAnyRowSelected => selectedSkills.Any();
     private List<UserSkill> selectedSkills = new();
@@ -113,55 +112,71 @@
     private bool showSuccessMessage = false;
     private string successMessage = "";
     private HashSet<string> expandedCategories = new();
+    private bool isLoading = true;
 
-    
-    
     protected override async Task OnInitializedAsync()
     {
+        await LoadSkills();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadSkills();
+    }
+    
+    private async Task LoadSkills()
+    {
         msg = "";
-       
+        isLoading = true;
+
         try
         {
-            string? username = await GetUsernameAsync();
-            userSkills= await UserSkillService.GetAsync(username,null,null);
-     //       userSkills= await UserSkillService.GetUserSkills(username);
+            if (!string.IsNullOrEmpty(Username))
+            {
+                headerText = $"{Username}'s Skills";
+                userSkills = await UserSkillService.GetUserSkills(Username);
+            }
+            else
+            {
+                string? username = await GetLoggedInUsernameAsync();
+                headerText = "My Skills";
+                userSkills = await UserSkillService.GetUserSkills(username);
+            }
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             msg = e.Message;
         }
-        
+        finally
+        {
+            isLoading = false;
+        }
     }
-    
-    
-    private async Task<string?> GetUsernameAsync() //using the claims set in blazor/webapi/authController to get id ??????????????/add companyID
+
+    private async Task<string?> GetLoggedInUsernameAsync() //using the claims set in blazor/webapi/authController to get id ??????????????/add companyID
     {
-        
         AuthenticationState authState = await AuthState;
         ClaimsPrincipal user = authState.User;
-        
-        //
+
         foreach (var claim in user.Claims)
         {
             Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
         }
-
-    // Safely attempt to find the claim
+		 
+		 // Safely attempt to find the claim
         Claim? usernameClaim = user.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.Name) || 
                                                                    claim.Type.Equals("name") || 
                                                                    claim.Type.Equals("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"));
 
         if (usernameClaim == null)
         {
-    // Handle the case where the claim doesn't exist
+		 // Handle the case where the claim doesn't exist
             msg = "No username claim found.";
             return null;
         }
-        //IEnumerable<Claim> claims = user.Claims;
-        //Claim usernameClaim = claims.First(claim => claim.Type.Equals("Name"));
-        string name = usernameClaim.Value; //if int-> int.Parse(idClaim.Value);
-        return name;
+
+        return usernameClaim.Value;
     }
     
     private void ToggleCategory(string category)
@@ -248,130 +263,3 @@
         selectedSkills.Clear();
     }
 }
-
-
-
-
-
-
-
-@* @page "/viewUserSkills" *@
-@* @using Domain.Models *@
-@* @using HttpClients.ClientInterfaces *@
-@* @using System.Security.Claims *@
-@* @inject IUserSkillService UserSkillService *@
-@* @inject NavigationManager navMgr *@
-@* @attribute [Authorize] *@
-@* $1$ need to be logged in for access #1# *@
-@* *@
-@* <h3 class="page-header">Skills</h3> *@
-@* *@
-@* @if (userSkills == null) *@
-@* { *@
-@* } *@
-@* else if (!userSkills.Any()) *@
-@* { *@
-@*     <p>No skills to display</p> *@
-@* } *@
-@* else *@
-@* { *@
-@*     <div class="table-container"> *@
-@*         <table class="styled-table"> *@
-@*             <thead> *@
-@*                 <tr> *@
-@*                     <th>Skill Name</th> *@
-@*                     <th>Proficiency</th> *@
-@*                     <th>Notes</th> *@
-@*                 </tr> *@
-@*             </thead> *@
-@*             <tbody> *@
-@*                 @foreach (var item in userSkills) *@
-@*                 { *@
-@*                     <tr> *@
-@*                         <td><a href="/OneUserSkill/@item.UserSkillId" class="skill-link">@item.Skill.Name</a></td> *@
-@*                         <td>@item.Proficiency</td> *@
-@*                         <td>@item.Notes</td> *@
-@*                     </tr> *@
-@*                 } *@
-@*             </tbody> *@
-@*         </table> *@
-@*     </div> *@
-@* } *@
-@* *@
-@* @if (!string.IsNullOrEmpty(msg)) *@
-@* { *@
-@*     <label style="color: red">@msg</label> *@
-@* } *@
-@* *@
-@* <button @onclick="MoveToSkill" class="acceptbtn">ADD NEW SKILL</button> *@
-@* *@
-@* *@
-@* *@
-@* *@
-@* *@
-@* @code { *@
-@*     [CascadingParameter] *@
-@*     public Task<AuthenticationState> AuthState { get; set; } = null!;   //added to remember the logged in claims *@
-@*     *@
-@*     private IEnumerable<UserSkill>? userSkills;    *@
-@*     private string msg = ""; *@
-@*     private string? userName; *@
-@*     private string? skillName; *@
-@*     private int? proficiency; *@
-@*      *@
-@*      *@
-@*     protected override async Task OnInitializedAsync() *@
-@*     { *@
-@*         msg = ""; *@
-@*         *@
-@*         try *@
-@*         { *@
-@*             string? username = await GetUsernameAsync(); *@
-@*           userSkills= await UserSkillService.GetAsync(username,null,null); *@
-@*      //       userSkills= await UserSkillService.GetUserSkills(username); *@
-@*         } *@
-@*         catch (Exception e) *@
-@*         { *@
-@*             Console.WriteLine(e); *@
-@*             msg = e.Message; *@
-@*         } *@
-@*          *@
-@*     } *@
-@*      *@
-@*      *@
-@*      *@
-@*     private async Task<string?> GetUsernameAsync() //using the claims set in blazor/webapi/authController to get id ??????????????/add companyID *@
-@*     { *@
-@*          *@
-@*         AuthenticationState authState = await AuthState; *@
-@*         ClaimsPrincipal user = authState.User; *@
-@*          *@
-@*         // *@
-@*         foreach (var claim in user.Claims) *@
-@*         { *@
-@*             Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}"); *@
-@*         } *@
-@* *@
-@*     // Safely attempt to find the claim *@
-@*         Claim? usernameClaim = user.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.Name) ||  *@
-@*                                                                    claim.Type.Equals("name") ||  *@
-@*                                                                    claim.Type.Equals("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")); *@
-@* *@
-@*         if (usernameClaim == null) *@
-@*         { *@
-@*     // Handle the case where the claim doesn't exist *@
-@*             msg = "No username claim found."; *@
-@*             return null; *@
-@*         } *@
-@*         //IEnumerable<Claim> claims = user.Claims; *@
-@*         //Claim usernameClaim = claims.First(claim => claim.Type.Equals("Name")); *@
-@*         string name = usernameClaim.Value; //if int-> int.Parse(idClaim.Value); *@
-@*         return name; *@
-@*     } *@
-@* *@
-@*     private async Task MoveToSkill() *@
-@*     { *@
-@*         navMgr.NavigateTo("/CreateUserSkill"); *@
-@*          *@
-@*     } *@
-@* } *@

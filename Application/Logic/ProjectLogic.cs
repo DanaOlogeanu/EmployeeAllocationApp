@@ -82,4 +82,10 @@ public class ProjectLogic : IProjectLogic
     {
         return projectDao.GetProjects(username);
     }
+
+    public Task<IEnumerable<Project>> SearchProjectsAsync(SearchProjectParameters parameters)
+    {
+        return projectDao.SearchProjectsAsync(parameters);
+    }
+    
 }

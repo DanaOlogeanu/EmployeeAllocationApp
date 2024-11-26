@@ -87,4 +87,62 @@ public class ProjectHttpClient: IProjectService
         return projects;
     }
     
+    public async Task<IEnumerable<Project>> GetProjectsByParameters(SearchProjectParameters parameters)
+    {
+        string uri = "/Projects/SearchProjects";
+        var queryParams = new List<string>();
+
+        if (!string.IsNullOrEmpty(parameters.ProjectName))
+        {
+            queryParams.Add($"projectName={parameters.ProjectName}");
+        }
+        if (!string.IsNullOrEmpty(parameters.OwnerUsername))
+        {
+            queryParams.Add($"ownerUsername={parameters.OwnerUsername}");
+        }
+        if (parameters.IsInvoicable.HasValue)
+        {
+            queryParams.Add($"isInvoicable={parameters.IsInvoicable}");
+        }
+        if (parameters.StartDate.HasValue)
+        {
+            queryParams.Add($"startDate={parameters.StartDate.Value.ToString("yyyy-MM-dd")}");
+        }
+        if (parameters.Deadline.HasValue)
+        {
+            queryParams.Add($"deadline={parameters.Deadline.Value.ToString("yyyy-MM-dd")}");
+        }
+        if (parameters.ProjectStatus.HasValue)
+        {
+            queryParams.Add($"projectStatus={parameters.ProjectStatus}");
+        }
+        if (!string.IsNullOrEmpty(parameters.TagName))
+        {
+            queryParams.Add($"tagName={parameters.TagName}");
+        }
+        if (parameters.ProjectPriority.HasValue)
+        {
+            queryParams.Add($"projectPriority={parameters.ProjectPriority}");
+        }
+
+        if (queryParams.Any())
+        {
+            uri += "?" + string.Join("&", queryParams);
+        }
+
+        HttpResponseMessage response = await client.GetAsync(uri);
+        string result = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            // Log the error response for troubleshooting
+            Console.WriteLine($"Error: {result}");
+            throw new Exception($"Error fetching projects: {response.ReasonPhrase}");
+        }
+
+        IEnumerable<Project> projects = JsonSerializer.Deserialize<IEnumerable<Project>>(result, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        })!;
+        return projects;
+    }
 }

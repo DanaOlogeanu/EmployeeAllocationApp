@@ -1,3 +1,4 @@
+using Domain.Dtos;
 using Domain.Models;
 
 namespace Application.DaoInterfaces;
@@ -11,4 +12,5 @@ public interface ITaskProjectDao
     Task UpdateAsync(TaskProject project);
     
     Task<IEnumerable<TaskProject>> GetTasksUser(string username);
+    Task<IEnumerable<TaskProject>> SearchTasksAsync(SearchTaskProjectParametersDto parameters); 
 }

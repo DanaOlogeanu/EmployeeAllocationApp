@@ -12,4 +12,6 @@ public interface ITaskProjectLogic
     Task UpdateAsync(TaskProjectBasicDto dto);
     
     Task<IEnumerable<TaskProject>> GetTasksUser(string username);
+    Task<IEnumerable<TaskProject>> SearchTasksAsync(SearchTaskProjectParametersDto parameters);
+    
 }

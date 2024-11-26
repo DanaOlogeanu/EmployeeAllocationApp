@@ -28,7 +28,10 @@ public class UserEfcDao:IUserDao
 
     public async Task<IEnumerable<User>?> GetByDepartmentAsync(string selectedDpt)
     {
-        IQueryable<User> usersQuery = context.Users.Include(user => user.Department).Include(user=>user.UserSkills).ThenInclude(us=>us.Skill ).AsQueryable();
+        IQueryable<User> usersQuery = context.Users
+            .Include(user => user.Department)
+            .Include(user=>user.UserSkills)!.ThenInclude(us=>us.Skill )
+            .AsQueryable();
         if (!string.IsNullOrEmpty(selectedDpt))
         {
             usersQuery = usersQuery.Where(u => u.Department.Name.ToLower().Equals(selectedDpt.ToLower()));
@@ -91,7 +94,7 @@ public class UserEfcDao:IUserDao
       
     }
     
-    
+
     //TODO: UPDATE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     public async Task<IEnumerable<User>> GetAsync(SearchUserParametersDto searchParameters)
     {
@@ -108,6 +111,11 @@ public class UserEfcDao:IUserDao
         }
         IEnumerable<User> result = await usersQuery.ToListAsync();
         return result;
+    }
+    
+    public Task<IEnumerable<UserSkill>> GetUserSkills(string username)
+    {
+        throw new NotImplementedException();
     }
     
     

@@ -47,6 +47,23 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
+            <NavLink class="nav-link" href="projectsOverview">
+                <span class="fas fa-tasks" aria-hidden="true"></span> Projects Overview 
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="tasksOverview">
+                <span class="fas fa-tasks" aria-hidden="true"></span> Tasks Overview 
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="skillsMatrix">
+                <span class="fas fa-tasks" aria-hidden="true"></span> Skill Matrix 
+            </NavLink>
+        </div>
+        
+        
+        <div class="nav-item px-3">
             <AuthorizeView Roles="Manager">
                 <Authorized>
                     @* Call RefreshPendingApprovals when the user is authorized as Manager *@

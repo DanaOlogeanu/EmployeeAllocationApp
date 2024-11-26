@@ -76,5 +76,26 @@ public class ProjectsController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
-}
+    
+    
+    
+    
+        [HttpGet("SearchProjects")]
+        public async Task<ActionResult<IEnumerable<Project>>> SearchProjects([FromQuery] SearchProjectParameters parameters)
+        {
+            var projects = await projectLogic.SearchProjectsAsync(parameters);
+            if (projects == null || !projects.Any())
+            {
+                return Ok(new List<Project>()); // Return an empty list instead of NotFound
+            }
+            return Ok(projects);
+        }
+    }
+
+       
+
+
+    
+
+
     

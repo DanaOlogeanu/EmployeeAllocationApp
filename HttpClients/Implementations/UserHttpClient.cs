@@ -255,8 +255,24 @@ public class UserHttpClient: IUserService
         ClaimsPrincipal principal = CreateClaimsPrincipal();
         return Task.FromResult(principal);
     }
-
     
+    public async Task<DepartmentMatrixDto> GetUsersByDepartmentAsync(string departmentName)
+    {
+        Console.WriteLine($"Sending request to get department matrix for: {departmentName}");
+        HttpResponseMessage response = await client.GetAsync($"/users/getDepartmentMatrix?selectedDpt={departmentName}");
+        string content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+           
+            throw new Exception(content);
+        }
 
+        DepartmentMatrixDto department = JsonSerializer.Deserialize<DepartmentMatrixDto>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        })!;
+        return department;
+    }
+    
     
 }

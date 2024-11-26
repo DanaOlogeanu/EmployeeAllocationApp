@@ -71,7 +71,11 @@ public class UserSkillEfcDao:IUserSkillDao
     //get list of skills for a user 
     public async Task<IEnumerable<UserSkill>> GetUserSkills(string username)
     {
-        IQueryable<UserSkill> skillsQuery = context.UserSkills.Include (us => us.Owner).AsQueryable();
+        IQueryable<UserSkill> skillsQuery = context.UserSkills
+            .Include(us => us.Skill) 
+            .Include(us => us.Owner) 
+            .Where(us => us.Owner.Username.ToLower() == username.ToLower()) 
+            .AsQueryable();
         if (!string.IsNullOrEmpty(username))
         {
             skillsQuery = skillsQuery.Where(u => u.Owner.Username == username);

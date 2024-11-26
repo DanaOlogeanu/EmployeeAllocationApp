@@ -87,4 +87,59 @@ public class TaskProjectHttpClient:ITaskProjectService
             return tasksProject;
         }
     
+    
+    public async Task<IEnumerable<TaskProject>?> GetTasksByParameters(SearchTaskProjectParametersDto parameters)
+    {
+        string uri = "/TasksProject/SearchTasks";
+        var queryParams = new List<string>();
+
+        if (parameters.Id.HasValue)
+        {
+            queryParams.Add($"id={parameters.Id}");
+        }
+        if (!string.IsNullOrEmpty(parameters.TaskName))
+        {
+            queryParams.Add($"taskName={parameters.TaskName}");
+        }
+        if (!string.IsNullOrEmpty(parameters.OwnerUsername))
+        {
+            queryParams.Add($"ownerUsername={parameters.OwnerUsername}");
+        }
+        if (parameters.StartDate.HasValue)
+        {
+            queryParams.Add($"startDate={parameters.StartDate.Value.ToString("yyyy-MM-dd")}");
+        }
+        if (parameters.Deadline.HasValue)
+        {
+            queryParams.Add($"deadline={parameters.Deadline.Value.ToString("yyyy-MM-dd")}");
+        }
+        if (parameters.TaskStatus.HasValue)
+        {
+            queryParams.Add($"taskStatus={parameters.TaskStatus}");
+        }
+        /*if (parameters.TaskPriority.HasValue)
+        {
+            queryParams.Add($"taskPriority={parameters.TaskPriority}");
+        }*/
+
+        if (queryParams.Any())
+        {
+            uri += "?" + string.Join("&", queryParams);
+        }
+
+        HttpResponseMessage response = await client.GetAsync(uri);
+        string result = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            // Log the error response for troubleshooting
+            Console.WriteLine($"Error: {result}");
+            throw new Exception($"Error fetching tasks: {response.ReasonPhrase}");
+        }
+
+        IEnumerable<TaskProject>? tasksProject = JsonSerializer.Deserialize<IEnumerable<TaskProject>>(result, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        })!;
+        return tasksProject;
+    }
 }

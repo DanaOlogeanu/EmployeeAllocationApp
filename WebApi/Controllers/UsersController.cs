@@ -86,6 +86,28 @@ public class UsersController : ControllerBase
         }
     }
 
+ // New method to get department matrix
+ [HttpGet("getDepartmentMatrix")]
+ public async Task<ActionResult<DepartmentMatrixDto>> GetUsersByDepartmentMatrixAsync([FromQuery]string selectedDpt)
+ {
+     try
+     {
+         if (string.IsNullOrEmpty(selectedDpt))
+         {
+             return BadRequest("Department name cannot be null or empty");
+         }
+
+         var department = await userLogic.GetUsersByDepartmentAsync(selectedDpt);
+         return Ok(department);
+     }
+     catch (Exception e)
+     {
+         Console.WriteLine(e);
+         return StatusCode(500, e.Message);
+     }
+ }
+ 
+ 
 [HttpGet("getHoliday")]    ///????
         public async Task<ActionResult<Task<bool>>> IsOnHoliday([FromQuery]string username, [FromQuery]DateOnly date)
         {

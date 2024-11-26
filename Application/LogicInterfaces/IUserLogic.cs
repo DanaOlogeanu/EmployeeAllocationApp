@@ -18,4 +18,6 @@ public interface IUserLogic
    Task<User?> GetByUsernameAsync(string username);
    Task<IEnumerable<User>?> GetByDepartmentAsync(string dpt);
    Task<bool> IsOnHoliday(string username, DateOnly date);
+   Task<DepartmentMatrixDto> GetUsersByDepartmentAsync(string departmentName);
+
 }

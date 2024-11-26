@@ -76,4 +76,19 @@ public class TasksProjectController : ControllerBase
         }
     }
     
+    [HttpGet("SearchTasks")]
+    public async Task<ActionResult<IEnumerable<TaskProject>>> SearchTasksAsync([FromQuery] SearchTaskProjectParametersDto parameters)
+    {
+        try
+        {
+            IEnumerable<TaskProject> tasks = await taskProjectLogic.SearchTasksAsync(parameters);
+            return Ok(tasks);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500, e.Message);
+        }
+    }
+    
 }

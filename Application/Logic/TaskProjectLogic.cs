@@ -74,4 +74,9 @@ public class TaskProjectLogic:ITaskProjectLogic
     {
         return taskProjectDao.GetTasksUser(username);
     }
+
+    public Task<IEnumerable<TaskProject>> SearchTasksAsync(SearchTaskProjectParametersDto parameters)
+    {
+        return taskProjectDao.SearchTasksAsync(parameters);
+    }
 }

@@ -1,4 +1,5 @@
 using Application.DaoInterfaces;
+using Domain.Dtos;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -105,7 +106,44 @@ public class TaskProjectEfcDao:ITaskProjectDao
         List<TaskProject> result = await query.ToListAsync();
         return result; 
     }
-}
+    
+    
+    
+    
+
+        public async Task<IEnumerable<TaskProject>> SearchTasksAsync(SearchTaskProjectParametersDto parameters)
+        {
+            IQueryable<TaskProject> query = context.TasksProject.AsQueryable();
+
+            if (parameters.Id.HasValue)
+            {
+                query = query.Where(t => t.Id == parameters.Id);
+            }
+            if (!string.IsNullOrEmpty(parameters.TaskName))
+            {
+                query = query.Where(t => t.Name.Contains(parameters.TaskName));
+            }
+            if (!string.IsNullOrEmpty(parameters.OwnerUsername))
+            {
+                query = query.Where(t => t.OwnerUsername == parameters.OwnerUsername);
+            }
+            if (parameters.StartDate.HasValue)
+            {
+                query = query.Where(t => t.StartDate >= parameters.StartDate);
+            }
+            if (parameters.Deadline.HasValue)
+            {
+                query = query.Where(t => t.Deadline <= parameters.Deadline);
+            }
+            if (parameters.TaskStatus.HasValue)
+            {
+                query = query.Where(t => t.TaskStatusEnum == parameters.TaskStatus);
+            }
+            
+            return await query.ToListAsync();
+        }
+    }
+
 
 
     // public async Task<Project> CreateAsync(Project project)

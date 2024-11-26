@@ -1,0 +1,167 @@
+@page "/skillsMatrix"
+@using Domain.Dtos
+@using Domain.Models
+@using HttpClients.ClientInterfaces
+@using System.Security.Claims
+@inject IUserService UserService
+@inject IUserSkillService UserSkillService
+@inject NavigationManager Navigation
+@attribute [Authorize]
+
+<link href="css/SkillsMatrix.css" rel="stylesheet" />
+
+<div class="card">
+    <h3>Skills Matrix for @departmentName</h3>
+    @if (isLoading)
+    {
+        <p>Loading department information...</p>
+    }
+    else if (!string.IsNullOrEmpty(msg))
+    {
+        <p class="text-danger">@msg</p>
+    }
+    else if (department == null)
+    {
+        <p>No users found in this department.</p>
+    }
+    else
+    {
+        <table class="skills-matrix">
+            <thead>
+                <tr>
+                    <th class="category-column">Category</th>
+                    <th>Skills</th>
+                    @foreach (var user in department.Users)
+                    {
+                        <th><a href="viewUserSkills/@user.Username?fromMatrix=true">@user.Name</a></th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in skillCategories)
+                {
+                    @foreach (var skill in category.Value)
+                    {
+                        <tr>
+                            @if (category.Value.IndexOf(skill) == 0)
+                            {
+                                <td class="vertical-text" rowspan="@category.Value.Count">@category.Key</td>
+                            }
+                            <td>@skill</td>
+                            @foreach (var user in department.Users)
+                            {
+                                <td>
+                                    @if (user.Skills.Any(s => s.SkillName == skill))
+                                    {
+                                        var userSkill = user.Skills.First(s => s.SkillName == skill);
+                                        <div class="skill">
+                                            <div class="proficiency">
+                                                @for (int i = 1; i <= 4; i++)
+                                                {
+                                                    <div class="level @((int)userSkill.Proficiency >= i ? "filled" : "empty")"></div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="proficiency">
+                                            @for (int i = 1; i <= 4; i++)
+                                            {
+                                                <div class="level empty"></div>
+                                            }
+                                        </div>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private DepartmentMatrixDto department;
+    private Dictionary<string, List<string>> skillCategories = new();
+    private string departmentName = "";
+    private string msg = "";
+    private bool isLoading = true;
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var username = await GetUsernameAsync();
+            if (string.IsNullOrEmpty(username))
+            {
+                msg = "User is not authenticated.";
+                return;
+            }
+
+            departmentName = await GetDepartmentByUsernameAsync(username) ?? "";
+            if (string.IsNullOrEmpty(departmentName))
+            {
+                msg = "Department information is missing.";
+                return;
+            }
+
+            department = await UserService.GetUsersByDepartmentAsync(departmentName);
+            skillCategories = await GetSkillCategoriesAsync();
+            await LoadSkillsForAllUsers(department.Users);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            msg = e.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task<string?> GetUsernameAsync()
+    {
+        var authState = await AuthState;
+        var user = authState.User;
+
+        var usernameClaim = user.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name);
+        return usernameClaim?.Value;
+    }
+
+    private async Task<string?> GetDepartmentByUsernameAsync(string username)
+    {
+        try
+        {
+            var user = await UserService.GetByUsernameAsync(username);
+            return user?.Department?.Name;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return null;
+        }
+    }
+
+    private async Task<Dictionary<string, List<string>>> GetSkillCategoriesAsync()
+    {
+        var userSkills = await UserSkillService.GetAsync(null, null, null);
+        var groupedSkills = userSkills.GroupBy(us => us.Skill.Category)
+                                      .ToDictionary(group => group.Key, group => group.Select(us => us.Skill.Name).Distinct().ToList());
+        return groupedSkills;
+    }
+
+    private async Task LoadSkillsForAllUsers(IEnumerable<UserMatrixDto> users)
+    {
+        foreach (var user in users)
+        {
+            var userSkills = await UserSkillService.GetUserSkills(user.Username);
+            user.Skills = userSkills.Select(us => new UserSkillMatrixDto(us.SkillName, us.Proficiency)).ToList();
+        }
+    }
+}
