@@ -112,11 +112,4 @@ public class UserEfcDao:IUserDao
         IEnumerable<User> result = await usersQuery.ToListAsync();
         return result;
     }
-    
-    public Task<IEnumerable<UserSkill>> GetUserSkills(string username)
-    {
-        throw new NotImplementedException();
-    }
-    
-    
 }

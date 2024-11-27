@@ -53,7 +53,6 @@ public class ProjectEfcDao:IProjectDao
         List<Project> result = await projectsQuery.ToListAsync();
         return result; 
     }
-
     public async Task<Project> DuplicateProject(Project originalProject, string username)
     {
         EntityEntry<Project> added = await context.Projects.AddAsync(originalProject);
@@ -74,7 +73,7 @@ public class ProjectEfcDao:IProjectDao
         List<Project> result = await projectsQuery.ToListAsync();
         return result; 
     }
-    
+
     public async Task<IEnumerable<Project>> SearchProjectsAsync(SearchProjectParameters parameters)
     {
         IQueryable<Project> query = context.Projects.AsQueryable();

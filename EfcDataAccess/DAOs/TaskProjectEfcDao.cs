@@ -128,7 +128,7 @@ public class TaskProjectEfcDao:ITaskProjectDao
 
             if (parameters.Id.HasValue)
             {
-                query = query.Where(t => t.Id == parameters.Id);
+                query = query.Where(t => t.Id == parameters.Id.Value);
             }
             if (!string.IsNullOrEmpty(parameters.TaskName))
             {
@@ -140,29 +140,45 @@ public class TaskProjectEfcDao:ITaskProjectDao
             }
             if (parameters.StartDate.HasValue)
             {
-                query = query.Where(t => t.StartDate >= parameters.StartDate);
+                query = query.Where(t => t.StartDate >= parameters.StartDate.Value);
             }
             if (parameters.Deadline.HasValue)
             {
-                query = query.Where(t => t.Deadline <= parameters.Deadline);
+                query = query.Where(t => t.Deadline <= parameters.Deadline.Value);
             }
             if (parameters.TaskStatus.HasValue)
             {
-                query = query.Where(t => t.TaskStatusEnum == parameters.TaskStatus);
+                query = query.Where(t => t.TaskStatusEnum == parameters.TaskStatus.Value);
             }
             
             return await query.ToListAsync();
         }
         
-    public async Task<TaskProject> GetBySeq(int projectId, int sequenceNo)
-    {
-        TaskProject? found = await context.TasksProject
-            .Where (tp=>tp.ProjectId==projectId)
-            .SingleOrDefaultAsync(us=> us.SequenceNo == sequenceNo);
-        return found;
-    }
+        public async Task<TaskProject> GetBySeq(int projectId, int sequenceNo)
+        {
+            try
+            {
+                TaskProject? found = await context.TasksProject
+                    .Where(tp => tp.ProjectId == projectId)
+                    .SingleOrDefaultAsync(us => us.SequenceNo == sequenceNo);
+
+                if (found == null)
+                {
+                    throw new Exception($"No task found for ProjectId: {projectId} and SequenceNo: {sequenceNo}");
+                }
+
+                return found;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error in GetBySeq: {e.Message}");
+                throw;
+            }
+        }
+
+    
 }
 
 
- 
-  
+
+
