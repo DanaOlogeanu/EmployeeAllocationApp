@@ -273,6 +273,24 @@ public class UserHttpClient: IUserService
         })!;
         return department;
     }
+    public async Task<IEnumerable<UserWithSkillsDto>> GetUsersBySkillsAsync(SearchUserSkillFilterParametersDto parameters)
+    {
+        string query = $"/users/filterBySkills?skillName1={parameters.SkillName1}&proficiency1={parameters.Proficiency1}&skillName2={parameters.SkillName2}&proficiency2={parameters.Proficiency2}&departmentName={parameters.DepartmentName}";
+        HttpResponseMessage response = await client.GetAsync(query);
+
+        string content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception(content);
+        }
+
+        IEnumerable<UserWithSkillsDto> users = JsonSerializer.Deserialize<IEnumerable<UserWithSkillsDto>>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        })!;
+
+        return users;
+    }
     
     
 }

@@ -112,4 +112,41 @@ public class UserEfcDao:IUserDao
         IEnumerable<User> result = await usersQuery.ToListAsync();
         return result;
     }
+    
+    public async Task<IEnumerable<User>> GetUsersBySkillsAsync(SearchUserSkillFilterParametersDto parameters)
+    {
+        IQueryable<User> query = context.Users
+            .Include(u => u.Department)
+            .Include(u => u.UserSkills).ThenInclude(us => us.Skill)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(parameters.DepartmentName))
+        {
+            query = query.Where(u => u.Department.Name.ToLower().Equals(parameters.DepartmentName.ToLower()));
+        }
+        if (!string.IsNullOrEmpty(parameters.SkillName1))
+        {
+            if (parameters.Proficiency1.HasValue)
+            {
+                query = query.Where(u => u.UserSkills.Any(us => us.Skill.Name.ToLower().Contains(parameters.SkillName1.ToLower()) && us.Proficiency == parameters.Proficiency1));
+            }
+            else
+            {
+                query = query.Where(u => u.UserSkills.Any(us => us.Skill.Name.ToLower().Contains(parameters.SkillName1.ToLower())));
+            }
+        }
+        if (!string.IsNullOrEmpty(parameters.SkillName2))
+        {
+            if (parameters.Proficiency2.HasValue)
+            {
+                query = query.Where(u => u.UserSkills.Any(us => us.Skill.Name.ToLower().Contains(parameters.SkillName2.ToLower()) && us.Proficiency == parameters.Proficiency2));
+            }
+            else
+            {
+                query = query.Where(u => u.UserSkills.Any(us => us.Skill.Name.ToLower().Contains(parameters.SkillName2.ToLower())));
+            }
+        }
+
+        return await query.ToListAsync();
+    }
 }

@@ -20,5 +20,6 @@ public interface IUserService
     //users on parameters
     Task<ICollection<User>> GetAsync(string? department, string?  skillOne, int? reqScoreOne, string? skillTwo, int? reqScoreTwo, string? skillThree, int? reqScoreThree); // to get list of users
     Task<DepartmentMatrixDto> GetUsersByDepartmentAsync(string departmentName);
+    Task<IEnumerable<UserWithSkillsDto>> GetUsersBySkillsAsync(SearchUserSkillFilterParametersDto parameters);
     
 }

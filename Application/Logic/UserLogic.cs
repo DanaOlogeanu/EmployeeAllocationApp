@@ -102,5 +102,19 @@ public class UserLogic: IUserLogic
   {
       return userSkillDao.GetUserSkills(username);
   }
+  public async Task<IEnumerable<UserWithSkillsDto>> GetUsersBySkillsAsync(SearchUserSkillFilterParametersDto parameters)
+  {
+      var users = await userDao.GetUsersBySkillsAsync(parameters);
+
+      return users
+          .OrderBy(u => u.Name)
+          .Select(u => new UserWithSkillsDto(
+              u.Username,
+              u.Name,
+              u.Department?.Name,
+              u.UserSkills.Select(us => new UserSkillBasicDto(us.UserSkillId, us.Owner.Username, us.Skill.Name, us.Proficiency, us.Notes)).ToList()
+          ))
+          .ToList();
+  }
   
 }

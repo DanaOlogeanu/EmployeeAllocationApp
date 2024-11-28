@@ -1,0 +1,117 @@
+@page "/UsersOverview"
+@using Domain.Dtos
+@using Domain.Models
+@using HttpClients.ClientInterfaces
+@inject IUserService UserService
+@inject NavigationManager navMgr
+
+<h3 class="main-header">Search Users by Skills</h3>
+
+<div class="card">
+    <div class="filter-header" @onclick="ToggleFilters">
+        <span>Add search filters</span>
+        <span class="filter-icon">@filterIcon</span>
+    </div>
+    <div class="filter-content" style="@(showFilters ? "display:block;" : "display:none;")">
+        <div class="filter-row single-row">
+            <div class="form-group">
+                <label for="SkillName1">Skill 1</label>
+                <input type="text" class="form-control" id="SkillName1" @bind="filterParameters.SkillName1"/>
+            </div>
+            <div class="form-group">
+                <label for="Proficiency1">Proficiency 1</label>
+                <select class="form-control" id="Proficiency1" @bind="filterParameters.Proficiency1">
+                    <option value="">Choose Proficiency</option>
+                    @foreach (var proficiency in Enum.GetValues(typeof(Proficiency)).Cast<Proficiency>())
+                    {
+                        <option value="@proficiency">@proficiency</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="SkillName2">Skill 2</label>
+                <input type="text" class="form-control" id="SkillName2" @bind="filterParameters.SkillName2"/>
+            </div>
+            <div class="form-group">
+                <label for="Proficiency2">Proficiency 2</label>
+                <select class="form-control" id="Proficiency2" @bind="filterParameters.Proficiency2">
+                    <option value="">Choose Proficiency</option>
+                    @foreach (var proficiency in Enum.GetValues(typeof(Proficiency)).Cast<Proficiency>())
+                    {
+                        <option value="@proficiency">@proficiency</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="DepartmentName">Department Name</label>
+                <input type="text" class="form-control" id="DepartmentName" @bind="filterParameters.DepartmentName"/>
+            </div>
+        </div>
+        <button class="btn btn-primary" @onclick="ApplyFilters">Search</button>
+    </div>
+</div>
+
+@if (users == null)
+{
+    <p>Loading users...</p>
+}
+else if (!users.Any())
+{
+    <p>No users found</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Employee Name</th>
+                <th>Department</th>
+                <th>Skills</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td><a @onclick="() => NavigateToUserSkills(user.Username)" class="nav-link">@user.Name</a></td>
+                    <td>@user.DepartmentName</td>
+                    <td>
+                        @foreach (var skill in user.UserSkills)
+                        {
+                            <div>@skill.SkillName (@skill.Proficiency)</div>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<UserWithSkillsDto>? users;
+    private readonly SearchUserSkillFilterParametersDto filterParameters = new SearchUserSkillFilterParametersDto();
+    private bool showFilters = false;
+    private string filterIcon = "🔍"; // Initial filter icon
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialize with all users
+        users = await UserService.GetUsersBySkillsAsync(new SearchUserSkillFilterParametersDto());
+    }
+
+    private async Task ApplyFilters()
+    {
+        users = await UserService.GetUsersBySkillsAsync(filterParameters);
+    }
+
+    private void ToggleFilters()
+    {
+        showFilters = !showFilters;
+        filterIcon = showFilters ? "⬆️" : "🔍"; // Toggle filter icon
+    }
+
+    private void NavigateToUserSkills(string username)
+    {
+        navMgr.NavigateTo($"/viewUserSkills/{username}");
+    }
+}

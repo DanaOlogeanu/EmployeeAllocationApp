@@ -123,4 +123,31 @@ public class UsersController : ControllerBase
             }  
         }
     
+        [HttpGet("filterBySkills")]
+        public async Task<ActionResult<IEnumerable<UserWithSkillsDto>>> FilterBySkills(
+            [FromQuery] string? skillName1, 
+            [FromQuery] Proficiency? proficiency1, 
+            [FromQuery] string? skillName2, 
+            [FromQuery] Proficiency? proficiency2, 
+            [FromQuery] string? departmentName)
+        {
+            try
+            {
+                var parameters = new SearchUserSkillFilterParametersDto
+                {
+                    SkillName1 = skillName1,
+                    Proficiency1 = proficiency1,
+                    SkillName2 = skillName2,
+                    Proficiency2 = proficiency2,
+                    DepartmentName = departmentName
+                };
+
+                var users = await userLogic.GetUsersBySkillsAsync(parameters);
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
 }
