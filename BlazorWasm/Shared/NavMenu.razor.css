@@ -3,11 +3,13 @@
 
 .navbar-toggler {
     background-color: rgba(255, 255, 255, 0.1);
+    
 }
 
 .top-row {
     height: 3.5rem;
     background-color: rgba(0,0,0,0.4);
+
 }
 
 .navbar-brand {
@@ -106,3 +108,25 @@
 .nav-link {
     position: relative; /* Needed for ::after positioning */
 }
+
+/*added*/
+.nav-category {
+    font-size: 1rem;
+    font-weight: bold;
+    color: darkblue;
+    /*color: #0a53be;*/
+    padding: 0.5rem 1rem;
+    /*background-color: rgba(0, 0, 0, 0.6);*/
+    background-color:lightsteelblue ;
+    /*background-color: #5791b3; */
+    cursor: default; /* Makes it clear it's not clickable */
+    margin-top: 1rem; /* Optional: Adds spacing above the category */
+    align-self: center;
+}
+
+.nav-sublist {
+    list-style: none;
+    margin: 0;
+    padding-left: 1rem; /* Indent sub-items */
+}
+

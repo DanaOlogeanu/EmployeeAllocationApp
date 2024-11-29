@@ -6,7 +6,9 @@
 @inject NavigationManager navMgr
 @attribute [Authorize]
 
-<h3 class="page-header">Projects</h3>
+<div class="title">
+<h2 class="page-header">Projects</h2>
+</div>
 <div class="button-container">
     <button @onclick="MoveToCreateProject" class="acceptbtn">ADD NEW PROJECT</button>     
     <button @onclick="MoveToDuplicateProject" class="acceptbtn">DUPLICATE EXISTING PROJECT</button>

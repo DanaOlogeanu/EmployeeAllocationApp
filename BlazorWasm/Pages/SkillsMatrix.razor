@@ -11,7 +11,9 @@
 
 
 <div class="card">
-    <h3>Skills Matrix for @departmentName</h3>
+    <div class="title">
+        <h2>Skills Matrix for @departmentName</h2>
+        </div>
     @if (isLoading)
     {
         <p>Loading department information...</p>
@@ -28,55 +30,55 @@
     {
         <table class="skills-matrix">
             <thead>
-                <tr>
-                    <th class="category-column">Category</th>
-                    <th>Skills</th>
-                    @foreach (var user in department.Users)
-                    {
-                        <th><a href="viewUserSkills/@user.Username?fromMatrix=true">@user.Name</a></th>
-                    }
-                </tr>
+            <tr>
+                <th class="category-column">Category</th>
+                <th>Skills</th>
+                @foreach (var user in department.Users)
+                {
+                    <th><a href="viewUserSkills/@user.Username?fromMatrix=true">@user.Name</a></th>
+                }
+            </tr>
             </thead>
             <tbody>
-                @foreach (var category in skillCategories)
+            @foreach (var category in skillCategories)
+            {
+                @foreach (var skill in category.Value)
                 {
-                    @foreach (var skill in category.Value)
-                    {
-                        <tr>
-                            @if (category.Value.IndexOf(skill) == 0)
-                            {
-                                <td class="vertical-text" rowspan="@category.Value.Count">@category.Key</td>
-                            }
-                            <td>@skill</td>
-                            @foreach (var user in department.Users)
-                            {
-                                <td>
-                                    @if (user.Skills.Any(s => s.SkillName == skill))
-                                    {
-                                        var userSkill = user.Skills.First(s => s.SkillName == skill);
-                                        <div class="skill">
-                                            <div class="proficiency">
-                                                @for (int i = 1; i <= 4; i++)
-                                                {
-                                                    <div class="level @((int)userSkill.Proficiency >= i ? "filled" : "empty")"></div>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                    else
-                                    {
+                    <tr>
+                        @if (category.Value.IndexOf(skill) == 0)
+                        {
+                            <td class="vertical-text" rowspan="@category.Value.Count">@category.Key</td>
+                        }
+                        <td>@skill</td>
+                        @foreach (var user in department.Users)
+                        {
+                            <td>
+                                @if (user.Skills.Any(s => s.SkillName == skill))
+                                {
+                                    var userSkill = user.Skills.First(s => s.SkillName == skill);
+                                    <div class="skill">
                                         <div class="proficiency">
                                             @for (int i = 1; i <= 4; i++)
                                             {
-                                                <div class="level empty"></div>
+                                                <div class="level @((int)userSkill.Proficiency >= i ? "filled" : "empty")"></div>
                                             }
                                         </div>
-                                    }
-                                </td>
-                            }
-                        </tr>
-                    }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="proficiency">
+                                        @for (int i = 1; i <= 4; i++)
+                                        {
+                                            <div class="level empty"></div>
+                                        }
+                                    </div>
+                                }
+                            </td>
+                        }
+                    </tr>
                 }
+            }
             </tbody>
         </table>
     }

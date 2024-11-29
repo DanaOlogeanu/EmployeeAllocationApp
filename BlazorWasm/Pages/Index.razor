@@ -1,9 +1,9 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components
 
-
-<h3 class="text-center">Welcome to Employee Allocation</h3>
-
+<div class="title">
+<h2 class="text-center">Project Employee Allocation</h2>
+</div>
 <div class="container">
     <div class="row">
         <!-- Skills Card -->
@@ -13,7 +13,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Skills</h5>
                     <p class="card-text">Manage skills: create skills or view existing ones.</p>
-                    <AuthorizeView Roles ="Project Manager,Employee">
+                    <AuthorizeView Roles ="Project Manager,Employee,Admin">
                         <div class="d-flex justify-content-around">
                             <a class="btn btn-primary" href="/CreateUserSkill">Add new Skill</a>
                             <a class="btn btn-secondary" href="/ViewUserSkills">View Skills</a>
@@ -37,7 +37,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Projects</h5>
                     <p class="card-text">Manage projects: create or view existing projects.</p>
-                    <AuthorizeView Roles ="Project Manager">
+                    <AuthorizeView Roles ="Project Manager,Admin">
                         <div class="d-flex justify-content-around">
                             <a class="btn btn-primary" href="/CreateProject">Add new Project</a>
                             <a class="btn btn-secondary" href="/ViewProjects">View Projects</a>
@@ -45,7 +45,7 @@
                     </AuthorizeView>
                       <AuthorizeView Roles ="Manager,Employee">
                           <div class="d-flex justify-content-around">
-                              <a class="btn btn-primary" href=" ">Search Projects</a>
+                              <a class="btn btn-primary" href="/ProjectsOverview">Search Projects</a>
                           </div>
                           </AuthorizeView>
                     
@@ -64,19 +64,19 @@
                      <AuthorizeView Roles ="Employee">
                          <div class="d-flex justify-content-around">
                              
-                             <a class="btn btn-primary" href="/create-project">Search Tasks</a>
+                             <a class="btn btn-primary" href="/UsersOverview">Search Tasks</a>
                              <a class="btn btn-secondary" href="/ViewUserTasks">View Tasks</a>
                          </div>
                      </AuthorizeView>
                      <AuthorizeView Roles ="Manager">
                          <div class="d-flex justify-content-around">
-                             <a class="btn btn-primary" href="/create-project">Search Tasks</a>
+                             <a class="btn btn-primary" href="/TasksOverview">Search Tasks</a>
                              <a class="btn btn-secondary" href="/ViewDepartmentUsers">Team Tasks Overview</a>
                          </div>
                      </AuthorizeView>
-                       <AuthorizeView Roles ="Project Manager">
+                       <AuthorizeView Roles ="Project Manager,Admin">
                            <div class="d-flex justify-content-around">
-                               <a class="btn btn-primary" href="/create-project">Search Tasks</a>
+                               <a class="btn btn-primary" href="/TasksOverview">Search Tasks</a>
                            </div>
                            </AuthorizeView>
                      

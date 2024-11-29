@@ -5,9 +5,9 @@
 @inject HttpClient HttpClient
 @inject ITaskProjectService TaskService
 @inject NavigationManager Navigation
-
-<h3 class="main-header">Tasks Overview</h3>
-
+<div class="title">
+    <h2>Tasks Overview</h2>
+</div>
 <div class="card">
     <div class="filter-header" @onclick="ToggleFilters">
         <span>Add search filters</span>

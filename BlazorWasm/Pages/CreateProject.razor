@@ -12,15 +12,16 @@
 
 <div class="center-container">
     <div class="container">
-        <h3 class="page-header">Add a New Project</h3>
-
+        <div class="title">
+        <h2>Add a New Project</h2>
+    </div>
         <div class="form-container">
             <table class="form-table">
                 <!-- Row for Project Name -->
                 <tr>
                     <td colspan="2">
                         <label>Project Name:</label>
-                        <input type="text" @bind="projectName" class="form-control" />
+                        <input type="text" @bind="projectName" class="form-control"/>
                     </td>
                 </tr>
 
@@ -58,11 +59,11 @@
                 <tr>
                     <td>
                         <label>Start Date:</label>
-                        <input type="date" @bind="startDate" class="form-control" />
+                        <input type="date" @bind="startDate" class="form-control"/>
                     </td>
                     <td>
                         <label>Deadline:</label>
-                        <input type="date" @bind="deadline" class="form-control" />
+                        <input type="date" @bind="deadline" class="form-control"/>
                     </td>
                 </tr>
 
@@ -116,7 +117,7 @@
                 <tr>
                     <td colspan="2">
                         <label>
-                            <input type="checkbox" @bind="isInvoicable" /> Invoicable Project
+                            <input type="checkbox" @bind="isInvoicable"/> Invoicable Project
                         </label>
                     </td>
                 </tr>

@@ -6,9 +6,9 @@
 @inject ITaskProjectService taskProjectService
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
-
-<h3 class="page-header">Team Project Assignments</h3>
-
+<div class="title">
+<h2 class="page-header">Team Project Tasks</h2>
+</div>
 @if (isLoading)
 {
     <p>Loading department information...</p>

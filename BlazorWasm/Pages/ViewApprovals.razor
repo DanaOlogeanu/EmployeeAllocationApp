@@ -8,9 +8,9 @@
 @inject NavigationManager navMgr
 @attribute [Authorize]
 
-
-<h3 class="page-header">Tasks for Approval</h3>
-
+<div class="title">
+<h2>Tasks for Approval</h2>
+</div>
 @if (!string.IsNullOrEmpty(msg))
 {
     <p class="text-danger">@msg</p>

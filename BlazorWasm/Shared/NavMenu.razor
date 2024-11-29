@@ -3,9 +3,11 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 
-
+        <AuthorizeView>
+            <Authorized>
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
+        
         <a class="navbar-brand" href="">Employee Allocation</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
@@ -13,195 +15,141 @@
     </div>
 </div>
 
+                            
+
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+        @* <AuthorizeView> *@
+        @*     <Authorized> *@
+                 @if (UserIsInRole("Admin"))
+                 {
+                     <div class="nav-category px-3">Admin</div>
+                     <ul class="nav-sublist">
 
-          <div class="nav-item px-3">
-                    <AuthorizeView Roles="Admin">
-                        <Authorized>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href=" ">
-                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Add user
-                                </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href=" ">
-                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Add project tag
-                                </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href="  ">
-                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Add department
-                                </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href="viewUserSkills">
-                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Skills
-                                </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href="viewProjects">
-                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Projects
-                                </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href="viewUserTasks">
-                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Tasks
-                                </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
+                         <li class="nav-item px-3">
+                             <NavLink class="nav-link" href="createUser">
+                                 <span class="oi oi-list-rich" aria-hidden="true"></span> Create user
+                             </NavLink>
+                         </li>
+                         <li class="nav-item px-3">
+                             <NavLink class="nav-link" href="createProjectTag">
+                                 <span class="oi oi-list-rich" aria-hidden="true"></span> Create project tag
+                             </NavLink>
+                         </li>
+                         <li class="nav-item px-3">
+                             <NavLink class="nav-link" href="createDepartment">
+                                 <span class="oi oi-list-rich" aria-hidden="true"></span> Create department
+                             </NavLink>
+                         </li>
+                         <li class="nav-item px-3">
+                             <NavLink class="nav-link" href="createSkill">
+                                 <span class="oi oi-list-rich" aria-hidden="true"></span> Create skill
+                             </NavLink>
+                         </li>
+                     </ul>
+                 }
+        @*     </Authorized> *@
+        @* </AuthorizeView> *@
+
+        <!-- My Profile Category -->
+        @* <AuthorizeView> *@
+        @*     <Authorized> *@
+                <div class="nav-category px-3">My Profile</div>
+                <ul class="nav-sublist">
+
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="viewUserSkills">
+                            <span class="oi oi-list-rich" aria-hidden="true"></span> Skills
+                        </NavLink>
+                    </li>
+                    @if (UserIsInRole("Employee"))
+                    {
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="viewUserTasks">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Tasks
+                            </NavLink>
+                        </li>
+                    }
+                    @if (UserIsInRole("Admin") || UserIsInRole("Project Manager"))
+                    {
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="viewProjects">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Projects
+                            </NavLink>
+                        </li>
+                    }
+
+                </ul>
+        @*     </Authorized> *@
+        @* </AuthorizeView> *@
+
+        @if (UserIsInRole("Admin") || UserIsInRole("Manager"))
+        {
+            {
+                @* <AuthorizeView> *@
+                @*     <Authorized> *@
+                        <!-- Team Category -->
+                        <div class="nav-category px-3">Team</div>
+                        <ul class="nav-sublist">
+
+                            <li class="nav-item px-3">
                                 <NavLink class="nav-link" href="viewDepartmentUsers">
                                     <span class="oi oi-list-rich" aria-hidden="true"></span> Team Tasks
                                 </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href="projectsOverview">
-                                    <span class="fas fa-tasks" aria-hidden="true"></span> Projects Overview 
-                                </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href="tasksOverview">
-                                    <span class="fas fa-tasks" aria-hidden="true"></span> Tasks Overview 
-                                </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
+                            </li>
+                            @if (isUserManager)
+                            {
+                                <li class="nav-item px-3">
+                                    <NavLink class="@($"nav-link {notificationClass}")" href="viewApprovals">
+                                        <span class="oi oi-list-rich" aria-hidden="true"></span>
+                                        Task Approvals @(PendingApprovals > 0 ? $" ({PendingApprovals})" : "")
+                                    </NavLink>
+                                </li>
+                            }
+                            <li class="nav-item px-3">
                                 <NavLink class="nav-link" href="skillsMatrix">
-                                    <span class="fas fa-tasks" aria-hidden="true"></span> Skill Matrix 
+                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Skills Matrix
                                 </NavLink>
-                            </div>
-                        </Authorized>
-                    </AuthorizeView>
-                </div>
-          
-        <div class="nav-item px-3">
-            <AuthorizeView Roles="Employee">
-                <Authorized>
-                       <div class="nav-item px-3">
-                               <NavLink class="nav-link" href="viewUserSkills">
-                                   <span class="oi oi-list-rich" aria-hidden="true"></span> Skills
-                               </NavLink>
-                           </div>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="viewUserTasks">
-                            <span class="oi oi-list-rich" aria-hidden="true"></span> Tasks 
-                        </NavLink>
-                    </div>
-                    <div class="nav-item px-3">
+                            </li>
+
+                        </ul>
+                //     </Authorized>
+                // </AuthorizeView>
+            }
+        }
+        <!-- Search Category -->
+        @* <AuthorizeView> *@
+        @*     <Authorized> *@
+                <div class="nav-category px-3">Search</div>
+                <ul class="nav-sublist">
+                    @if (UserIsInRole("Admin") || UserIsInRole("Project Manager") || UserIsInRole("Manager"))
+                    {
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="usersOverview">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Users by Skills
+                            </NavLink>
+                        </li>
+                    }
+                    <li class="nav-item px-3">
                         <NavLink class="nav-link" href="projectsOverview">
-                            <span class="fas fa-tasks" aria-hidden="true"></span> Projects Overview 
+                            <span class="oi oi-list-rich" aria-hidden="true"></span> Search Projects
                         </NavLink>
-                    </div>
-                    <div class="nav-item px-3">
+                    </li>
+                    <li class="nav-item px-3">
                         <NavLink class="nav-link" href="tasksOverview">
-                            <span class="fas fa-tasks" aria-hidden="true"></span> Tasks Overview 
+                            <span class="oi oi-list-rich" aria-hidden="true"></span> Search Tasks
                         </NavLink>
-                    </div>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="skillsMatrix">
-                            <span class="fas fa-tasks" aria-hidden="true"></span> Skill Matrix 
-                        </NavLink>
-                    </div>
-                </Authorized>
-            </AuthorizeView>
-        </div>
-        
-          <div class="nav-item px-3">
-                    <AuthorizeView Roles="Project Manager">
-                        <Authorized>
-                                   <div class="nav-item px-3">
-                                       <NavLink class="nav-link" href="viewUserSkills">
-                                           <span class="oi oi-list-rich" aria-hidden="true"></span> Skills
-                                           </NavLink>
-                                       </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href="viewProjects">
-                                    <span class="oi oi-list-rich" aria-hidden="true"></span> Projects
-                                </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href="projectsOverview">
-                                    <span class="fas fa-tasks" aria-hidden="true"></span> Projects Overview 
-                                </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href="tasksOverview">
-                                    <span class="fas fa-tasks" aria-hidden="true"></span> Tasks Overview 
-                                </NavLink>
-                            </div>
-                            <div class="nav-item px-3">
-                                <NavLink class="nav-link" href="skillsMatrix">
-                                    <span class="fas fa-tasks" aria-hidden="true"></span> Skill Matrix 
-                                </NavLink>
-                            </div>
-                        </Authorized>
-                    </AuthorizeView>
-                </div>
-        
-        
-        
-        <div class="nav-item px-3">
-            <AuthorizeView Roles="Manager">
-                <Authorized>
-                       <div class="nav-item px-3">
-                               <NavLink class="nav-link" href="viewUserSkills">
-                                   <span class="oi oi-list-rich" aria-hidden="true"></span> Skills
-                               </NavLink>
-                           </div>
-                           @* <div class="nav-item px-3"> *@
-                           @*     <NavLink class="nav-link" href="viewProjects"> *@
-                           @*         <span class="oi oi-list-rich" aria-hidden="true"></span> Projects *@
-                           @*     </NavLink> *@
-                           @* </div> *@
-                           <div class="nav-item px-3">
-                               <NavLink class="nav-link" href="viewDepartmentUsers">
-                                   <span class="oi oi-list-rich" aria-hidden="true"></span> Team Tasks
-                               </NavLink>
-                           </div>
-                           <div class="nav-item px-3">
-                               <NavLink class="nav-link" href="projectsOverview">
-                                   <span class="fas fa-tasks" aria-hidden="true"></span> Projects Overview 
-                               </NavLink>
-                           </div>
-                           <div class="nav-item px-3">
-                               <NavLink class="nav-link" href="tasksOverview">
-                                   <span class="fas fa-tasks" aria-hidden="true"></span> Tasks Overview 
-                               </NavLink>
-                           </div>
-                           <div class="nav-item px-3">
-                               <NavLink class="nav-link" href="skillsMatrix">
-                                   <span class="fas fa-tasks" aria-hidden="true"></span> Skill Matrix 
-                               </NavLink>
-                           </div>
-                           <div class="nav-item px-3">
-                               <NavLink class="nav-link" href="usersOverview">
-                                   <span class="fas fa-tasks" aria-hidden="true"></span> Users by Skills
-                               </NavLink>
-                           </div>
-                           <div>
-                               
-                                   @if (isUserManager)
-                                   {
-                                       <NavLink class="@($"nav-link {notificationClass}")" href="viewApprovals">
-                                           <span class="oi oi-list-rich" aria-hidden="true"></span>
-                                           Task Approvals
-                                           @(PendingApprovals > 0 ? $" ({PendingApprovals})" : "")
-                                       </NavLink>
-                                   }
-                           </div>
-                           
-                </Authorized>
-            </AuthorizeView>
-        </div>
+                    </li>
+
+                </ul>
+        @*     </Authorized> *@
+        @* </AuthorizeView> *@
     </nav>
 </div>
-      @code {
+  </Authorized>
+        </AuthorizeView>
+@code {
           [CascadingParameter]
           public Task<AuthenticationState> AuthState { get; set; } = null!;
       
@@ -283,5 +231,12 @@
                   notificationClass = string.Empty;
               }
           }
+    
+    
+    private bool UserIsInRole(string role)
+    {
+        var authState = AuthState.Result;
+        return authState.User.IsInRole(role);
+    }
       }
 

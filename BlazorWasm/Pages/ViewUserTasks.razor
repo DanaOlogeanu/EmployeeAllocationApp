@@ -9,8 +9,9 @@
 @using Domain.Dtos
 @using HttpClients.ClientInterfaces
 
-<h3 class="page-header">@pageHeader</h3>
-
+<div class="title">
+<h2 >@pageHeader</h2>
+</div>
   
 
 
@@ -101,7 +102,7 @@
     private string? msg;
     private bool isLoading = true;
     private readonly HashSet<int> expandedProjects = new();
-    private string pageHeader = "Tasks";
+    private string pageHeader = "My Tasks";
 
     protected override async Task OnInitializedAsync()
     {
@@ -121,7 +122,7 @@
             else
             {
                 var userName = await GetUserNameAsync(username);
-                pageHeader = $"{userName}'s Tasks";
+                pageHeader = $"Tasks assigned to {userName}";
             }
 
             var tasks = (await TaskProjectService.GetTasksUser(username)).ToList();

@@ -2,8 +2,9 @@
 @using HttpClients.ClientInterfaces
 @using Domain.Dtos
 @inject ITaskAssignmentLogService assignLogService
-
-<h3>Project Task Assignment Log</h3>
+<div class="title">
+<h2 > TASK ASSIGNMENT LOG</h2>
+</div>
 @if (taskAssignmentLogs == null)
 {
     <p>Loading...</p>
@@ -13,7 +14,7 @@ else
     <table class="log-table">
         <thead>
         <tr>
-            <th>Id</th>
+            <th>Log Id</th>
             <th>Task Id</th>
             <th>Assigned By</th>
             <th>Assigned To</th>

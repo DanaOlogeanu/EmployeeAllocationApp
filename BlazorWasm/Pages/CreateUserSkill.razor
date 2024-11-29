@@ -19,8 +19,9 @@ else if (!categories.Any())
 }
 else
 {
-    <h3 class="form-title">Add a new Skill</h3>
-
+    <div class="title">
+    <h2>Add a new Skill</h2>
+</div>
     <div class="form-container">
         <div class="form-group">
             <label class="form-label">Skill Category:</label>
@@ -84,24 +85,24 @@ else
 
 
 @code {
-    
+
     [CascadingParameter]
-    public Task<AuthenticationState> AuthState { get; set; } = null!;   //added to remember the logged in claims
+    public Task<AuthenticationState> AuthState { get; set; } = null!; //added to remember the logged in claims
 
     private Proficiency selectedProficiency;
     private string? username;
-    private List<string>? skills= new List<string>();
+    private List<string>? skills = new List<string>();
     private string? selectedSkillName;
-   // private int? proficiency;
-    private  string? notes;
+    // private int? proficiency;
+    private string? notes;
     private string msg = "";
-    
+
     private List<string> categories = new List<string>();
     private string? selectedCategory;
     private bool showSuccessMessage = false;
     private string successMessage = "";
-  
-    
+
+
     protected override async Task OnInitializedAsync()
     {
         msg = "";
@@ -116,8 +117,8 @@ else
             msg = e.Message;
         }
     }
-    
-    
+
+
     private async Task LoadSkills(ChangeEventArgs category)
     {
     // Get the selected category
@@ -134,11 +135,11 @@ else
             Console.WriteLine(e);
             msg = e.Message;
         }
-     }
-    
-   
-   
-    
+    }
+
+
+
+
     private async Task Create()
     {
         username = await GetUsernameAsync();
@@ -153,7 +154,7 @@ else
             msg = "You must select a skill!";
             return;
         }
-        if ((int)selectedProficiency==0)
+        if ((int)selectedProficiency == 0)
         {
             msg = "You must select proficiency level!";
             return;
@@ -172,21 +173,21 @@ else
             Console.WriteLine(e);
             msg = e.Message;
         }
-        // selectedCategory = null;
-        // newCategory = null;
-        // selectedSkillName = null;
-        // isAddingNewCategory = false;
+    // selectedCategory = null;
+    // newCategory = null;
+    // selectedSkillName = null;
+    // isAddingNewCategory = false;
     }
-    
-    
-    
+
+
+
     //remember userName
     private async Task<string?> GetUsernameAsync() //using the claims set in blazor/webapi/authController 
     {
-        
+
         AuthenticationState authState = await AuthState;
         ClaimsPrincipal user = authState.User;
-        
+
     //
         foreach (var claim in user.Claims)
         {
@@ -194,8 +195,8 @@ else
         }
 
     // Safely attempt to find the claim
-        Claim? usernameClaim = user.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.Name) || 
-                                                                   claim.Type.Equals("name") || 
+        Claim? usernameClaim = user.Claims.FirstOrDefault(claim => claim.Type.Equals(ClaimTypes.Name) ||
+                                                                   claim.Type.Equals("name") ||
                                                                    claim.Type.Equals("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"));
 
         if (usernameClaim == null)
@@ -209,9 +210,10 @@ else
         string name = usernameClaim.Value; //if int-> int.Parse(idClaim.Value);
         return name;
     }
-    
+
     private void CloseSuccessMessage()
     {
         showSuccessMessage = false;
     }
+
 }

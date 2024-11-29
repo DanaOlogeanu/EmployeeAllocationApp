@@ -16,24 +16,26 @@
 
 <div class="center-container">
 <div class="container">
-    <h3 class="page-header">Task Overview</h3>
+    <div class="title">
+        <h2>Task Overview</h2>
+        </div>
     <div>
         @if (isEditMode)
         {
             <!-- Editable Mode -->
             <EditForm Model="taskProject" OnValidSubmit="HandleSave" class="form-container">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
+                <DataAnnotationsValidator/>
+                <ValidationSummary/>
                 @* added *@
                 <div class="form-container">
                     <div class="form-group">
                         <label for="task-name">Name:</label>
-                        <InputText id="task-name" class="form-control" @bind-Value="taskProject.Name" />
+                        <InputText id="task-name" class="form-control" @bind-Value="taskProject.Name"/>
                     </div>
 
                     <div class="form-group">
                         <label for="project-id">Project ID:</label>
-                        <InputNumber id="project-id" class="form-control" @bind-Value="taskProject.ProjectId" readonly />
+                        <InputNumber id="project-id" class="form-control" @bind-Value="taskProject.ProjectId" readonly/>
                     </div>
 
                     <div class="form-group">
@@ -43,7 +45,7 @@
 
                     <div class="form-group">
                         <label for="estimate">Estimate (hours):</label>
-                        <InputNumber id="estimate" class="form-control" @bind-Value="taskProject.Estimate" />
+                        <InputNumber id="estimate" class="form-control" @bind-Value="taskProject.Estimate"/>
                     </div>
 
                     <div class="form-group">
@@ -56,53 +58,53 @@
                         </InputSelect>
                     </div>
 
-                
+
                     <div class="form-group">
                         <label for="start-date">Start Date:</label>
                         @* <InputDate id="start-date" class="form-control" @bind-Value="taskProject.StartDate" /> *@
-                        <input id="start-date" type="date" @bind="taskProject.StartDate" class="form-control"  />
+                        <input id="start-date" type="date" @bind="taskProject.StartDate" class="form-control"/>
                     </div>
 
                     <div class="form-group">
                         <label for="deadline">Deadline:</label>
                         @* <InputDate id="deadline" class="form-control" @bind-Value="taskProject.Deadline" /> *@
-                        <input id="deadline" type="date" @bind="taskProject.Deadline" class="form-control"  />
-                    
+                        <input id="deadline" type="date" @bind="taskProject.Deadline" class="form-control"/>
+
                     </div>
 
                     <div class="form-group">
                         <label for="dependent-on">Dependent On:</label>
-                        <InputNumber id="dependent-on" class="form-control" @bind-Value="taskProject.DependentOn" />
+                        <InputNumber id="dependent-on" class="form-control" @bind-Value="taskProject.DependentOn"/>
                     </div>
 
                     <div class="form-group">
                         <label for="order-no">Order No:</label>
-                        <InputNumber id="order-no" class="form-control" @bind-Value="taskProject.OrderNo" />
+                        <InputNumber id="order-no" class="form-control" @bind-Value="taskProject.OrderNo" readonly/>
                     </div>
 
                     <div class="form-group">
                         <label for="notes">Notes:</label>
-                        <InputTextArea id="notes" class="form-control" @bind-Value="taskProject.Notes" />
+                        <InputTextArea id="notes" class="form-control" @bind-Value="taskProject.Notes"/>
                     </div>
 
                     <div class="button-group">
                         <button type="submit" class="acceptbtn">Save</button>
                         <button type="button" class="cancelbtn" @onclick="CancelEdit">Cancel</button>
                     </div>
-   
+
                     @* added *@
                 </div>
             </EditForm>
         }
         else
-        {    
+        {
             <div class="button-group">
-                <button class="acceptbtn" @onclick="EnableEdit">Edit Task</button>  
+                <button class="acceptbtn" @onclick="EnableEdit">Edit Task</button>
             </div>
             <!-- Read-Only Mode -->
             <div class="task-details">
                 <p><strong>Name:</strong> @taskProject?.Name</p>
-            
+
                 <p><a href="/OneProject/@taskProject?.ProjectId" class="project-link"><strong>Project ID:</strong> @taskProject?.ProjectId</a></p>
                 <div class="two-column-fields">
                     <p><strong>Assigned To:</strong> @(string.IsNullOrWhiteSpace(taskProject?.OwnerUsername) ? "Unassigned" : taskProject.OwnerUsername)</p>
@@ -110,23 +112,24 @@
                     <p><strong>Task Status:</strong> @taskProject?.TaskStatusEnum</p>
                     <p><strong>Start Date:</strong>@taskProject?.StartDate.ToString()</p>
                     @* <p><strong>Dependent On:</strong> @taskProject?.DependentOn</p> *@
-                    
+
                     @if (taskForLink != null)
                     {
-                        <p><a class="project-link" @onclick="() => NavigateToTask(taskForLink?.Id,taskForLink?.ProjectId)"><strong>Dependent on Task:</strong> @taskForLink?.Id - @taskForLink?.Name</a></p>
+                        <p><a class="project-link" @onclick="() => NavigateToTask(taskForLink?.Id, taskForLink?.ProjectId)"><strong>Dependent on Task:</strong> @taskForLink?.Id - @taskForLink?.Name</a></p>
                     }
-                    else{
+                    else
+                    {
                         <p><strong>Dependent on:</strong> No dependencies.</p>
                     }
                     <p><strong>Deadline:</strong> @taskProject?.Deadline.ToString()</p>
-              
+
                     @* <p><strong>Order No:</strong> @taskProject?.OrderNo</p> *@
                 </div>
                 <p><strong>Notes:</strong> @taskProject?.Notes</p>
             </div>
         }
     </div>
-    
+
 </div>
 
  <AuthorizeView Roles="Admin,Project Manager"> 
@@ -134,8 +137,9 @@
     <div class="container">
         @* add *@
         <div>
-            <h4 class="section-header">Task Required Skills</h4>
-
+            <div class="title">
+            <h3>Task Required Skills</h3>
+</div>
             @if (taskSkills != null && taskSkills.Any())
             {
                 <table class="table">
@@ -168,9 +172,9 @@
             @if (showAddSkillForm)
             {
                 <EditForm Model="skills" OnValidSubmit="AddSkill" class="form-container" Context="editFormContext">
-                    
+
                     <div class="form-container">
-                        
+
                         <div class="form-group">
                             <label for="category">Skill Category:</label>
                             <select id="category" class="form-control" @onchange="LoadSkills">
@@ -181,8 +185,8 @@
                                 }
                             </select>
                         </div>
-                        
-                        
+
+
                         @if (skills != null && skills.Any())
                         {
                             <div class="form-group">
@@ -195,8 +199,8 @@
                                     }
                                 </select>
                             </div>
-                        
-                        
+
+
                             <div class="form-group">
                                 <label for="proficiency">Proficiency:</label>
                                 <select id="proficiency" class="form-control" @bind="selectedProficiency">
@@ -213,11 +217,11 @@
                             <button type="submit" class="acceptbtn">Add Skill</button>
                             <button type="button" class="cancelbtn" @onclick="CancelAddSkill">Cancel</button>
                         </div>
-                        
-                      @* added   *@
+
+                        @* added   *@
                     </div>
-                    
-                    
+
+
                 </EditForm>
             }
             else
@@ -239,8 +243,8 @@
         
         <div>
             @* Assignment of user to task *@
-            <div>
-                <h4 class="section-header">Task Assignment</h4>
+            <div class="title">
+                <h3>Task Assignment</h3>
             </div>
 
             @if (showAddAssignmentForm)
@@ -331,7 +335,9 @@
      @* add *@
         
      <div>
-         <h4 class="section-header">Assignment Approval Status</h4>
+         <div class="title">
+             <h3>Assignment Approval Status</h3>
+             </div>
          <div class="button-group">
              <button class="btn btn-primary" style="margin-bottom: 10px;" @onclick="MoveToLogs">Task Assignment Log</button>
          </div>

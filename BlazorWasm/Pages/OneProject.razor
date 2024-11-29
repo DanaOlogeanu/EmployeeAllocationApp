@@ -16,8 +16,10 @@ else
 {
     <div class="center-container">
         <div class="container">
-            <h3>Project Overview</h3>
-
+            
+            <div class="title">
+                <h2>Project Overview</h2>
+            </div>
             <!-- Toggle buttons for editing mode -->
             <div style="text-align: center; padding-top: 10px;">
                 @if (isEditing)
@@ -27,7 +29,7 @@ else
                 }
                 else
                 {
-                    <AuthorizeView Roles="Admin, Manager,Project Manager"> 
+                    <AuthorizeView Roles="Admin, Manager,Project Manager">
                         <button class="btn-primary" @onclick="ToggleEdit">Edit Project</button>
                     </AuthorizeView>
                 }
@@ -159,7 +161,9 @@ else
             </table>
 
             <!-- Section for Project Tasks (Read-Only) -->
-            <h4>Project Tasks</h4>
+            <div class="title">
+                <h3>Project Tasks</h3>
+                </div>
             @if (project.Tasks != null && project.Tasks.Any())
             {
                 <table>
@@ -205,12 +209,12 @@ else
                 <p class="no-data-msg">No tasks available for this project.</p>
             }
 
-            <AuthorizeView Roles="Admin, Manager,Project Manager"> 
-            <!-- Add Task Button -->
-            <div style="text-align: center; padding-top: 10px;">
-                <button class="btn-primary" @onclick="ToggleTaskForm">Add Task</button>
-            </div>
-                </AuthorizeView>
+            <AuthorizeView Roles="Admin, Manager,Project Manager">
+                <!-- Add Task Button -->
+                <div style="text-align: center; padding-top: 10px;">
+                    <button class="btn-primary" @onclick="ToggleTaskForm">Add Task</button>
+                </div>
+            </AuthorizeView>
         </div>
 
     </div>
