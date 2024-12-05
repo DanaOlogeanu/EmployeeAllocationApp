@@ -149,6 +149,13 @@
                 headerText = "My Skills";
                 userSkills = await UserSkillService.GetUserSkills(username);
             }
+            if (userSkills != null)
+            {
+                expandedCategories = userSkills
+                    .Select(skill => skill.Skill.Category)
+                    .Distinct()
+                    .ToHashSet();
+            }
         }
         catch (Exception e)
         {

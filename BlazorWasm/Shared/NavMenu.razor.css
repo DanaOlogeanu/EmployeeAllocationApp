@@ -130,3 +130,8 @@
     padding-left: 1rem; /* Indent sub-items */
 }
 
+.nav-link .fas {
+    margin-right: 8px; /* Space between icon and text */
+    font-size: 1.2em;  /* Adjust icon size */
+}
+
