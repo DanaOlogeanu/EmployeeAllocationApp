@@ -39,7 +39,7 @@ else
         </tr>
         </thead>
         <tbody>
-        @foreach (var approval in tasksApprovals.OrderBy(t =>t.Date))  //remove OrderBy if showing change of status
+        @foreach (var approval in tasksApprovals.OrderByDescending(t =>t.Date))  //remove OrderBy if showing change of status
         {
             <tr>
                 @if (editingTaskApproval == approval)

@@ -226,6 +226,8 @@
 
                         @* added   *@
                     </div>
+
+
                 </EditForm>
             }
         else if (context.User.IsInRole("Admin") || context.User.IsInRole("Project Manager"))
@@ -240,7 +242,8 @@
 </div>
  </AuthorizeView>  
 
-<AuthorizeView Roles="Admin, Project Manager, Manager"> 
+ <AuthorizeView Roles="Admin, Manager, Project Manager"> 
+
 @* <div class="center-container"> *@
     <div class="container">
         @* add *@
@@ -324,6 +327,13 @@
             }
             else
             {
+                @if (showAssignmentMessage)
+                {
+                    <div class="alert alert-success">
+                        @assignmentMessage
+                    </div>
+                }
+                
                 <div class="button-group">
                     <button class="btn btn-primary" @onclick="ShowAddAssignmentForm">Assign task </button>
                 </div>
@@ -441,9 +451,11 @@
             approvals = (await taskApprovalService.GetByTaskIdAsync(taskProjectId)).ToList();
             
             int projectId = taskProject.ProjectId;
-            int sequenceNo = (int)taskProject.DependentOn;
-            taskForLink = await taskProjectService.GetBySeq(projectId, sequenceNo);
-           
+            if (taskProject.DependentOn != null)
+            {
+                int sequenceNo = (int)taskProject.DependentOn;
+                taskForLink = await taskProjectService.GetBySeq(projectId, sequenceNo);
+            }
         }
         catch (Exception e)
         {
@@ -491,6 +503,11 @@
 
     private void CancelAddSkill()
     {
+    // Reset fields related to adding a skill
+        selectedSkill = string.Empty;
+        selectedProficiency = default;
+        selectedCategory = null;
+        
         showAddSkillForm = false;
     }
 
@@ -619,6 +636,9 @@
 
 
     private TaskApproval taskApproval;
+    private string assignmentMessage = string.Empty;
+    private bool showAssignmentMessage = false;
+    
     private async Task AssignTaskToUser(string username)
     {
         string currentUser = await GetUsernameAsync();
@@ -626,37 +646,56 @@
         {
             taskProject.OwnerUsername = username;
             taskProject.StartDate = userAvailability[username];
+
             taskProject.Deadline = userDeadline[username];
             taskProject.TaskStatusEnum = TaskStatusEnum.Requested;
             await taskProjectService.UpdateAsync(taskProject);
-            //update project status to Ongoing once a task is assigned 
+    //update project status to Ongoing once a task is assigned 
             var project = await projectService.GetByIdAsync(taskProject.ProjectId);
             project.ProjectStatus = ProjectStatus.Ongoing;
             if (project != null)
             {
                 await projectService.UpdateAsync(project);
             }
-            //
+    
         }
-        foreach (User user in usersByDpt)
-        {
-            if (user.Role.Equals("Manager"))
+            foreach (User user in usersByDpt)
             {
-                TaskApprovalCreationDto dto = new(taskProject.Id, user.Username, ApprovalStatus.Requested);  //TODO add assined to aka taskProject.OwnerUsername
-              taskApproval = await taskApprovalService.CreateAsync(dto);
-                //added
-                TaskApprovalBasicDto added = new(taskApproval.Id,taskApproval.TaskProjectId, taskApproval.OwnerUsername, taskApproval.Status, taskApproval.Comments, taskApproval.Date);
-                approvals.Add(added);
-                //added
+                if (user.Role.Equals("Manager"))
+                {
+                    TaskApprovalCreationDto dto = new(taskProject.Id, user.Username, ApprovalStatus.Requested); //TODO add assined to aka taskProject.OwnerUsername
+                    taskApproval = await taskApprovalService.CreateAsync(dto);
+    
+                    TaskApprovalBasicDto added = new(taskApproval.Id, taskApproval.TaskProjectId, taskApproval.OwnerUsername, taskApproval.Status, taskApproval.Comments, taskApproval.Date);
+                    approvals.Add(added);
+                }
             }
-        }
-        await taskAssignmentLogService.CreateAsync(new TaskAssignmentLogCreationDto(taskProject.Id,currentUser , username));
+            await taskAssignmentLogService.CreateAsync(new TaskAssignmentLogCreationDto(taskProject.Id, currentUser, username));
         showAddAssignmentForm = false;
+        ShowTemporaryMessage("Task assigned!");
+   
+      
     }
 
+    private async void ShowTemporaryMessage(string message)
+    {
+        assignmentMessage = message;
+        showAssignmentMessage = true;
+
+        await Task.Delay(5000); // Wait for 5 seconds
+
+        showAssignmentMessage = false;
+        assignmentMessage = string.Empty;
+
+        StateHasChanged(); // Trigger a UI update
+    }
     
     private void CancelAddAssign()
     {
+    // Reset fields related to assignment
+        selectedDpt = string.Empty;
+        selectedUser = null;
+        usersByDpt = Enumerable.Empty<User>(); // Clear the users list
         showAddAssignmentForm = false;
     }
     
@@ -712,6 +751,8 @@
                     userDeadline[user.Username] = userDeadlinevar;
                     userSkillScore[user] = userScore;
                 }
+              // Order users by their skill score in descending order
+                usersByDpt = usersByDpt.OrderByDescending(user => userSkillScore[user]).ToList();
             }
         }
         catch (Exception e)

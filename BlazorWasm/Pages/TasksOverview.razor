@@ -2,7 +2,6 @@
 @using Domain.Models
 @using HttpClients.ClientInterfaces
 @using Domain.Dtos
-@inject HttpClient HttpClient
 @inject ITaskProjectService TaskService
 @inject NavigationManager Navigation
 <div class="title">
@@ -69,7 +68,7 @@ else
                 <th>Task Name</th>
                 <th>Start Date</th>
                 <th>End Date</th>
-                <th>Owner</th>
+                <th>Assigned To</th>
                 <th>Status</th>
             </tr>
         </thead>

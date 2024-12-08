@@ -36,7 +36,7 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in projects)
+                @foreach (var item in projects.OrderBy(t =>t.ProjectStatus))
                 {
                     <tr>
                         <td><a href="/OneProject/@item.ProjectId" class="project-link">@item.ProjectName</a></td>
