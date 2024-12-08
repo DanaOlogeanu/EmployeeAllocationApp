@@ -120,6 +120,9 @@
     private string successMessage = "";
     private HashSet<string> expandedCategories = new();
     private bool isLoading = true;
+    private List<(int UserSkillId, Proficiency OriginalProficiency, string? OriginalNotes)> originalSkillStates;
+
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -151,6 +154,10 @@
             }
             if (userSkills != null)
             {
+                originalSkillStates = userSkills 
+                    .Select(skill => (skill.UserSkillId, skill.Proficiency, skill.Notes))
+                    .ToList();
+                
                 expandedCategories = userSkills
                     .Select(skill => skill.Skill.Category)
                     .Distinct()
@@ -273,7 +280,20 @@
 
     private void CancelChanges()
     {
+        if (originalSkillStates != null)
+        {
+            foreach (var state in originalSkillStates)
+            {
+                var skill = userSkills.FirstOrDefault(s => s.UserSkillId == state.UserSkillId);
+                if (skill != null)
+                {
+                    skill.Proficiency = state.OriginalProficiency;
+                    skill.Notes = state.OriginalNotes;
+                }
+            }
+        }
         isEditing = false;
         selectedSkills.Clear();
     }
+
 }
