@@ -16,12 +16,24 @@ public class AppContext:DbContext
     public DbSet<TaskAssignmentLog> TaskAssignmentLogs { get; set; }
     public DbSet<TaskSkill> TaskSkills { get; set; }
     public DbSet<Holiday> Holidays { get; set; }
+    
+    
+    // Default constructor for production setup (using SQLite)
+    public AppContext() { }
+    // Default constructor (for production use) -Testing
+    public AppContext(DbContextOptions<AppContext> options) : base(options)
+    {
+    }
   
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-         // optionsBuilder.UseSqlite("Data Source = EmployeeAllocation.db");  //initial 
-        optionsBuilder.UseSqlite("Data Source = ../EfcDataAccess/EmployeeAllocation.db");   //CHANGE ONCE Initially created+migrated
-        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
+        if (!optionsBuilder.IsConfigured)
+        {
+            // optionsBuilder.UseSqlite("Data Source = EmployeeAllocation.db");  //initial 
+            optionsBuilder.UseSqlite("Data Source = ../EfcDataAccess/EmployeeAllocation.db"); //CHANGE ONCE Initially created+migrated
+              optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }
     }
     
     //define primary keys, (and maybe constraints if not in logic)
