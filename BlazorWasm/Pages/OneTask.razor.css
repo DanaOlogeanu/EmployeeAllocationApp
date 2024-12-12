@@ -99,28 +99,13 @@
     background-color: #d32f2f;
 }
 
-/* Centered Card Layout */
-/*.center-container {*/
-/*    display: flex;*/
-/*    justify-content: center;*/
-/*    padding: 20px;*/
-/*    background-color: #f5f5f5;*/
-/*}*/
-
-/*.container {*/
-/*    width: 60%;*/
-/*    max-width: 800px;*/
-/*    background-color: #ffffff;*/
-/*    padding: 20px;*/
-/*    border-radius: 10px;*/
-/*    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
-/*}*/
 
 /* General Page Background */
 body {
     margin: 0;
     padding: 0;
     background-color: #f0f0f0; /* Light gray background for the entire page */
+    /*background-color: white;*/
     font-family: Arial, sans-serif;
 }
 
@@ -131,7 +116,8 @@ body {
     align-items: center;
     padding: 20px;
     gap: 20px; /* Spacing between individual containers */
-    background-color: #f5f5f5;
+    /*background-color: #f5f5f5;*/
+    background-color: white;  /* !!!!!!!!!!!!!!*/
 }
 
 /* Inner Containers */
@@ -193,10 +179,6 @@ button {
     margin: 0 auto; 
 }
 
-/*div {*/
-/*    margin-bottom: 30px;*/
-/*  */
-/*}*/
 
 
 /* === BASE HEADING === */

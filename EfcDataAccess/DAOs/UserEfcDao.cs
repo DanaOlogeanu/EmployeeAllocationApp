@@ -72,7 +72,7 @@ public class UserEfcDao:IUserDao
         // Get ordered tasks for the user
         var tasks = await GetTasksForUser(username);
 
-        // Determine the latest deadline
+        // Determine the latest deadline -> can be today if not other tasks or a deadline set in the future
         DateOnly latestDeadline = DateOnly.FromDateTime(DateTime.Now);
 
         foreach (var task in tasks)

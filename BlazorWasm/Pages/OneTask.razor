@@ -549,7 +549,7 @@
     //Availability
     private List<string> departments = new List<string>();
     private string selectedDpt;
-    private IEnumerable<User> usersByDpt;
+    private IEnumerable<User>? usersByDpt;
     private string? selectedUser;
 
     private DateOnly availableStartDate;
@@ -557,7 +557,7 @@
     //private int hoursForProjectsPerDay;
 
     //start date
-    public async Task<DateOnly> SoonestAvailabilityForUser(string username)
+    private async Task<DateOnly> SoonestAvailabilityForUser(string username)
     {
         try
         {
@@ -574,19 +574,19 @@
     }
 
     //deadline
-    public async Task<DateOnly> calculateTaskDeadline(string username, int? estimatedTaskHours, int? hoursForProjectsPerDay, DateOnly availableStartDate)
+    private async Task<DateOnly> CalculateTaskDeadline(string username, int? estimatedTaskHours, int? hoursForProjectsPerDay, DateOnly date)
     {
         try
         {
-            if (estimatedTaskHours > 0)
+            if (estimatedTaskHours > 0) // repeat until estimated h are 0
             {
-                bool holiday = await IsOnHoliday(username, availableStartDate);
-                if (!holiday || !IsWeekend(availableStartDate))
+                bool holiday = await IsOnHoliday(username, date);  //checking if date is holiday
+                if (!holiday || !IsWeekend(date))   //checking if date is weekend
                 {
-                    estimatedTaskHours -= hoursForProjectsPerDay;
+                    estimatedTaskHours -= hoursForProjectsPerDay;  //subtract day project hours from the total estimated task hours
                 }
-                availableStartDate = availableStartDate.AddDays(1);
-                return await calculateTaskDeadline(username, estimatedTaskHours, hoursForProjectsPerDay, availableStartDate);
+                date = date.AddDays(1);  //add one more day
+                return await CalculateTaskDeadline(username, estimatedTaskHours, hoursForProjectsPerDay, date);
             }
         }
         catch (Exception e)
@@ -594,13 +594,13 @@
             Console.WriteLine(e);
             msg = e.Message;
         }
-        return availableStartDate;
+        return date;
     }
 
 
    
     
-    public bool IsWeekend(DateOnly date)
+    private bool IsWeekend(DateOnly date)
     {
         if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
         {
@@ -609,7 +609,7 @@
         return false;
     }
 
-    public async Task<bool> IsOnHoliday(string username,DateOnly date)
+    private async Task<bool> IsOnHoliday(string username,DateOnly date)
     {
         try
         {
@@ -624,8 +624,7 @@
     }
 
 
-    private Dictionary<string, DateOnly> userAvailability;
-    private Dictionary<string, DateOnly> userDeadline;
+  
  
    
     private void ShowAddAssignmentForm()
@@ -643,38 +642,39 @@
     {
         string currentUser = await GetUsernameAsync();
         if (username != null)
-        {
+        { 
+            //update task assignee, start date, deadline, status to requested
             taskProject.OwnerUsername = username;
             taskProject.StartDate = userAvailability[username];
-
             taskProject.Deadline = userDeadline[username];
             taskProject.TaskStatusEnum = TaskStatusEnum.Requested;
             await taskProjectService.UpdateAsync(taskProject);
-    //update project status to Ongoing once a task is assigned 
+            
+             //update project status to Ongoing once a task is assigned 
             var project = await projectService.GetByIdAsync(taskProject.ProjectId);
             project.ProjectStatus = ProjectStatus.Ongoing;
             if (project != null)
             {
                 await projectService.UpdateAsync(project);
             }
-    
         }
             foreach (User user in usersByDpt)
             {
-                if (user.Role.Equals("Manager"))
+                if (user.Role.Equals("Manager")) // finding manager from department to approve assignment
                 {
-                    TaskApprovalCreationDto dto = new(taskProject.Id, user.Username, ApprovalStatus.Requested); //TODO add assined to aka taskProject.OwnerUsername
-                    taskApproval = await taskApprovalService.CreateAsync(dto);
+                    TaskApprovalCreationDto dto = new(taskProject.Id, user.Username, ApprovalStatus.Requested);   //creating task approval dto
+                    taskApproval = await taskApprovalService.CreateAsync(dto);  // creating new approval using dto
     
+                    //to view task approval details in OneTask  
                     TaskApprovalBasicDto added = new(taskApproval.Id, taskApproval.TaskProjectId, taskApproval.OwnerUsername, taskApproval.Status, taskApproval.Comments, taskApproval.Date);
                     approvals.Add(added);
                 }
             }
+             //adding a new record in task assignment log
             await taskAssignmentLogService.CreateAsync(new TaskAssignmentLogCreationDto(taskProject.Id, currentUser, username));
         showAddAssignmentForm = false;
+        //show success message 5 sec
         ShowTemporaryMessage("Task assigned!");
-   
-      
     }
 
     private async void ShowTemporaryMessage(string message)
@@ -701,35 +701,39 @@
     
     //SKILLS
     
-    private Dictionary<User,int> userSkillScore;
     
-    private async Task<int> GetUserScoreForTask(User user, List<TaskSkill> taskSkills)
+    
+    private async Task<int> GetUserScoreForTask(User user, List<TaskSkill>taskSkills)
     {
-    // Identify the skill with the highest required proficiency
+    // identify the skill with the highest required proficiency
         var highestReqSkill = taskSkills.OrderByDescending(s => s.Proficiency).First();
-        const int MaxProficiency = (int)Proficiency.Expert; // Expert Level
         int totalScore = 0;
         int totalScoreForTask = 0;
         foreach (var reqSkill in taskSkills)
         {
-    // Get the user's skill level or 0 if not found
+    // get the user's skill level or 0 if not found
             IEnumerable<UserSkill> userSkills = await userSkillService.GetUserSkills(user.Username);
             var userSkill = userSkills.FirstOrDefault(s => s.SkillName.Equals(reqSkill.SkillName));
             int userSkillLevel = userSkill != null ? (int)userSkill.Proficiency : 0;
             int requiredSkillLevel = (int)reqSkill.Proficiency;
-    // Apply extra weight for the most critical skill
+    // apply extra weight for the most critical skill
             if (reqSkill.SkillName == highestReqSkill.SkillName)
             {
-                userSkillLevel *= 2; // Weight multiplier for highest relevance
+                userSkillLevel *= 2; // weight multiplier for highest relevance
                 requiredSkillLevel *= 2;
             }
             totalScore += userSkillLevel;
             totalScoreForTask += requiredSkillLevel;
         }
-        int scoreAsPercentage = (totalScore * 100) / totalScoreForTask; // perfect match 100% , skills score over task score >100%, less <100%
-        int scoreWhereZeroIsPerfectMatch = totalScore - totalScoreForTask;
+        int scoreAsPercentage = (totalScore * 100) /totalScoreForTask; // perfect match 100% , skills score over task score >100%, less <100%
+       
         return scoreAsPercentage;
     }
+    
+    
+    private Dictionary<User,int> userSkillScore;
+    private Dictionary<string, DateOnly> userAvailability;
+    private Dictionary<string, DateOnly> userDeadline;
     
     private async Task LoadUsers(ChangeEventArgs department)
     {
@@ -745,7 +749,7 @@
                 foreach (var user in usersByDpt)
                 {
                     var userAvailabilityvar = await SoonestAvailabilityForUser(user.Username);
-                    var userDeadlinevar = await calculateTaskDeadline(user.Username, taskProject.Estimate, user.ProjectHoursPerDay, userAvailabilityvar);
+                    var userDeadlinevar = await CalculateTaskDeadline(user.Username, taskProject.Estimate, user.ProjectHoursPerDay, userAvailabilityvar);
                     var userScore = await GetUserScoreForTask(user, taskSkills);
                     userAvailability[user.Username] = userAvailabilityvar;
                     userDeadline[user.Username] = userDeadlinevar;
